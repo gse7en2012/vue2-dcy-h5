@@ -1,0 +1,109 @@
+<template>
+	<!-- <div class="nav-bar" v-if="!hideNavBar"> -->
+		<van-tabbar v-model="active">
+			<van-tabbar-item icon="shop" :to="{path:'/message'}">
+				<span>设备消息</span>
+				<img slot="icon" slot-scope="props" :src="props.active ? iconHash.message.active : iconHash.message.normal">
+			</van-tabbar-item>
+			<van-tabbar-item icon="chat" :to="{path:'/project'}">
+				<span>项目</span>
+				<img slot="icon" slot-scope="props" :src="props.active ? iconHash.device.active : iconHash.device.normal">
+			</van-tabbar-item>
+			<van-tabbar-item icon="records" :to="{path:'/report'}">
+				<span>报告</span>
+				<img slot="icon" slot-scope="props" :src="props.active ? iconHash.report.active : iconHash.report.normal">
+			</van-tabbar-item>
+			<van-tabbar-item icon="gold-coin" :to="{path:'/my'}">
+				<span>我的</span>
+				<img slot="icon" slot-scope="props" :src="props.active ? iconHash.mine.active : iconHash.mine.normal">
+			</van-tabbar-item>
+		</van-tabbar>
+	<!-- </div> -->
+</template>
+
+<script>
+import messageIcon from "@/assets/icons/message.png";
+import messageIconS from "@/assets/icons/message_s.png";
+import deviceIcon from "@/assets/icons/device.png";
+import deviceIconS from "@/assets/icons/device_s.png";
+import reportIcon from "@/assets/icons/report.png";
+import reportIconS from "@/assets/icons/report_s.png";
+import mineIcon from "@/assets/icons/my.png";
+import mineIconS from "@/assets/icons/my_s.png";
+
+export default {
+    name: "bottomTab",
+    props: ["hideNavBar"],
+    data() {
+        return {
+            active: 0,
+            // showNavBar: true,
+            iconHash: {
+                message: {
+                    active: messageIconS,
+                    normal: messageIcon
+                },
+                device: {
+                    active: deviceIconS,
+                    normal: deviceIcon
+                },
+                report: {
+                    active: reportIconS,
+                    normal: reportIcon
+                },
+                mine: {
+                    active: mineIconS,
+                    normal: mineIcon
+                }
+            },
+            uHash: {
+                message: 0,
+                project: 1,
+                report: 2,
+                my: 3
+            }
+        };
+	},
+	watch:{
+		$route(to,from){
+			this.checkCurrentParentRoute();
+		}
+	},
+	created(){
+		console.log('created bottom')
+	},
+    async mounted() {
+		console.log('mounted bottom')
+		this.checkCurrentParentRoute();
+        this.$nextTick(() => {
+			//  this.checkCurrentParentRoute();
+		});
+    },
+    methods: {
+        hideBar() {
+            console.log("hideBotBar");
+            this.showNavBar = false;
+        },
+        showBar() {
+            this.showNavBar = true;
+        },
+        checkCurrentParentRoute() {
+			const path = this.$route.path;
+			const parent = path.split("/")[1];
+			console.log(parent);
+            this.active = this.uHash[parent];
+        }
+    }
+};
+</script>
+
+<style lang="scss" scoped>
+body {
+    background-color: #f8f8f8;
+}
+
+.nav-bar {
+    // z-index: -1;
+    // height: 1px;
+}
+</style>
