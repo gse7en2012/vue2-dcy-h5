@@ -137,7 +137,7 @@ $color-name-list: red green orange yellow;
                         flex: 1;
                         span {
                             color: #666;
-                            font-weight: 300;
+                            // font-weight: 300;
                         }
                     }
                 }

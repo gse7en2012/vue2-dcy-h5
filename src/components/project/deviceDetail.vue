@@ -203,7 +203,7 @@ $color-name-list: red green orange yellow;
 
 .detail-list {
     .van-cell {
-        font-size: 13px;
+        font-size: 14px;
         line-height: 20px;
     }
 }

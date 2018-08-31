@@ -111,13 +111,32 @@ body {
 .van-tabbar {
 	z-index: 11 !important; // position: absolute!important;
 }
-.van-hairline--bottom::after{
+
+.van-hairline--bottom::after {
 	border-color: #d6d8da;
 }
 
 .device-chat-tabbar {
 	box-shadow: 1px -1px 5px #eee;
+	height: 50px;
 	.van-tabbar-item__text {
 		font-size: 16px;
+		color: #666;
+	}
+}
+
+.dialog-van-cell-group {
+	margin: 15px 5px;
+	.van-field .van-cell__title {
+		max-width: none;
+		color: #444;
+	}
+	.van-cell__value {
+		border: 1px solid #ddd;
+	}
+	.van-field__control {
+		text-align: right;
+		color: #666;
+		padding-right: 5px;
 	}
 }

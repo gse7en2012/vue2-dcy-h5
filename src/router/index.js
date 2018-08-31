@@ -9,6 +9,7 @@ import deviceDetail from '@/components/project/deviceDetail';
 import deviceCharts from '@/components/project/deviceCharts';
 import deviceChat from '@/components/project/deviceChat';
 import deviceAlarmList from '@/components/project/deviceAlarmList';
+import deviceConfig from '@/components/project/deviceConfig';
 
 import messageIndex from '@/components/message/messageIndex';
 import messageDetail from '@/components/message/messageDetail';
@@ -63,6 +64,12 @@ const dcyRoutes = [{
 		name: 'deviceAlarmList',
 		component: deviceAlarmList
 	},
+	{
+		path: '/project/devices/:pid/detail/chat/config',
+		name: 'deviceConfig',
+		component: deviceConfig
+	},
+
 	{
 		path: '/message',
 		name: 'messageIndex',

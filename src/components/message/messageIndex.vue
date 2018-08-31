@@ -93,9 +93,7 @@ export default {
         editMessage() {
             this.edit = !this.edit;
         },
-        god() {
-            this.$router.push({ path: "/message/detail", params: { id: 2 } });
-        },
+
         chooseMsg(item, indexOfItem) {
             if (!this.edit) return;
             this.$set(item, "choose", !item.choose);
