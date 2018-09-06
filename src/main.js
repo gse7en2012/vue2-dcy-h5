@@ -2,10 +2,11 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import vueg from 'vueg';
-
 import theme from './theme/theme.json';
 import ECharts from 'vue-echarts/components/ECharts.vue';
 ECharts.registerTheme('ovilia-green', theme);
+
+import store from './store';
 
 // // 手动引入 ECharts 各模块来减小打包体积
 // import 'echarts/lib/chart/bar'
@@ -38,8 +39,11 @@ import {
 	Cell,
 	CellGroup,
 	Popup,
+	Uploader,
 	Picker,
 	Loading,
+	Panel,
+	ImagePreview,
 	Switch,
 	SwitchCell,
 	DatetimePicker,
@@ -63,7 +67,10 @@ Vue.use(Tab)
 	.use(Picker)
 	.use(Loading)
 	.use(Field)
+	.use(Panel)
+	.use(ImagePreview)
 	.use(Switch)
+	.use(Uploader)
 	.use(SwitchCell)
 	.use(Actionsheet)
 	.use(DatetimePicker);
@@ -73,6 +80,7 @@ Vue.use(Tab)
 
 new Vue({
 	el: '#app',
+	store,
 	router,
 	render: h => h(App)
 });

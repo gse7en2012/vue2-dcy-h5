@@ -2,19 +2,10 @@
 	<div class="main">
 		<van-nav-bar title="设备报警列表" @click-left="goBack" left-arrow />
 		<div class="top-box">
-			<div class="tab">
-				火警
-			</div>
-			<div class="tab">
-				火警
-			</div>
+			<div class="tab" @click="show=true">{{current.name}}</div>
+			<div class="tab" @click="show=true">{{current.name}}</div>
 		</div>
 
-		<div class="edit-bar">
-			<div class="edit-bar-span" @click="editMessage()">
-				<img src="@/assets/icons/edit.png">{{edit?'取消':'编辑'}}
-			</div>
-		</div>
 		<div class="wrapper" ref="wrapper">
 			<div class="device-list">
 				<div class="row" v-for="(item,i) in deviceList" @click="chooseMsg(item,i)">
@@ -23,15 +14,19 @@
 						<div class="radio" :class="{chose:item.choose}"></div>
 					</div>
 					<div class="wrap">
-						<div class="icon" :class="{unread:item.unread}">
-							<img src='@/assets/icons/device_msg.png'>
-						</div>
 						<div class="ctx">
-							<p class="info">
-								<span class="title">{{item.title}}</span>
-								<span class="date">{{item.time}}</span>
+							<p class="title">
+								<span class="left">通道类型+通道号</span>
+								<span class="right red">火警</span>
 							</p>
-							<p class="msg" :class="{show:edit}">{{item.msg}}</p>
+							<p class="info">
+								<span class="left">报警值/阈值</span>
+								<span class="right">90/120</span>
+							</p>
+							<p class="info">
+								<span class="left">报警时间</span>
+								<span class="right">{{item.time}}</span>
+							</p>
 						</div>
 					</div>
 
@@ -41,16 +36,19 @@
 				<div class="dcy-radio" @click="chooseAll()">
 					<div class="radio" :class="{chose:chooseAllFlag}"></div>全选
 				</div>
-				<a class="dcy-btn" @click="alertMsg('全部删除','确定删除将所选设备消息吗？')">删除</a>
-				<a class="dcy-btn" @click="alertMsg('全部已读','确定将所选设备消息标记为已读吗？')">已读</a>
+				<a class="dcy-btn" @click="commitDeviceAlarmList()">提交</a>
 			</div>
 		</div>
+
+		<van-actionsheet v-model="show" :actions="actions" @select="onSelect" />
+
 	</div>
 
 </template>
 
 <script>
 import BScroll from "better-scroll";
+import { Toast } from "vant";
 
 export default {
     name: "deviceAlarmList",
@@ -64,7 +62,20 @@ export default {
             value: "",
             tmp: [],
             deviceList: [],
-            calcHeight: 500,
+            show: false,
+            current: { name: "火警" },
+            actions: [
+                { name: "火警" },
+                {
+                    name: "正常"
+                    // subname: "描述信息"
+                },
+                { name: "故障" },
+                {
+                    name: "报警"
+                    // disabled: true
+                }
+            ],
             vuegConfig: {
                 backAnim: "touchPoint",
                 forwardAnim: "touchPoint", //options所有配置可以写在这个对象里，会覆盖全局的配置
@@ -73,6 +84,7 @@ export default {
         };
     },
     async mounted() {
+        console.log("this count", this.$store.state.count);
         this.$nextTick(() => {
             this.setupBetterScroll();
         });
@@ -103,26 +115,24 @@ export default {
         editMessage() {
             this.edit = !this.edit;
         },
-
+        onSelect(item) {
+            // 点击选项时默认不会关闭菜单，可以手动关闭
+            this.show = false;
+            this.current = item;
+            Toast(item.name);
+        },
         chooseMsg(item, indexOfItem) {
             if (!this.edit) return;
             this.$set(item, "choose", !item.choose);
         },
-        alertMsg(title, msg, type) {
-            Dialog.confirm({
-                title: title,
-                message: msg
-            })
-                .then(() => {
-                    // on confirm
-                    console.log(this.deviceList.filter(item => item.choose));
-                    if (type == 1) {
-                    }
-                })
-                .catch(() => {
-                    // on cancel
-                });
+        commitDeviceAlarmList() {
+            this.$store.dispatch(
+                "changeDeviclAlarmListChooseList",
+                this.deviceList.filter(item => item.choose)
+            );
+            this.$router.push({ name: "deviceAlarmHandle" });
         },
+
         chooseAll() {
             this.chooseAllFlag = !this.chooseAllFlag;
             this.deviceList.forEach(msg => {
@@ -134,7 +144,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$dcyColor: #282549;
+@import "@/assets/color.scss";
 
 .wrapper {
     position: absolute;
@@ -153,7 +163,7 @@ $dcyColor: #282549;
     .tab {
         flex: 1;
         text-align: center;
-        font-size: 16px;
+        font-size: 15px;
         line-height: 40px;
         height: 40px;
         position: relative;
@@ -180,7 +190,7 @@ $dcyColor: #282549;
             transform: rotate(-45deg);
             top: 0;
             right: 0;
-            top: 14px;
+            top: 13px;
             right: 30px;
             position: absolute;
         }
@@ -208,7 +218,7 @@ $dcyColor: #282549;
     position: absolute;
     top: 86px;
     width: 100%;
-    bottom:0;
+    bottom: 0;
 }
 
 .device-list {
@@ -260,37 +270,38 @@ $dcyColor: #282549;
             border-radius: 4px;
             display: flex;
             transition: all 0.3s ease-in-out;
-            .icon {
-                width: 60px;
-                align-items: center;
-                display: flex;
-                text-align: center;
-                position: relative;
-                &.unread {
-                    &::before {
-                        position: absolute;
-                        width: 8px;
-                        height: 8px;
-                        background: #ff2c2c;
-                        border-radius: 8px;
-                        right: 15px;
-                        top: 15px;
-                        content: "";
-                    }
-                }
-                img {
-                    margin: auto;
-                    width: 36px;
-                }
-            }
             .ctx {
                 flex: 2;
-                margin-right: 10px;
+                margin: 5px 10px;
                 .info {
                     font-weight: normal;
                     display: flex;
-                    margin: 10px 0 5px;
-                    .title {
+                    // margin: 10px 0 5px;
+                    margin: 5px 0;
+                    .left {
+                        font-size: 14px;
+                        color: #333;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 1;
+                        -webkit-box-orient: vertical;
+
+                        line-height: 22px;
+                        flex: 1;
+                    }
+                    .right {
+                        font-size: 14px;
+                        // color: #999;
+                        text-align: right;
+                        line-height: 22px;
+                    }
+                }
+                .title {
+                    font-weight: normal;
+                    display: flex;
+                    margin: 5px 0;
+                    .left {
                         font-size: 16px;
                         color: #333;
                         overflow: hidden;
@@ -298,27 +309,14 @@ $dcyColor: #282549;
                         display: -webkit-box;
                         -webkit-line-clamp: 1;
                         -webkit-box-orient: vertical;
-                        margin-right: 5px;
                         line-height: 22px;
                         flex: 1;
                     }
-                    .date {
+                    .right {
                         font-size: 12px;
-                        color: #666;
-                        word-break: keep-all;
-                        white-space: nowrap;
+                        color: #999;
+                        text-align: right;
                         line-height: 22px;
-                    }
-                }
-                .msg {
-                    margin: 0 0 10px;
-                    font-size: 14px;
-                    color: #666;
-                    overflow: hidden;
-                    &.show {
-                        display: -webkit-box;
-                        -webkit-line-clamp: 1;
-                        -webkit-box-orient: vertical;
                     }
                 }
             }
@@ -342,6 +340,53 @@ $dcyColor: #282549;
         img {
             height: 12px;
             margin-right: 4px;
+        }
+    }
+}
+
+.dcy-btn {
+    float: right;
+    line-height: 32px;
+    font-size: 15px;
+    color: #fff;
+    background: $dcyColor;
+    text-align: center;
+    min-width: 74px;
+    margin: 9px;
+    border-radius: 32px;
+    font-weight: 300;
+}
+
+.dcy-radio {
+    float: left;
+    color: #3a3a3a;
+    font-size: 12px;
+    margin: 8px 12px;
+    .radio {
+        margin: auto;
+        width: 20px;
+        height: 20px;
+        border-radius: 20px;
+        border: 1px solid #364760;
+        opacity: 0.2;
+        position: relative;
+        top: 7px;
+        margin-right: 10px;
+        display: inline-block;
+        &.chose {
+            opacity: 1;
+            border-color: $dcyColor;
+            &:before {
+                content: "";
+                position: absolute;
+                width: 80%;
+                height: 80%;
+                top: 10%;
+                left: 10%;
+                background: $dcyColor;
+                border-radius: 50%;
+                z-index: 2;
+            }
         }
     }
 }

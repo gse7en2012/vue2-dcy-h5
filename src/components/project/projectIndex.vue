@@ -154,21 +154,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$dcyColor: #282549;
-// $red: #ff0000;
-// $green: #3fb059;
-// $orange: #ff7200;
-// $yellow: #ffb900;
 
-$color-list: #ff0000 #3fb059 #ff7200 #ffb900;
-$color-name-list: red green orange yellow;
-
-@each $color in $color-name-list {
-    $i: index($color-name-list, $color);
-    .#{$color} {
-        color: nth($color-list, $i);
-    }
-}
+@import '@/assets/color.scss';
 
 .search-box {
     // margin-top: 46px;

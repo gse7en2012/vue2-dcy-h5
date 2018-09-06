@@ -53,6 +53,8 @@
 <script>
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
+import moment from "moment";
+
 export default {
     name: "reportPopup",
     props: ["projectList"],
@@ -215,8 +217,8 @@ $dcyColor: #282549;
     }
     .van-cell-box {
         flex: 1;
-		display: flex;
-		flex-flow: row-reverse;
+        display: flex;
+        flex-flow: row-reverse;
     }
 }
 

@@ -86,6 +86,7 @@ export default {
         };
     },
     async mounted() {
+        // console.log(this.$store.getters.deviclAlarmListChooseList);
         this.$nextTick(() => {
             // document.title = "项目列表";
             // this.calcHeight =
@@ -112,21 +113,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$dcyColor: #282549;
-// $red: #ff0000;
-// $green: #3fb059;
-// $orange: #ff7200;
-// $yellow: #ffb900;
-
-$color-list: #ff0000 #3fb059 #ff7200 #ffb900;
-$color-name-list: red green orange yellow;
-
-@each $color in $color-name-list {
-    $i: index($color-name-list, $color);
-    .#{$color} {
-        color: nth($color-list, $i);
-    }
-}
+@import "@/assets/color.scss";
 
 .wrapper {
     position: absolute;
