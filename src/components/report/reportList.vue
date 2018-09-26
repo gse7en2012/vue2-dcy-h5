@@ -6,7 +6,7 @@
 
 		<div class="wrapper" ref="wrapper">
 			<div class="report-list">
-				<div class="row" v-for="(item,i) in reportList" @click="chooseMsg(item,i)">
+				<div class="row" v-for="(item,i) in reportList" @click="gotoDetail(item,i)">
 					<div class="wrap">
 						<div class="ctx">
 							<p class="info">
@@ -62,7 +62,8 @@ export default {
                 nums: "14",
                 msg: `这是地址啊啊啊啊啊${i}长很长很长长很长很长长很长很长`,
                 choose: false,
-                unread: true
+                unread: true,
+                id: i
             };
         });
         this.setupBetterScroll();
@@ -77,6 +78,10 @@ export default {
             setTimeout(() => {
                 this.scroll.refresh();
             }, 1000);
+        },
+        gotoDetail(item) {
+            // this.$router.push({ name: "reportDetail" });
+            this.$router.push(`/report/${item.id}/detail`);
         }
     }
 };

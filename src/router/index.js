@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-
+import store from '../store';
 
 import projectIndex from '@/components/project/projectIndex';
 import projectMap from '@/components/project/projectMap';
@@ -18,8 +18,11 @@ import myIndex from '@/components/my/myIndex';
 import myAbout from '@/components/my/myAbout';
 import myAddress from '@/components/my/myAddress';
 import myCompany from '@/components/my/myCompany';
+
 import reportIndex from '@/components/report/reportIndex';
-import landPage from '@/components/landPage';
+import reportDetail from '@/components/report/reportDetail';
+
+import loginPage from '@/components/landPage';
 
 Vue.use(Router);
 
@@ -28,27 +31,44 @@ const dcyRoutes = [{
 		path: '',
 		// name: 'landPage',
 		// component: landPage
-		redirect: '/message'
+		redirect: '/login'
+	},
+	{
+		path: '/login',
+		name: 'loginPage',
+		component: loginPage
 	},
 	{
 		path: '/project',
 		name: 'projectIndex',
-		component: projectIndex
+		component: projectIndex,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/project/map',
 		name: 'projectMap',
-		component: projectMap
+		component: projectMap,
+		meta: {
+			nokeepAlive: true,
+		},
 	},
 	{
-		path: '/project/devices/:pid',
+		path: '/project/:pid/devices',
 		name: 'deviceList',
-		component: deviceList
+		component: deviceList,
+		meta: {
+			nokeepAlive: true,
+		},
 	},
 	{
-		path: '/project/devices/:pid/detail',
+		path: '/project/:pid/devices/:did/detail',
 		name: 'deviceDetail',
-		component: deviceDetail
+		component: deviceDetail,
+		meta: {
+			nokeepAlive: true,
+		},
 	},
 	{
 		path: '/project/devices/:pid/detail/charts',
@@ -67,8 +87,8 @@ const dcyRoutes = [{
 	},
 	{
 		path: '/project/devices/:pid/detail/chat/alarm/handle',
-		name:'deviceAlarmHandle',
-		component:deviceAlarmHandle
+		name: 'deviceAlarmHandle',
+		component: deviceAlarmHandle
 	},
 	{
 		path: '/project/devices/:pid/detail/chat/config',
@@ -79,7 +99,10 @@ const dcyRoutes = [{
 	{
 		path: '/message',
 		name: 'messageIndex',
-		component: messageIndex
+		component: messageIndex,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/message/detail',
@@ -111,6 +134,11 @@ const dcyRoutes = [{
 		name: 'reportIndex',
 		component: reportIndex
 	},
+	{
+		path: '/report/:rid/detail',
+		name: 'reportDetail',
+		component: reportDetail
+	}
 ];
 
 const dcyRouter = new Router({
@@ -119,5 +147,37 @@ const dcyRouter = new Router({
 	routes: dcyRoutes
 });
 
+
+
+dcyRouter.beforeEach((to, from, next) => {
+	//check
+	// let toDepth = to.path.split('/').length
+	// let fromDepth = from.path.split('/').length
+	// if (to.path.charAt(to.path.length - 1) !== '/')
+	// 	toDepth += 1
+	// if (from.path.charAt(from.path.length - 1) !== '/')
+	// 	fromDepth += 1
+	// const transitionType = toDepth > fromDepth ? 'forward' : 'back'
+	// if(toDepth>fromDepth){
+	// 	to.meta.nokeepAlive=true;
+	// }else{
+	// 	to.meta.nokeepAlive=false;
+	// }
+
+	if (to.matched.some(r => r.meta.requireAuth)) {
+		if (store.state.accessToken) {
+			next();
+		} else {
+			next({
+				path: '/login',
+				query: {
+					redirect: to.fullPath
+				}
+			})
+		}
+	} else {
+		next();
+	}
+})
 
 export default dcyRouter;

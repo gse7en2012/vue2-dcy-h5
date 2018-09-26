@@ -7,7 +7,7 @@
 			<div id="amap"></div>
 			<div class="project-list-box" ref="wrapper">
 				<div>
-					<div class="row" v-for="(item,i) in deviceList" @click="moveMapCenter(item.lng,item.lat)">
+					<div class="row" v-for="(item,i) in projectList" @click="moveMapCenter(item.efairyproject_location_lng,item.efairyproject_location_lat)">
 						<div class="wrap">
 							<div class="icon">
 								<img src='@/assets/icons/green.png'>
@@ -15,9 +15,9 @@
 							</div>
 							<div class="ctx">
 								<p class="info">
-									<span class="title">{{item.title}}</span>
+									<span class="title">{{item.efairyproject_name}}</span>
 								</p>
-								<p class="address">{{item.msg}}</p>
+								<p class="address">{{item.efairyproject_address}}</p>
 							</div>
 							<div class="local">
 								<img src='@/assets/icons/local.png'>
@@ -51,42 +51,83 @@ export default {
             addressLoading: true,
             showAddressPicker: false,
             value: "",
-            deviceList: [],
-            mapObj: null
+            projectList: [],
+            areaQuery: null,
+            mapObj: null,
+            listLoading: false,
+            listPage: 1,
+            listPagesize: 10,
+            listFinished: false
         };
     },
     async mounted() {
-        this.deviceList = Array.from({ length: 20 }).map((_, i) => {
-            return {
-                title: `${i}.这是项目标题测试自猪猪猪猪长很长很长`,
-                nums: "14",
-                msg: `这是地址啊啊啊啊啊${i}长很长很长长很长很长长很长很长`,
-                choose: false,
-                unread: true,
-                lng: Math.random() * (113 - 111 + 1) + 111,
-                lat: Math.random() * (23 - 21 + 1) + 21
-            };
-        });
-        this.$nextTick(() => {
-            // document.title = "项目地图";
-			this.initMap();
-			this.initMapLocation();
-            this.setupBetterScroll();
-        });
+        this.areaQuery = this.$store.state.projectAreaSelectedQuery;
+        this.getProjectList();
     },
     methods: {
         goBack() {
             this.$router.back();
         },
         setupBetterScroll() {
-            this.scroll = new BScroll(this.$refs.wrapper, {
-                tap: true,
-                click: true
-            });
-            setTimeout(() => {
+            if (!this.scroll) {
+                this.scroll = new BScroll(this.$refs.wrapper, {
+                    tap: true,
+                    click: true
+                });
+                this.scroll.on("scrollEnd", pos => {
+                    if (pos.y < this.scroll.maxScrollY + 100) {
+                        this.loadMoreProjectList();
+                    }
+                });
+            } else {
                 this.scroll.refresh();
-            }, 1000);
+            }
         },
+        async getProjectList() {
+            this.projectList = [];
+            const data = await this.$service.projectService.getProjectList({
+                regeo_info: this.areaQuery,
+                keyword: this.keyword,
+                page: this.listPage,
+                size: this.listPagesize
+            });
+            this.projectList = data.result.project_list;
+			this.initMap();
+			this.drawMapMarker();
+            this.initMapLocation();
+
+            this.projectList = data.result.project_list;
+            if (data.result.project_list.length < this.listPagesize)
+                this.listFinished = true;
+            this.$nextTick(() => {
+                this.calcHeight =
+                    document.querySelector(".main").offsetHeight - 197;
+                this.setupBetterScroll();
+            });
+        },
+        async loadMoreProjectList() {
+            if (this.listFinished) return;
+            this.listLoading = true;
+            this.listPage++;
+            const data = await this.$service.projectService.getProjectList({
+                regeo_info: this.areaQuery,
+                keyword: this.keyword,
+                page: this.listPage,
+                size: this.listPagesize
+            });
+            this.listLoading = false;
+            this.projectList = this.projectList.concat(
+                data.result.project_list
+            );
+            if (data.result.project_list.length < this.listPagesize)
+                this.listFinished = true;
+            this.$nextTick(() => {
+                this.scroll.refresh();
+			});
+			this.drawMapMarker();
+
+        },
+
         initMapLocation() {
             this.mapObj.plugin("AMap.Geolocation", () => {
                 const geolocation = new AMap.Geolocation({
@@ -111,11 +152,14 @@ export default {
         initMap() {
             this.mapObj = new AMap.Map("amap", {
                 center: [113.000923, 23.575807],
-                zoom: 8,
+                zoom: 10,
                 mapStyle: "amap://styles/fresh"
             });
+		},
 
-            this.deviceList.forEach((item, i) => {
+		drawMapMarker(){
+			 this.mapObj.clearMap();
+			 this.projectList.forEach((item, i) => {
                 const mapIcon = new AMap.Icon({
                     size: new AMap.Size(30, 38),
                     imageSize: new AMap.Size(30, 38),
@@ -125,7 +169,10 @@ export default {
                 });
 
                 const marker = new AMap.Marker({
-                    position: new AMap.LngLat(item.lng, item.lat),
+                    position: new AMap.LngLat(
+                        item.efairyproject_location_lng,
+                        item.efairyproject_location_lat
+                    ),
                     offset: new AMap.Pixel(-30, -38),
                     icon: mapIcon
                 });
@@ -134,7 +181,10 @@ export default {
                     textAlign: "center",
                     verticalAlign: "middle",
                     offset: new AMap.Pixel(-15, -24),
-                    position: new AMap.LngLat(item.lng, item.lat),
+                    position: new AMap.LngLat(
+                        item.efairyproject_location_lng,
+                        item.efairyproject_location_lat
+                    ),
                     style: {
                         background: "transparent",
                         border: "0",
@@ -147,10 +197,15 @@ export default {
                 this.mapObj.add(marker);
                 this.mapObj.add(text);
                 if (i == 0) {
-                    this.mapObj.setCenter(new AMap.LngLat(item.lng, item.lat));
+                    this.mapObj.setCenter(
+                        new AMap.LngLat(
+                            item.efairyproject_location_lng,
+                            item.efairyproject_location_lat
+                        )
+                    );
                 }
             });
-        },
+		},
         moveMapCenter(lng, lat) {
             this.mapObj.panTo(new AMap.LngLat(lng, lat));
         }

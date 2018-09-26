@@ -1,11 +1,13 @@
 <template>
 	<div id="app">
 		<!-- <div class="main" :class="{nobar:isWeixin}"> -->
-			<div>
-				<!-- <keep-alive> -->
-					<router-view v-on:hideBotBar="hideBar" v-on:showBotBar="showBar" v-transition/>
-				<!-- </keep-alive> -->
-			</div>
+		<van-loading v-if="showLoading" />
+		<div>
+			<keep-alive>
+				<router-view v-if="!$route.meta.nokeepAlive" v-transition />
+			</keep-alive>
+			<router-view v-if="$route.meta.nokeepAlive" v-transition />
+		</div>
 		<!-- </div> -->
 		<!-- <bottom-tab/> -->
 
@@ -24,22 +26,29 @@ import mineIconS from "@/assets/icons/my_s.png";
 
 import BScroll from "better-scroll";
 import bottomTab from "@/components/bottomTab";
+import { mapState } from "vuex";
 
 export default {
     name: "App",
     components: {
         bottomTab
     },
+    computed: {
+        ...mapState({
+            showLoading: state => state.isAjaxLoading
+        })
+    },
     data() {
         return {
             active: 0,
+            // showLoading: false,
             isWeixin: false,
-            showNavBar: true,
+            showNavBar: true
         };
     },
     async mounted() {
         this.$nextTick(() => {
-           // this.isWeixin = this.checkIsWeixin();
+            // this.isWeixin = this.checkIsWeixin();
         });
     },
     methods: {
@@ -47,13 +56,6 @@ export default {
             // return true;
             const ua = navigator.userAgent.toLowerCase();
             return /micromessenger/.test(ua) ? true : false;
-        },
-        hideBar() {
-            console.log("hideBotBar");
-            this.showNavBar = false;
-        },
-        showBar() {
-            this.showNavBar = true;
         }
     }
 };
