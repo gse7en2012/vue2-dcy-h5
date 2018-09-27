@@ -1,6 +1,5 @@
 <template>
 	<div id="app">
-		<!-- <div class="main" :class="{nobar:isWeixin}"> -->
 		<van-loading v-if="showLoading" />
 		<div>
 			<keep-alive>
@@ -8,9 +7,6 @@
 			</keep-alive>
 			<router-view v-if="$route.meta.nokeepAlive" v-transition />
 		</div>
-		<!-- </div> -->
-		<!-- <bottom-tab/> -->
-
 	</div>
 </template>
 
@@ -23,7 +19,6 @@ import reportIcon from "@/assets/icons/report.png";
 import reportIconS from "@/assets/icons/report_s.png";
 import mineIcon from "@/assets/icons/my.png";
 import mineIconS from "@/assets/icons/my_s.png";
-
 import BScroll from "better-scroll";
 import bottomTab from "@/components/bottomTab";
 import { mapState } from "vuex";
@@ -40,10 +35,7 @@ export default {
     },
     data() {
         return {
-            active: 0,
-            // showLoading: false,
             isWeixin: false,
-            showNavBar: true
         };
     },
     async mounted() {

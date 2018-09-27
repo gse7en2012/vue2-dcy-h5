@@ -8,6 +8,7 @@ export default new Vuex.Store({
 		accessToken: localStorage.getItem('dcyAccessToken'),
 		rcToken: localStorage.getItem('dcyRcToken'),
 		userId: localStorage.getItem('dcyUserId'),
+		userMsgId: localStorage.getItem('dcyUserMsgId'),
 		count: 0,
 		userAccountInfo: null,
 		isAjaxLoading: false,
@@ -29,10 +30,13 @@ export default new Vuex.Store({
 			localStorage.dcyAccessToken = data.access_token;
 			localStorage.dcyRcToken = data.rc_token;
 			localStorage.dcyUserId = data.user_info.efairyuser_id;
+			localStorage.dcyUserMsgId = data.user_info.efairyuser_msgobj_id;
 			state.accessToken = data.access_token;
-			state.userId=data.user_info.efairyuser_id;
+			state.userId = data.user_info.efairyuser_id;
+			state.userMsgId = data.user_info.efairyuser_msgobj_id;
 			state.rcToken = data.rc_token;
 			state.userAccountInfo = data.user_info;
+
 		},
 		accountLogout: (state) => {
 			localStorage.removeItem('dcyAccessToken');

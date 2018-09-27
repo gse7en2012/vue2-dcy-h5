@@ -1,37 +1,35 @@
 <template>
 	<div class="main">
 		<van-nav-bar title="设备对话框" @click-right="goBack">
-			<!-- <van-icon name="close" slot="right" /> -->
 			<span slot="right" class="bar-close">&times;</span>
 		</van-nav-bar>
 		<div class="wrapper" ref="wrapper">
 			<div class="chat-box">
-				<div class="block" v-for="(msg,i) in chatList">
-					<div class="chat-time">{{msg.time}}</div>
+				<div class="block" v-for="(msg,i) in chatList" :id="'msg'+msg.efairymsg_id">
+					<div class="chat-time">{{msg.efairymsg_add_time}}</div>
 					<div class="chat-message" :class="{my:msg.isMine}">
 						<div class="avatar">
 							<img src="@/assets/icons/device_chat.png" v-if="!msg.isMine">
 							<img src="@/assets/icons/avatar.png" v-if="msg.isMine">
 						</div>
-						<div class="ctx">{{msg.msg}}</div>
-						<div class="status" v-if="!msg.isMine">
-							<img src="@/assets/icons/fixed_chat.png" v-if="msg.status==1">
-							<img src="@/assets/icons/warning_chat.png" v-if="msg.status==2">
+							<div class="ctx">{{msg.ctx.text}}</div>
+							<div class="status" v-if="!msg.isMine">
+								<img src="@/assets/icons/fixed_chat.png" v-if="msg.efairymsg_ishandle==1">
+								<img src="@/assets/icons/warning_chat.png" v-if="msg.efairymsg_ishandle==0">
+						</div>
+							</div>
 						</div>
 					</div>
 				</div>
-
+				<router-link :to="{name:'deviceAlarmList'}" class="alarm-list-btn">
+					报警列表
+				</router-link>
+				<van-tabbar class="device-chat-tabbar">
+					<van-tabbar-item @click="sendMsg()">消音</van-tabbar-item>
+					<van-tabbar-item @click="sendMsg()">复位</van-tabbar-item>
+					<van-tabbar-item @click="gotoConfig()">配置</van-tabbar-item>
+				</van-tabbar>
 			</div>
-		</div>
-		<router-link :to="{name:'deviceAlarmList'}" class="alarm-list-btn">
-			报警列表
-		</router-link>
-		<van-tabbar class="device-chat-tabbar">
-			<van-tabbar-item @click="sendMsg()">消音</van-tabbar-item>
-			<van-tabbar-item @click="sendMsg()">复位</van-tabbar-item>
-			<van-tabbar-item @click="gotoConfig()">配置</van-tabbar-item>
-		</van-tabbar>
-	</div>
 
 </template>
 
@@ -41,51 +39,51 @@ import moment, { max } from "moment";
 
 export default {
     name: "deviceChat",
-
+    //0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常
     data() {
         return {
-            // query: this.$route.query,
-            addressLoading: true,
-            showAddressPicker: false,
-            showprojectMap: false,
-            value: "",
-            tmp: [],
+            query: this.$route.query,
+            deviceId: this.$route.params.did,
+            userMsgId: this.$store.state.userMsgId,
             chatList: [],
-            calcHeight: 500
+            lastId: 0,
+            page: 1,
+            pageSize: 10,
+            statusHash: ["离线", "火警", "预警", "故障", "启动", "屏蔽", "正常"]
         };
     },
     async mounted() {
+        this.getChatMsgList();
         this.$nextTick(() => {
-            // document.title = "项目列表";
-            // this.calcHeight =
-            //     document.querySelector(".main").offsetHeight -
-            //     this.$refs.wrapper.offsetTop;
-            this.initChatList();
             this.setupBetterScroll();
         });
     },
     methods: {
-        initChatList() {
-            this.chatList = Array.from({ length: 6 }).map((_, i) => {
-                return {
-                    msg: `这是地址啊啊啊啊啊${i}长很长很长长很长很长长很长很长`,
-                    time: "2018-12-12 11:11:11",
-                    status: Math.floor(Math.random() * (2 - 1 + 1) + 1),
-                    isMine: 0
-                    // isMine: Math.floor(Math.random() * (1 - 0 + 1) + 0)
-                };
+        async getChatMsgList() {
+            const data = await this.$service.projectService.getDeviceChatMsgList(
+                {
+                    efairyuser_msgobj_id: this.userMsgId,
+                    efairydevice_msgobj_id: this.query.msgobj_id,
+                    size: this.pageSize
+                }
+            );
+            this.chatList = data.result.msg_list.reverse();
+            this.chatList.forEach((item, index) => {
+                item.ctx = JSON.parse(item.efairymsg_content);
+                if (index == 0) this.lastId = item.efairymsg_id;
             });
         },
         sendMsg() {
             this.chatList.push({
-                msg: "复位",
-                time: moment().format("YYYY-MM-DD HH:mm:ss"),
-                isMine: 1
+                isMine: 1,
+                efairymsg_add_time: moment().format("YYYY-MM-DD HH:mm:ss"),
+                ctx: {
+                    text: "复位"
+                },
+                efairymsg_ishandle: 1
             });
             this.scroll.refresh();
-
             setTimeout(() => {
-                // this.scroll.refresh();
                 this.scroll.scrollTo(0, this.scroll.maxScrollY);
             }, 0);
         },
@@ -93,26 +91,53 @@ export default {
             this.$router.back();
         },
         gotoConfig() {
-            this.$router.push({ name: "deviceConfig" ,params:{q:3}});
+            this.$router.push({ name: "deviceConfig", query: { q: 3 } });
         },
-        setupBetterScroll() {
+        async setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
                 tap: true,
-                click: true
+                click: true,
+                pullDownRefresh: {
+                    threshold: 0,
+                    stop: 0
+                }
             });
-            const maxY = this.scroll.maxScrollY;
-            console.log(maxY);
+            this.scroll.on("pullingDown", () => {
+                this.loadEarlyMsgList();
+            });
+            setTimeout(() => {
+                this.scroll.scrollTo(0, this.scroll.maxScrollY);
+            }, 1000);
+        },
+        async loadEarlyMsgList() {
+            const tmpLastId = this.lastId;
+            const data = await this.$service.projectService.getDeviceChatMsgList(
+                {
+                    efairyuser_msgobj_id: this.userMsgId,
+                    efairydevice_msgobj_id: this.query.msgobj_id,
+                    size: this.pageSize,
+                    page: ++this.page,
+                    last_id: this.lastId
+                }
+            );
+            const chatList = data.result.msg_list.reverse();
+            chatList.forEach((item, index) => {
+                item.ctx = JSON.parse(item.efairymsg_content);
+                if (index == 0) this.lastId = item.efairymsg_id;
+            });
+            this.chatList = chatList.concat(this.chatList);
+            this.scroll.finishPullDown();
             setTimeout(() => {
                 this.scroll.refresh();
-            }, 1000);
+                this.scroll.scrollToElement("#msg" + tmpLastId, 0, 0, -20);
+            }, 0);
         }
     }
 };
 </script>
 
 <style lang="scss" scoped>
-
-@import '@/assets/color.scss';
+@import "@/assets/color.scss";
 
 .bar-close {
     font-size: 24px;

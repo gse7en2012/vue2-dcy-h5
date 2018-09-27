@@ -14,6 +14,21 @@ const projectService = {
 		return await axios.get('/device_list', {
 			params: opts
 		})
+	},
+	async getDeviceDetail(opts){
+		return await axios.get('/device_rt_info',{
+			params:opts
+		})
+	},
+	async getDeviceChatMsgList(opts){
+		return await axios.get('/device_msg_list',{
+			params:opts
+		})
+	},
+	async getDeviceAlarmUnhandleList(opts){
+		return await axios.get('/device_unhandle_alarm_msg_list',{
+			params:opts
+		})
 	}
 }
 

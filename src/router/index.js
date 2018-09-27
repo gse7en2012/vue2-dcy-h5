@@ -71,14 +71,20 @@ const dcyRoutes = [{
 		},
 	},
 	{
-		path: '/project/devices/:pid/detail/charts',
+		path: '/project/:pid/devices/:did/detail/charts',
 		name: 'deviceCharts',
-		component: deviceCharts
+		component: deviceCharts,
+		meta: {
+			nokeepAlive: true,
+		},
 	},
 	{
-		path: '/project/devices/:pid/detail/chat',
+		path: '/project/:pid/devices/:did/detail/chat',
 		name: 'deviceChat',
-		component: deviceChat
+		component: deviceChat,
+		meta: {
+			nokeepAlive: true,
+		},
 	},
 	{
 		path: '/project/devices/:pid/detail/chat/alarm',
@@ -88,12 +94,18 @@ const dcyRoutes = [{
 	{
 		path: '/project/devices/:pid/detail/chat/alarm/handle',
 		name: 'deviceAlarmHandle',
-		component: deviceAlarmHandle
+		component: deviceAlarmHandle,
+		meta: {
+			nokeepAlive: true,
+		},
 	},
 	{
-		path: '/project/devices/:pid/detail/chat/config',
+		path: '/project/:pid/devices/:did/detail/chat/config',
 		name: 'deviceConfig',
-		component: deviceConfig
+		component: deviceConfig,
+		meta: {
+			nokeepAlive: true,
+		},
 	},
 
 	{

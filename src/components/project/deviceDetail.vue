@@ -5,25 +5,26 @@
 			<div>
 				<div class="main-box">
 					<div class="title row">
-						<span class="l">应再庆出租房总闸</span>
-						<span class="r">V1.0032</span>
+						<span class="l">{{basicInfo.efairydevice_name}}</span>
+						<span class="r">{{'版本:'+basicInfo.efairydevice_version}}</span>
 					</div>
 					<div class="row">
 						<span class="l">所属项目名称</span>
-						<span class="r">应再庆出租房</span>
+						<span class="r">{{basicInfo.efairyproject_name}}</span>
 					</div>
 					<div class="row">
-						<span class="l">所属项目名称</span>
-						<span class="r">应再庆出租房</span>
+						<span class="l">设备ID</span>
+						<span class="r">{{basicInfo.efairydevice_uuid}}</span>
 					</div>
 					<div class="row">
-						<span class="l">所属项目名称</span>
-						<span class="r">应再庆出租房</span>
+						<span class="l">设备安装时间</span>
+						<span class="r">{{basicInfo.efairydevice_install_time}}</span>
 					</div>
 					<div class="row">
-						<span class="l">所属项目名称</span>
-						<span class="r">广东省深圳市宝安区公明街道凤3337号广东省深圳市宝安区公明街</span>
+						<span class="l">设备地址</span>
+						<span class="r">{{basicInfo.efairydevice_address}}</span>
 					</div>
+
 				</div>
 
 				<van-cell-group class="my-list">
@@ -31,36 +32,41 @@
 				</van-cell-group>
 
 				<van-cell-group class="my-list">
-					<van-cell title="设备消息" is-link :to="{name:'deviceChat'}" />
+					<van-cell title="设备消息" is-link :to="{name:'deviceChat',query:{'msgobj_id':basicInfo.efairydevice_msgobj_id}}" />
 				</van-cell-group>
 
-				<!-- <van-cell-group class="my-list">
-					<van-cell title="实时数据" />
-				</van-cell-group> -->
 				<div class="block-title">
-					实时数据
+					实时状态
 				</div>
 				<van-cell-group class="detail-list">
-					<van-cell title="单元格">333</van-cell>
-					<van-cell title="单元格" value="内容" />
-					<van-cell title="单元格" value="内容" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="单元格" value="内容" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="温度通道1" value="29.0°C/70.0°C" />
-					<van-cell title="单元格" value="内容" />
+					<van-cell title="设备状态">{{statusHash[rtInfo.efairydevice_alarm_id]}}</van-cell>
+					<van-cell title="是否在线" :value="rtInfo.efairydevice_is_online?'是':'否'" />
+					<van-cell title="信号强度" :value="rtInfo.efairydevice_csq" />
+					<van-cell title="信号等级" :value="levelHash[rtInfo.efairydevice_csq_level]" />
+					<van-cell title="心跳间隔" :value="rtInfo.heartbeat_interval||'--'" />
+					<van-cell title="音响模式" :value="rtInfo.audio_on?'静音':'音响'" />
+					<van-cell title="更新时间" :value="rtInfo.rt_data_time||'--'" />
+				</van-cell-group>
+
+				<div class="block-title">
+					通道数据
+				</div>
+				<van-cell-group class="detail-list">
+					<van-cell title="暂无数据" v-if="cdataList.length==0" />
+					<van-cell :title="c.c_name" v-for="(c,i) in cdataList" :key="c.cid" :value="c.c_value" />
+				</van-cell-group>
+
+				<div class="block-title">
+					用户列表
+				</div>
+				<van-cell-group class="detail-list">
+					<van-cell :title="user.efairyuser_nickname" v-for="(user,i) in userList" :key="user.efairyuser_id" :value="user.efairyuser_phonenumber" />
 				</van-cell-group>
 			</div>
 		</div>
-		<a href="tel:400-0000-688" class="phone">
-			<img src="@/assets/icons/phone_big.png">
-		</a>
+		<van-actionsheet v-model="show" :actions="phoneList" @select="onSelect" />
+
+		<a class="phone" @click="showPhoneList()"><img src="@/assets/icons/phone_big.png"></a>
 
 	</div>
 
@@ -68,36 +74,69 @@
 
 <script>
 import BScroll from "better-scroll";
+// 设备状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常，优先级:离线 报警  预警  故障 启动 屏蔽 正常
 
 export default {
     name: "deviceDetail",
 
     data() {
         return {
-            // query: this.$route.query,
-            active: 0,
-            addressLoading: true,
-            showAddressPicker: false,
-            showprojectMap: false,
+            statusHash: [
+                "离线",
+                "火警",
+                "预警",
+                "故障",
+                "启动",
+                "屏蔽",
+                "正常"
+            ],
+            levelHash: ["弱", "中", "强"],
+            deviceId: this.$route.params.did,
             value: "",
-            tmp: [],
-            deviceList: [],
-            calcHeight: 500
+            show: false,
+            phoneList: [],
+            basicInfo: {},
+            rtInfo: {},
+            userList: [],
+            cdataList: []
         };
     },
     async mounted() {
         // console.log(this.$store.getters.deviclAlarmListChooseList);
+        this.getDeviceDetail();
         this.$nextTick(() => {
-            // document.title = "项目列表";
-            // this.calcHeight =
-            //     document.querySelector(".main").offsetHeight -
-            //     this.$refs.wrapper.offsetTop;
             this.setupBetterScroll();
         });
+        // document.location.href = "tel:xxx";
     },
     methods: {
         goBack() {
             this.$router.back();
+        },
+        showPhoneList() {
+            this.show = true;
+        },
+        async getDeviceDetail() {
+            const data = await this.$service.projectService.getDeviceDetail({
+                efairydevice_id: this.deviceId
+            });
+            this.basicInfo = data.result.basic_info;
+            this.rtInfo = data.result.rt_info;
+            this.userList = data.result.user_list;
+            this.phoneList = this.userList.map(item => {
+                return {
+                    name: `${item.efairyuser_nickname} - ${
+                        item.efairyuser_phonenumber
+                    }`,
+                    phone: item.efairyuser_phonenumber
+                };
+            });
+            if (data.result.rt_info)
+                this.cdataList = data.result.rt_info.c_data_list || [];
+        },
+        onSelect(item) {
+            this.show = false;
+            document.location.href = "tel:" + item.phone;
         },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
