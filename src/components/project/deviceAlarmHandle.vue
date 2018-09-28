@@ -5,20 +5,20 @@
 			<div>
 				<div class="main-box">
 					<div class="title row">
-						<span class="l">这里是设备名称</span>
+						<span class="l">{{deviceName}}</span>
 					</div>
-					<div class="section" v-for="(msg,i) in showList" :key="i">
+					<div class="section" v-for="(item,i) in showList" :key="i">
 						<div class="row">
 							<span class="l">报警值/阈值</span>
-							<span class="r red">90/120</span>
+							<span class="r">{{item.efairydevicealarmstatistics_highest_value}}</span>
 						</div>
 						<div class="row">
 							<span class="l">报警时间</span>
-							<span class="r ">2018-06-09 09:37:48</span>
+							<span class="r ">{{item.efairydevicealarmstatistics_start_time}}</span>
 						</div>
 						<div class="row">
-							<span class="l">这里是通道名称</span>
-							<span class="r orange">故障</span>
+							<span class="l">{{item.efairydevicealarmstatistics_c_name}}</span>
+							<span class="r red">{{item.efairydevicealarmstatistics_c_alarm}}</span>
 						</div>
 					</div>
 
@@ -32,32 +32,31 @@
 				<div class="box">
 					<!-- <van-cell-group class="op-list"> -->
 					<van-cell @click="showDatePopup('start')" is-link>
-						<span class="van-cell-text">开始日期</span>
+						<span class="van-cell-text">排查时间</span>
 						<div class="van-cell-box">
 							<span>{{startDate}}</span>
 						</div>
 					</van-cell>
 
-					<van-cell is-link>
+					<van-cell is-link @click="showActions(1)">
 						<span class="van-cell-text">排查现场</span>
 						<div class="van-cell-box">
-							<span>是</span>
+							<span>{{isScene.name}}</span>
 						</div>
 					</van-cell>
 
-					<van-cell is-link>
+					<van-cell is-link @click="showActions(2)">
 						<span class="van-cell-text">排查隐患</span>
 						<div class="van-cell-box">
-							<span>是</span>
+							<span>{{isFixed.name}}</span>
 						</div>
 					</van-cell>
 					<!-- </van-cell-group> -->
 				</div>
 
 				<div class="box">
-					<div class="ctx">这里是描述内人人人人人人
-
-						<br>这里是描述内人人人人人人<br>这里是描述内人人人人人人
+					<div class="ctx">
+						<textarea class="desc-txt" placeholder="在这里输入描述内容" rows="4"></textarea>
 					</div>
 				</div>
 
@@ -70,18 +69,20 @@
 								<img :src="img.content" :class="{'ver':img.isWide}" @click="previewUploadImg(i)">
 							</div>
 
-							<van-uploader :after-read="onReadUploadImg" class="item add" v-if="uploadList.length<=8" />
+								<van-uploader :after-read="onReadUploadImg" class="item add" v-if="uploadList.length<=8" />
+							</div>
 						</div>
 					</div>
+
+					<a class="dcy-btn">提交</a>
+
 				</div>
-
-				<a class="dcy-btn">提交</a>
-
-			</div>
 		</section>
 		<van-popup v-model="showDatePicker" @click-overlay="closeDatePopup()" position="bottom" lazy-render>
-			<van-datetime-picker v-model="currentDate" type="date" @confirm="setTime" :title="datePickerTitle" />
+			<van-datetime-picker v-model="currentDate" type="datetime" @confirm="setTime" :title="datePickerTitle" />
 		</van-popup>
+
+		<van-actionsheet v-model="show" :actions="actions" @select="onSelect" />
 
 	</div>
 </template>
@@ -89,31 +90,36 @@
 <script>
 import { Dialog, ImagePreview } from "vant";
 import BScroll from "better-scroll";
+import moment from "moment";
 
 export default {
     name: "deviceAlarmHandle",
     data() {
         return {
-            // query: this.$route.query,
+            deviceName: this.$store.state.tmpDeviceName,
             list: [],
             showList: [],
             idSeed: 1,
             uploadList: [],
             uploadImgFlag: false,
-            showMoreFlag: false,
+			showMoreFlag: false,
+			startDate:'',
             currentDatePickerType: "start",
             currentDate: new Date(),
             showDatePicker: false,
-            startDate: "",
-            endDate: "",
-            datePickerTitle: "开始日期",
-            imgPrevie: null
+            datePickerTitle: "排查时间",
+            imgPrevie: null,
+            //actions
+            actions: [{ name: "是", status: 1 }, { name: "否", status: 0 }],
+            currentModel: null,
+            isScene: { name: "否", status: 0 },
+            isFixed: { name: "否", status: 0 },
+            show: false
         };
     },
     async mounted() {
         // document.title = "我的";
-        this.list = this.$store.getters.deviclAlarmListChooseList;
-        this.list.push({ a: 1 });
+        this.list = this.$store.getters.deviclAlarmListChooseList || [];
         this.showList.push(this.list[0]);
         this.setupBetterScroll();
     },
@@ -132,7 +138,17 @@ export default {
                 this.showMoreFlag = false;
             }
         },
-
+        showActions(type) {
+            type == 1
+                ? (this.currentModel = "isScene")
+                : (this.currentModel = "isFixed");
+            this.show = true;
+        },
+        onSelect(item) {
+            this.show = false;
+            this[this.currentModel] = item;
+            console.log(this.isScene, this.isFixed);
+        },
         onReadUploadImg(file) {
             file.id = this.idSeed++;
             this.getImgWidthAndHeight(file);
@@ -294,6 +310,12 @@ export default {
         border-bottom: 1px solid #eee;
         font-size: 14px;
         color: #333;
+    }
+    .desc-txt {
+        width: 100%;
+        background: #fff;
+        border: 0;
+        resize: none;
     }
 }
 

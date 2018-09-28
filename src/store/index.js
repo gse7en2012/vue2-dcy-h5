@@ -12,6 +12,7 @@ export default new Vuex.Store({
 		count: 0,
 		userAccountInfo: null,
 		isAjaxLoading: false,
+		tmpDeviceName:'',
 		deviclAlarmListChooseList: [], //选择报警列表
 		projectAreaSelectedQuery: null //项目地区信息
 	},
@@ -54,6 +55,9 @@ export default new Vuex.Store({
 		},
 		setProjectAreaSelectedQuery(ctx, data) {
 			ctx.state.projectAreaSelectedQuery = data;
+		},
+		saveCurrentDeviceName(ctx,data){
+			ctx.state.tmpDeviceName=data;
 		}
 	}
 })

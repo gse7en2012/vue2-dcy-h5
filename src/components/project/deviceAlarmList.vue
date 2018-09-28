@@ -3,33 +3,60 @@
 		<van-nav-bar title="设备报警列表" @click-left="goBack" left-arrow />
 		<div class="top-box">
 			<div class="tab" @click="show=true">{{current.name}}</div>
-			<div class="tab" @click="show=true">{{current.name}}</div>
+			<div class="tab" @click="showStatus=true">{{currentStatus.name}}</div>
 		</div>
 
 		<div class="wrapper" ref="wrapper">
-			<div class="device-list">
-				<div class="row" v-for="(item,i) in deviceList" @click="chooseMsg(item,i)">
-
-					<div class="ctrl" :class="{show:edit}">
-						<div class="radio" :class="{chose:item.choose}"></div>
-					</div>
-					<div class="wrap">
-						<div class="ctx">
-							<p class="title">
-								<span class="left">通道类型+通道号</span>
-								<span class="right red">火警</span>
-							</p>
-							<p class="info">
-								<span class="left">报警值/阈值</span>
-								<span class="right">90/120</span>
-							</p>
-							<p class="info">
-								<span class="left">报警时间</span>
-								<span class="right">{{item.time}}</span>
-							</p>
+			<div>
+				<div class="no-result" v-if="!showLoading&&alarmList.length==0">
+					暂无数据
+				</div>
+				<div class="device-list" v-if="currentStatus.status==0">
+					<div class="row" v-for="(item,i) in alarmList" @click="chooseMsg(item,i)" :key="item.efairydevicealarmstatistics_id">
+						<div class="ctrl" :class="{show:edit}">
+							<div class="radio" :class="{chose:item.choose}"></div>
+						</div>
+						<div class="wrap">
+							<div class="ctx">
+								<p class="title">
+									<span class="left">{{item.efairydevicealarmstatistics_c_name}}</span>
+									<span class="right red">{{item.efairydevicealarmstatistics_c_alarm}}</span>
+								</p>
+								<p class="info">
+									<span class="left">报警值/阈值</span>
+									<span class="right">{{item.efairydevicealarmstatistics_highest_value}}</span>
+								</p>
+								<p class="info">
+									<span class="left">报警时间</span>
+									<span class="right">{{item.efairydevicealarmstatistics_start_time}}</span>
+								</p>
+							</div>
 						</div>
 					</div>
+				</div>
 
+				<div class="device-handled-list" v-if="currentStatus.status==1">
+					<div class="row" v-for="(item,i) in alarmList" @click="chooseMsg(item,i)" :key="item.efairydevicealarmstatistics_id">
+						<div class="ctrl" :class="{show:edit}">
+							<div class="radio" :class="{chose:item.choose}"></div>
+						</div>
+						<div class="wrap">
+							<div class="ctx">
+								<p class="title">
+									<span class="left">{{item.efairydevicealarmstatistics_c_name}}</span>
+									<span class="right red">{{item.efairydevicealarmstatistics_c_alarm}}</span>
+								</p>
+								<p class="info">
+									<span class="left">报警值/阈值</span>
+									<span class="right">{{item.efairydevicealarmstatistics_highest_value}}</span>
+								</p>
+								<p class="info">
+									<span class="left">报警时间</span>
+									<span class="right">{{item.efairydevicealarmstatistics_start_time}}</span>
+								</p>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="edit-button-box" :class="{show:edit}">
@@ -38,10 +65,11 @@
 				</div>
 				<a class="dcy-btn" @click="commitDeviceAlarmList()">提交</a>
 			</div>
+
 		</div>
 
 		<van-actionsheet v-model="show" :actions="actions" @select="onSelect" />
-
+		<van-actionsheet v-model="showStatus" :actions="statusActions" @select="onSelectStatusAction" />
 	</div>
 
 </template>
@@ -49,32 +77,42 @@
 <script>
 import BScroll from "better-scroll";
 import { Toast } from "vant";
+import { mapState } from "vuex";
 
 export default {
     name: "deviceAlarmList",
-
+    computed: {
+        ...mapState({
+            showLoading: state => state.isAjaxLoading
+        })
+    },
     data() {
         return {
-            // query: this.$route.query,
-            active: 0,
             edit: true,
+            deviceId: this.$route.params.did,
             chooseAllFlag: false,
-            value: "",
-            tmp: [],
-            deviceList: [],
+            alarmList: [],
+            listFinished: false,
             show: false,
-            current: { name: "火警" },
+            showStatus: false,
+            current: { name: "全部", id: -1 },
+            currentStatus: { name: "未处理", status: 0 },
+            pageSize: 10,
+            lastId: 0,
             actions: [
-                { name: "火警" },
-                {
-                    name: "正常"
-                    // subname: "描述信息"
-                },
-                { name: "故障" },
-                {
-                    name: "报警"
-                    // disabled: true
-                }
+                //不传则返回所有状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常
+                { name: "全部", id: -1 },
+                { name: "正常", id: 6 },
+                { name: "故障", id: 3 },
+                { name: "屏蔽", id: 5 },
+                { name: "火警", id: 1 },
+                { name: "预警", id: 2 },
+                { name: "离线", id: 0 },
+                { name: "启动", id: 4 }
+            ],
+            statusActions: [
+                { name: "未处理", status: 0 },
+                { name: "已处理", status: 1 }
             ],
             vuegConfig: {
                 backAnim: "touchPoint",
@@ -84,19 +122,9 @@ export default {
         };
     },
     async mounted() {
-        console.log("this count", this.$store.state.count);
+        await this.getDeviceAlarmList();
         this.$nextTick(() => {
             this.setupBetterScroll();
-        });
-        this.deviceList = Array.from({ length: 20 }).map((_, i) => {
-            return {
-                title: `${i}.这是标题紫薯很长很长很长很长很长很长很长`,
-                time: "2018-09-11 11:22:33",
-                msg: `${i}.这是消息主题内容啊啊啊啊啊${i}条哟哦哟33333333333`,
-                choose: false,
-                unread: true,
-                id: i
-            };
         });
     },
     methods: {
@@ -106,12 +134,59 @@ export default {
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
                 tap: true,
-                click: true
+                click: true,
+                pullUpLoad: {
+                    threshold: 0,
+                    stop: 0
+                }
             });
-            setTimeout(() => {
-                this.scroll.refresh();
-            }, 1000);
+            this.scroll.on("pullingUp", () => {
+                this.getDeviceAlarmList();
+                this.scroll.finishPullUp();
+                setTimeout(() => {
+                    this.scroll.refresh();
+                }, 0);
+            });
         },
+        async getDeviceAlarmList() {
+            if (this.showLoading) return;
+            if (this.listFinished) return this.$toast("没有更多了");
+            const query = {
+                alarm_id: this.current.id == -1 ? null : this.current.id,
+                efairydevice_id: this.deviceId,
+                size: this.pageSize,
+                last_id: this.lastId
+            };
+            const data = await this.$service.projectService.getDeviceAlarmUnhandleList(
+                query
+            );
+            const list = data.result.alarm_msg_list;
+            if (list.length < this.pageSize) this.listFinished = true;
+            if (list.length == 0) return;
+            this.alarmList = this.alarmList.concat(list);
+            this.lastId =
+                list[list.length - 1]["efairydevicealarmstatistics_id"];
+        },
+        async getDeviceAlarmHandledList() {
+            if (this.showLoading) return;
+            if (this.listFinished) return this.$toast("没有更多了");
+            const query = {
+                alarm_id: this.current.id == -1 ? null : this.current.id,
+                efairydevice_id: this.deviceId,
+                size: this.pageSize,
+                last_id: this.lastId
+            };
+            const data = await this.$service.projectService.getDeviceAlarmHandledList(
+                query
+            );
+            const list = data.result.alarmrecord_list;
+            if (list.length < this.pageSize) this.listFinished = true;
+            if (list.length == 0) return;
+            this.alarmList = this.alarmList.concat(list);
+            this.lastId =
+                list[list.length - 1]["efairydevicealarmstatistics_id"];
+        },
+
         editMessage() {
             this.edit = !this.edit;
         },
@@ -119,7 +194,23 @@ export default {
             // 点击选项时默认不会关闭菜单，可以手动关闭
             this.show = false;
             this.current = item;
-            Toast(item.name);
+            this.alarmList = [];
+            this.listFinished = false;
+            this.lastId = 0;
+            this.currentStatus.status == 1
+                ? this.getDeviceAlarmHandledList()
+                : this.getDeviceAlarmList();
+        },
+        onSelectStatusAction(item) {
+            this.showStatus = false;
+            this.currentStatus = item;
+            this.alarmList = [];
+            this.listFinished = false;
+            this.lastId = 0;
+            item.status == 1
+                ? this.getDeviceAlarmHandledList()
+                : this.getDeviceAlarmList();
+            this.scroll && this.scroll.refresh();
         },
         chooseMsg(item, indexOfItem) {
             if (!this.edit) return;
@@ -128,14 +219,14 @@ export default {
         commitDeviceAlarmList() {
             this.$store.dispatch(
                 "changeDeviclAlarmListChooseList",
-                this.deviceList.filter(item => item.choose)
+                this.alarmList.filter(item => item.choose)
             );
             this.$router.push({ name: "deviceAlarmHandle" });
         },
 
         chooseAll() {
             this.chooseAllFlag = !this.chooseAllFlag;
-            this.deviceList.forEach(msg => {
+            this.alarmList.forEach(msg => {
                 msg.choose = this.chooseAllFlag;
             });
         }
@@ -221,6 +312,18 @@ export default {
     bottom: 0;
 }
 
+.no-result {
+    text-align: center;
+    margin: 20px;
+    color: #999;
+    font-size: 14px;
+}
+
+.device-handled-list {
+    padding-bottom: 55px;
+    overflow: hidden;
+}
+
 .device-list {
     // margin-top: 88px;
     padding-bottom: 55px;
@@ -292,7 +395,7 @@ export default {
                     }
                     .right {
                         font-size: 14px;
-                        // color: #999;
+                        color: #999;
                         text-align: right;
                         line-height: 22px;
                     }
@@ -314,7 +417,7 @@ export default {
                     }
                     .right {
                         font-size: 12px;
-                        color: #999;
+                        // color: #999;
                         text-align: right;
                         line-height: 22px;
                     }

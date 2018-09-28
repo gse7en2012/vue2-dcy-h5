@@ -127,6 +127,7 @@ export default {
             });
             this.chatList = chatList.concat(this.chatList);
             this.scroll.finishPullDown();
+            this.$toast("已加载更早前的消息");
             setTimeout(() => {
                 this.scroll.refresh();
                 this.scroll.scrollToElement("#msg" + tmpLastId, 0, 0, -20);

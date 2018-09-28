@@ -87,12 +87,15 @@ const dcyRoutes = [{
 		},
 	},
 	{
-		path: '/project/devices/:pid/detail/chat/alarm',
+		path: '/project/:pid/devices/:did/detail/chat/alarm',
 		name: 'deviceAlarmList',
-		component: deviceAlarmList
+		component: deviceAlarmList,
+		meta: {
+			nokeepAlive: true,
+		},
 	},
 	{
-		path: '/project/devices/:pid/detail/chat/alarm/handle',
+		path: '/project/:pid/devices/:did/detail/chat/alarm/handle',
 		name: 'deviceAlarmHandle',
 		component: deviceAlarmHandle,
 		meta: {

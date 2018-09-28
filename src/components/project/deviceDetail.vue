@@ -120,6 +120,10 @@ export default {
             const data = await this.$service.projectService.getDeviceDetail({
                 efairydevice_id: this.deviceId
             });
+            this.$store.dispatch(
+                "saveCurrentDeviceName",
+                data.result.basic_info.efairydevice_name
+            );
             this.basicInfo = data.result.basic_info;
             this.rtInfo = data.result.rt_info;
             this.userList = data.result.user_list;
