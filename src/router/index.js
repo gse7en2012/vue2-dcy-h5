@@ -10,6 +10,7 @@ import deviceCharts from '@/components/project/deviceCharts';
 import deviceChat from '@/components/project/deviceChat';
 import deviceAlarmList from '@/components/project/deviceAlarmList';
 import deviceAlarmHandle from '@/components/project/deviceAlarmHandle';
+import deviceAlarmFixed from '@/components/project/deviceAlarmFixed';
 import deviceConfig from '@/components/project/deviceConfig';
 
 import messageIndex from '@/components/message/messageIndex';
@@ -103,6 +104,14 @@ const dcyRoutes = [{
 		},
 	},
 	{
+		path: '/project/:pid/devices/:did/detail/chat/alarm/fixed',
+		name: 'deviceAlarmFixed',
+		component: deviceAlarmFixed,
+		meta: {
+			nokeepAlive: true,
+		},
+	},
+	{
 		path: '/project/:pid/devices/:did/detail/chat/config',
 		name: 'deviceConfig',
 		component: deviceConfig,
@@ -166,18 +175,20 @@ const dcyRouter = new Router({
 
 dcyRouter.beforeEach((to, from, next) => {
 	//check
-	// let toDepth = to.path.split('/').length
-	// let fromDepth = from.path.split('/').length
-	// if (to.path.charAt(to.path.length - 1) !== '/')
-	// 	toDepth += 1
-	// if (from.path.charAt(from.path.length - 1) !== '/')
-	// 	fromDepth += 1
-	// const transitionType = toDepth > fromDepth ? 'forward' : 'back'
-	// if(toDepth>fromDepth){
-	// 	to.meta.nokeepAlive=true;
-	// }else{
-	// 	to.meta.nokeepAlive=false;
+	let toDepth = to.path.split('/').length
+	let fromDepth = from.path.split('/').length
+	if (to.path.charAt(to.path.length - 1) !== '/')
+		toDepth += 1
+	if (from.path.charAt(from.path.length - 1) !== '/')
+		fromDepth += 1
+	const transitionType = toDepth > fromDepth ? 'forward' : 'back';
+
+	// if (toDepth > fromDepth) {
+	// 	to.meta.nokeepAlive = true;
+	// } else {
+	// 	to.meta.nokeepAlive = false;
 	// }
+
 
 	if (to.matched.some(r => r.meta.requireAuth)) {
 		if (store.state.accessToken) {

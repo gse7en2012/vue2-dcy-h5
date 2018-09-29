@@ -36,10 +36,7 @@
 				</div>
 
 				<div class="device-handled-list" v-if="currentStatus.status==1">
-					<div class="row" v-for="(item,i) in alarmList" @click="chooseMsg(item,i)" :key="item.efairydevicealarmstatistics_id">
-						<div class="ctrl" :class="{show:edit}">
-							<div class="radio" :class="{chose:item.choose}"></div>
-						</div>
+					<div class="row" v-for="(item,i) in alarmList" @click="gotoFixedDetail(item)" :key="item.efairydevicealarmstatistics_id">
 						<div class="wrap">
 							<div class="ctx">
 								<p class="title">
@@ -54,6 +51,15 @@
 									<span class="left">报警时间</span>
 									<span class="right">{{item.efairydevicealarmstatistics_start_time}}</span>
 								</p>
+								<p class="info">
+									<span class="left">处理时间</span>
+									<span class="right">{{item.efairyalarmrecord_add_time}}</span>
+								</p>
+								<p class="info">
+									<span class="left">处理人名称</span>
+									<span class="right">{{item.efairyuser_nickname}}</span>
+								</p>
+								<div class="desc">{{item.efairyalarmrecord_content}}</div>
 							</div>
 						</div>
 					</div>
@@ -229,6 +235,15 @@ export default {
             this.alarmList.forEach(msg => {
                 msg.choose = this.chooseAllFlag;
             });
+        },
+        gotoFixedDetail(item) {
+            this.$router.push({
+                name: "deviceAlarmFixed",
+                query: {
+                    fixedId: item.efairydevicealarmstatistics_id,
+                    deviceName: item.efairydevicealarmstatistics_c_name
+                }
+            });
         }
     }
 };
@@ -322,6 +337,73 @@ export default {
 .device-handled-list {
     padding-bottom: 55px;
     overflow: hidden;
+    .wrap {
+        flex: 1;
+        background: #fff;
+        border-radius: 4px;
+        display: flex;
+        transition: all 0.3s ease-in-out;
+        margin: 8px;
+        .ctx {
+            flex: 2;
+            .info {
+                font-weight: normal;
+                display: flex;
+                // margin: 10px 0 5px;
+                margin: 5px 0;
+                padding: 0 10px;
+                .left {
+                    font-size: 14px;
+                    color: #333;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+
+                    line-height: 22px;
+                    flex: 1;
+                }
+                .right {
+                    font-size: 14px;
+                    color: #999;
+                    text-align: right;
+                    line-height: 22px;
+                }
+            }
+            .desc {
+                padding: 5px 10px;
+                font-size: 13px;
+                color: #999;
+                border-top: 1px dashed #eee;
+                margin: 10px 0 5px;
+            }
+            .title {
+                font-weight: normal;
+                display: flex;
+                padding: 8px 10px;
+                margin: 0;
+                border-bottom: 1px solid #eee;
+                .left {
+                    font-size: 16px;
+                    color: #333;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+                    line-height: 22px;
+                    flex: 1;
+                }
+                .right {
+                    font-size: 12px;
+                    // color: #999;
+                    text-align: right;
+                    line-height: 22px;
+                }
+            }
+        }
+    }
 }
 
 .device-list {

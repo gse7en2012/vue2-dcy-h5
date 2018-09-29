@@ -31,10 +31,10 @@
 
 				<div class="box">
 					<!-- <van-cell-group class="op-list"> -->
-					<van-cell @click="showDatePopup('start')" is-link>
-						<span class="van-cell-text">排查时间</span>
+					<van-cell @click="showAlarmActions()" is-link>
+						<span class="van-cell-text">报警类型</span>
 						<div class="van-cell-box">
-							<span>{{startDate}}</span>
+							<span>{{alarmType.name}}</span>
 						</div>
 					</van-cell>
 
@@ -56,7 +56,7 @@
 
 				<div class="box">
 					<div class="ctx">
-						<textarea class="desc-txt" placeholder="在这里输入描述内容" rows="4"></textarea>
+						<textarea class="desc-txt" placeholder="在这里输入描述内容" rows="4" v-model="desc"></textarea>
 					</div>
 				</div>
 
@@ -74,15 +74,13 @@
 						</div>
 					</div>
 
-					<a class="dcy-btn">提交</a>
+					<a class="dcy-btn" @click="postHandle()">提交</a>
 
 				</div>
 		</section>
-		<van-popup v-model="showDatePicker" @click-overlay="closeDatePopup()" position="bottom" lazy-render>
-			<van-datetime-picker v-model="currentDate" type="datetime" @confirm="setTime" :title="datePickerTitle" />
-		</van-popup>
 
 		<van-actionsheet v-model="show" :actions="actions" @select="onSelect" />
+		<van-actionsheet v-model="showAlarmAction" :actions="alarmActions" @select="onSelectAlarmActions" />
 
 	</div>
 </template>
@@ -102,24 +100,34 @@ export default {
             idSeed: 1,
             uploadList: [],
             uploadImgFlag: false,
-			showMoreFlag: false,
-			startDate:'',
-            currentDatePickerType: "start",
-            currentDate: new Date(),
-            showDatePicker: false,
-            datePickerTitle: "排查时间",
+            showMoreFlag: false,
+            currentDate: "",
             imgPrevie: null,
+            desc: "",
             //actions
             actions: [{ name: "是", status: 1 }, { name: "否", status: 0 }],
+            alarmActions: [
+                { name: "请选择", id: -1 },
+                { name: "正常", id: 6 },
+                { name: "故障", id: 3 },
+                { name: "屏蔽", id: 5 },
+                { name: "火警", id: 1 },
+                { name: "预警", id: 2 },
+                { name: "离线", id: 0 },
+                { name: "启动", id: 4 }
+            ],
             currentModel: null,
             isScene: { name: "否", status: 0 },
             isFixed: { name: "否", status: 0 },
-            show: false
+            alarmType: { name: "请选择", id: -1 },
+            show: false,
+            showAlarmAction: false
         };
     },
     async mounted() {
         // document.title = "我的";
         this.list = this.$store.getters.deviclAlarmListChooseList || [];
+        console.log(this.list);
         this.showList.push(this.list[0]);
         this.setupBetterScroll();
     },
@@ -144,10 +152,36 @@ export default {
                 : (this.currentModel = "isFixed");
             this.show = true;
         },
+        showAlarmActions(type) {
+            this.showAlarmAction = true;
+        },
         onSelect(item) {
             this.show = false;
             this[this.currentModel] = item;
             console.log(this.isScene, this.isFixed);
+        },
+        onSelectAlarmActions(item) {
+            this.showAlarmAction = false;
+            this.alarmType = item;
+        },
+        async postHandle() {
+            const data = await this.$service.projectService.postDeviceAlarmHandle(
+                {
+                    efairydevicealarmstatistics_id_list: this.list.map(
+                        item => item.efairydevicealarmstatistics_id
+                    ),
+                    alarmrecord_info: {
+                        efairyalarmrecord_alarm_id: this.alarmType.id,
+                        efairyalarmrecord_is_handle: this.isFixed.status,
+                        efairyalarmrecord_is_insite_handle: this.isScene.status,
+                        efairyalarmrecord_content: this.desc
+                    },
+                    alarmrecord_imgurl_list: this.uploadList.map(
+                        item => item.content
+                    )
+                }
+            );
+            console.log(data);
         },
         onReadUploadImg(file) {
             file.id = this.idSeed++;
@@ -189,30 +223,6 @@ export default {
             setTimeout(() => {
                 this.scroll.refresh();
             }, 1000);
-        },
-        showDatePopup(type) {
-            this.showDatePicker = true;
-            this.currentDatePickerType = type;
-            this.datePickerTitle = type == "start" ? "开始日期" : "结束日期";
-        },
-        closeDatePopup() {
-            this.showDatePicker = false;
-            this.$emit("showBar");
-        },
-        setTime(date) {
-            // const formatDate = [
-            //     date.getFullYear(),
-            //     date.getMonth() + 1 < 10
-            //         ? "0" + (date.getMonth() + 1)
-            //         : date.getMonth() + 1,
-            //     date.getDate() < 10 ? "0" + date.getDate() : date.getDate()
-            // ].join("-");
-            const formatDate = moment(date).format("YYYY-MM-DD HH:mm:ss");
-
-            if (this.currentDatePickerType == "start")
-                this.startDate = formatDate;
-            if (this.currentDatePickerType == "end") this.endDate = formatDate;
-            this.showDatePicker = false;
         }
     }
 };

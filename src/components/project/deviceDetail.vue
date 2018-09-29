@@ -6,7 +6,7 @@
 				<div class="main-box">
 					<div class="title row">
 						<span class="l">{{basicInfo.efairydevice_name}}</span>
-						<span class="r">{{'版本:'+basicInfo.efairydevice_version}}</span>
+						<span class="r">版本{{basicInfo.efairydevice_version}}</span>
 					</div>
 					<div class="row">
 						<span class="l">所属项目名称</span>

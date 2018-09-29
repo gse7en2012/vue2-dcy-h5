@@ -12,12 +12,18 @@ axios.defaults.baseURL = '/wxluaapi';
 // http request 拦截器
 axios.interceptors.request.use(
 	config => {
-		// console.log(config);
 		if (store.state.accessToken) {
 			config.headers.Authorization = `token ${store.state.accessToken}`;
-			if (!config.params) config.params = {};
-			config.params.access_token = store.state.accessToken;
-			config.params.efairyuser_id = store.state.userId;
+			if (config.method == "get") {
+				if (!config.params) config.params = {};
+				config.params.access_token = store.state.accessToken;
+				config.params.efairyuser_id = store.state.userId;
+			}
+			if (config.method == 'post') {
+				if (!config.data) config.data = {};
+				config.data.access_token = store.state.accessToken;
+				config.data.efairyuser_id = store.state.userId;
+			}
 		}
 		store.commit('updateLoadingStatus', {
 			isLoading: true

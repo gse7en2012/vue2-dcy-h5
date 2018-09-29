@@ -1,10 +1,11 @@
 import userService from './user';
 import projectService from './project';
-
+import reportService from './report';
 
 const dcyService = {
 	userService,
-	projectService
+	projectService,
+	reportService
 }
 
 export default dcyService;
