@@ -14,15 +14,24 @@ axios.interceptors.request.use(
 	config => {
 		if (store.state.accessToken) {
 			config.headers.Authorization = `token ${store.state.accessToken}`;
-			if (config.method == "get") {
-				if (!config.params) config.params = {};
-				config.params.access_token = store.state.accessToken;
-				config.params.efairyuser_id = store.state.userId;
-			}
-			if (config.method == 'post') {
-				if (!config.data) config.data = {};
-				config.data.access_token = store.state.accessToken;
-				config.data.efairyuser_id = store.state.userId;
+			switch (config.method) {
+				case "get":
+					if (!config.params) config.params = {};
+					config.params.access_token = store.state.accessToken;
+					config.params.efairyuser_id = store.state.userId;
+					break;
+				case "post":
+					if (!config.data) config.data = {};
+					config.data.access_token = store.state.accessToken;
+					config.data.efairyuser_id = store.state.userId;
+					break;
+				case "delete":
+					if (!config.params) config.params = {};
+					config.params.access_token = store.state.accessToken;
+					config.params.efairyuser_id = store.state.userId;
+					break;
+				default:
+					break;
 			}
 		}
 		store.commit('updateLoadingStatus', {

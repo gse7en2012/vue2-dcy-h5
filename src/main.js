@@ -7,6 +7,10 @@ import theme from './theme/theme.json';
 import ECharts from 'vue-echarts/components/ECharts.vue';
 
 
+// import VueCookies from 'vue-cookies'
+// Vue.use(VueCookies);
+
+
 import store from './store';
 import 'vueg/css/transition-min.css'
 // // 手动引入 ECharts 各模块来减小打包体积
@@ -25,6 +29,8 @@ Vue.use(vueg, router, {
 	// backAnim:'slideInLeft',
 	// forwardAnim:'slideInRight'
 });
+
+
 
 import {
 	Tabbar,

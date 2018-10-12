@@ -14,11 +14,16 @@ export default new Vuex.Store({
 		isAjaxLoading: false,
 		tmpDeviceName:'',
 		deviclAlarmListChooseList: [], //选择报警列表
-		projectAreaSelectedQuery: null //项目地区信息
+		projectAreaSelectedQuery: null, //项目地区信息
+		isLogin:false
 	},
 	getters: {
 		deviclAlarmListChooseList(state) {
 			return state.deviclAlarmListChooseList;
+		},
+		checkLogin(){
+			console.log(Vue.$cookies);
+			return 3;
 		}
 	},
 	mutations: {

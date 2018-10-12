@@ -5,7 +5,7 @@
 			<div>
 				<div class="title-box">
 					<div class="title-editable">
-						这里是报告标题
+						{{basicInfo.efairyreport_title||'待编辑'}}
 						<span class="right">编辑</span>
 					</div>
 				</div>
@@ -13,49 +13,57 @@
 
 					<div class="row">
 						<span class="l">报告时间</span>
-						<span class="r">2012.11.11</span>
+						<span class="r">{{basicInfo.efairyreport_starttime}} - {{basicInfo.efairyreport_endtime}}</span>
 					</div>
 					<div class="row">
 						<span class="l">报警点位</span>
-						<span class="r">90/180</span>
+						<span class="r red">{{basicInfo.efairyreport_project_statistics.total_alarm_device_rows}}/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
+					</div>
+					<div class="row">
+						<span class="l">预警点位</span>
+						<span class="r yellow">{{basicInfo.efairyreport_project_statistics.total_early_warning_device_rows}}/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
+					</div>
+					<div class="row">
+						<span class="l">故障点位</span>
+						<span class="r">{{basicInfo.efairyreport_project_statistics.total_trouble_device_rows||0}}/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
 					</div>
 					<div class="row">
 						<span class="l">项目总数</span>
-						<span class="r">90/180</span>
+						<span class="r">{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
 					</div>
+
 					<div class="row">
-						<span class="l">项目总数</span>
-						<span class="r">90/180</span>
-					</div>
-					<div class="row">
-						<span class="l">项目总数</span>
-						<span class="r">90/180</span>
-					</div>
-					<div class="row">
-						<span class="l">所属项目名称</span>
-						<span class="r">最高分133</span>
+						<span class="l">项目评分</span>
+						<span class="r">
+							<label>最高分{{basicInfo.efairyreport_score_statistics.highest_score}}</label>
+							<label>最低分{{basicInfo.efairyreport_score_statistics.lowest_score}}</label>
+							<label>平均分{{basicInfo.efairyreport_score_statistics.average_score}}</label>
+						</span>
 					</div>
 				</div>
 				<form action="/" class="search-box">
-					<van-search v-model="value" placeholder="请输入项目名称" show-action @search="showprojectMapPopup" background="#fff">
-						<div slot="action" @click="showprojectMapPopup()">
-							<span class="point">评分</span>
+					<van-search v-model="keyword" placeholder="请输入项目名称" show-action @search="getReportIndexProjectList" background="#fff">
+						<div slot="action" @click="changeOrder()">
+							<span  :class="{point:true,asc:order==0,desc:order!=0}">评分</span>
 						</div>
 					</van-search>
 				</form>
-
-				<div class="box">
+				<div class="box" v-if="projectList.length==0">
+					<div class="ctx">没有项目数据</div>
+				</div>
+				<div class="box" v-for="(p,i) in projectList" :key="i">
 					<div class="title">
-						在庆出租房
-						<span class="score orange">评分87</span>
+						{{p.efairyproject_name}}
+						<span class="score orange">评分{{p.efairyproject_security_score}}</span>
 					</div>
 					<div class="ctx">
 						<div class="intro">
 							项目负责人：
-							<span>王大壮</span>
-							<a class="icon"><img src="@/assets/icons/phone_big.png" /></a>
+							<span>{{p.efairyproject_user_name}}</span>
+							<a class="icon" :href="'tel:'+p.efairyproject_user_phonenumber"><img src="@/assets/icons/phone_big.png" /></a>
 						</div>
-						<div class="table">
+
+						<div class="table" v-if="p.efairyproject_device_statistics.device_statistics_list.length!=0">
 							<table>
 								<tr>
 									<th>设备类型</th>
@@ -64,49 +72,18 @@
 									<th>预警点位数</th>
 									<th>故障点位</th>
 								</tr>
-								<tr>
-									<td>DDHZ4738X</td>
-									<td>90</td>
-									<td class="red">66</td>
-									<td class="orange">66</td>
-									<td class="yellow">66</td>
-								</tr>
-								<tr>
-									<td>DDHZ4738X</td>
-									<td>90</td>
-									<td class="red">66</td>
-									<td class="orange">66</td>
-									<td class="yellow">66</td>
-								</tr>
-								<tr>
-									<td>DDHZ4738X</td>
-									<td>90</td>
-									<td class="red">66</td>
-									<td class="orange">66</td>
-									<td class="yellow">66</td>
+								<tr v-for="(d,i) in p.efairyproject_device_statistics.device_statistics_list">
+									<td>{{d.efairydevice_device_type}}</td>
+									<td>{{d.total_devices}}</td>
+									<td class="red">{{d.total_alarm_devices}}</td>
+									<td class="orange">{{d.total_early_warning_devices}}</td>
+									<td class="yellow">{{d.total_trouble_devices||0}}</td>
 								</tr>
 							</table>
 						</div>
 					</div>
 				</div>
-				<div class="box">
-					<div class="title">在庆出租房</div>
-					<div class="ctx">
-						33333
-					</div>
-				</div>
-				<div class="box">
-					<div class="title">在庆出租房</div>
-					<div class="ctx">
-						33333
-					</div>
-				</div>
-				<div class="box">
-					<div class="title">在庆出租房</div>
-					<div class="ctx">
-						33333
-					</div>
-				</div>
+
 
 			</div>
 		</div>
@@ -117,6 +94,7 @@
 
 <script>
 import BScroll from "better-scroll";
+import moment from "moment";
 
 export default {
     name: "reportDetail",
@@ -124,17 +102,23 @@ export default {
     data() {
         return {
             // query: this.$route.query,
-            active: 0,
-            addressLoading: true,
-            showAddressPicker: false,
-            showprojectMap: false,
             value: "",
             tmp: [],
-            deviceList: [],
-            calcHeight: 500
+            projectList: [],
+            basicInfo: {
+                efairyreport_project_statistics: {},
+                efairyreport_score_statistics: {}
+            },
+            keyword: "",
+            order: 0,
+            page: 1,
+            size: 200,
+            reportId: this.$route.params.rid
         };
     },
     async mounted() {
+        this.getReportBasicInfo();
+        this.getReportIndexProjectList();
         // console.log(this.$store.getters.deviclAlarmListChooseList);
         this.$nextTick(() => {
             // document.title = "项目列表";
@@ -148,6 +132,37 @@ export default {
         goBack() {
             this.$router.back();
         },
+        async getReportBasicInfo() {
+            const basicInfo = await this.$service.reportService.getReportBasicInfo(
+                {
+                    efairyreport_id: this.reportId
+                }
+            );
+            this.basicInfo = basicInfo.result;
+            this.basicInfo.efairyreport_endtime = moment(
+                this.basicInfo.efairyreport_endtime
+            ).format("YYYY/MM/DD");
+            this.basicInfo.efairyreport_starttime = moment(
+                this.basicInfo.efairyreport_starttime
+            ).format("YYYY/MM/DD");
+            console.log(basicInfo);
+        },
+        async getReportIndexProjectList() {
+            const projectList = await this.$service.reportService.getReportIndexProjectList(
+                {
+                    efairyreport_id: this.reportId,
+                    keyword: this.keyword,
+                    page: this.page,
+                    size: this.size,
+                    order: this.order
+                }
+            );
+            this.projectList = projectList.result.efairyreport_project_list;
+		},
+		changeOrder(){
+			this.order=1-this.order;
+			this.getReportIndexProjectList();
+		},
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
                 tap: true,
@@ -213,6 +228,9 @@ export default {
                 color: #666;
                 flex: 2;
             }
+			label{
+				margin-left: 5px;
+			}
         }
         &.title {
             font-size: 16px;
@@ -260,6 +278,14 @@ export default {
             bottom: -3px;
         }
     }
+	.desc{
+		&::after{
+			border-bottom:5px solid #ccc;
+		}
+		&::before{
+			border-top:5px solid $dcyColor;
+		}
+	}
 }
 
 .box {
@@ -309,8 +335,8 @@ export default {
         .icon {
             width: 24px;
             height: 24px;
-			float: right;
-			margin-top: -2px;
+            float: right;
+            margin-top: -2px;
             img {
                 width: 100%;
             }

@@ -24,9 +24,12 @@ import reportIndex from '@/components/report/reportIndex';
 import reportDetail from '@/components/report/reportDetail';
 
 import loginPage from '@/components/landPage';
+import VueCookies from '../service/cookies';
 
 Vue.use(Router);
 
+// const appId='wx7df072b8e5881faf';
+const appId = 'wx1cb0950621818b8e';
 
 const dcyRoutes = [{
 		path: '',
@@ -161,7 +164,10 @@ const dcyRoutes = [{
 	{
 		path: '/report/:rid/detail',
 		name: 'reportDetail',
-		component: reportDetail
+		component: reportDetail,
+		meta: {
+			nokeepAlive: true,
+		},
 	}
 ];
 
@@ -171,10 +177,7 @@ const dcyRouter = new Router({
 	routes: dcyRoutes
 });
 
-
-
-dcyRouter.beforeEach((to, from, next) => {
-	//check
+const checkRouterForwardOrBack = (to, from) => {
 	let toDepth = to.path.split('/').length
 	let fromDepth = from.path.split('/').length
 	if (to.path.charAt(to.path.length - 1) !== '/')
@@ -182,14 +185,26 @@ dcyRouter.beforeEach((to, from, next) => {
 	if (from.path.charAt(from.path.length - 1) !== '/')
 		fromDepth += 1
 	const transitionType = toDepth > fromDepth ? 'forward' : 'back';
-
 	// if (toDepth > fromDepth) {
 	// 	to.meta.nokeepAlive = true;
 	// } else {
 	// 	to.meta.nokeepAlive = false;
 	// }
+}
 
+const checkWeixinToken = (to, from) => {
+	if (!VueCookies.get('efairywxuser_id')) {
+		// const redirectUri=encodeURIComponent(location.origin+'/wechatapi/oauth_callback');
+		const path = encodeURIComponent(to.path);
+		const redirectUri = encodeURIComponent(`http://wechatts.cciotsz.com/wechatapi/oauth_callback?return_uri=${path}`);
+		window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_userinfo&state=${Number(new Date())}#wechat_redirect`;
+	}
+}
 
+dcyRouter.beforeEach((to, from, next) => {
+	//check
+	// checkRouterForwardOrBack(to,from);
+	// checkWeixinToken(to, from);
 	if (to.matched.some(r => r.meta.requireAuth)) {
 		if (store.state.accessToken) {
 			next();

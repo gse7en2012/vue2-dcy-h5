@@ -108,7 +108,10 @@ export default {
     },
     async mounted() {
         await this.getAreaList();
-        await this.getProjectList();
+		await this.getProjectList();
+
+		console.log(this.$cookies);
+
     },
     methods: {
         async getAreaList() {

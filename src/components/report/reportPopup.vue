@@ -3,7 +3,7 @@
 		<van-nav-bar title="生成报告" @click-left="goBack()" fixed left-arrow class="pop-nav-bar" />
 		<div class="my-box" ref="wrapper">
 			<van-cell-group class="my-list">
-				<van-cell :title="p.title" v-for="(p,index) in projectList" :key="index">
+				<van-cell :title="p.efairyproject_name" v-for="(p,index) in projectList" :key="index">
 				</van-cell>
 
 			</van-cell-group>
@@ -11,14 +11,21 @@
 		<div class="op-box">
 			<van-cell-group class="op-list">
 				<van-cell>
+					<span class="van-cell-text">报告标题</span>
+					<div class="van-cell-box">
+						<!-- <van-field v-model="title" placeholder="请在这里输入报告标题" /> -->
+						<input  v-model="title" placeholder="请在这里输入" class="title-input">
+					</div>
+				</van-cell>
+				<van-cell>
 					<!-- <template slot="title"> -->
 					<span class="van-cell-text">快捷选择</span>
 					<!-- </template> -->
 
 					<div class="van-cell-box">
-						<a class="dcy-btn">本日</a>
-						<a class="dcy-btn cur">本周</a>
-						<a class="dcy-btn">本月</a>
+						<a class="dcy-btn" :class="{cur:dateRangeType==1}" @click="chooseDateRange(1)">本日</a>
+						<a class="dcy-btn" :class="{cur:dateRangeType==2}" @click="chooseDateRange(2)">本周</a>
+						<a class="dcy-btn" :class="{cur:dateRangeType==3}" @click="chooseDateRange(3)">本月</a>
 					</div>
 
 				</van-cell>
@@ -36,6 +43,7 @@
 						<span>{{endDate}}</span>
 					</div>
 				</van-cell>
+
 				<!-- <van-field label="开始日期" @click="showDatePopup('start')" v-model="startDate" /> -->
 				<!-- <van-field label="结束日期" @click="showDatePopup('end')" v-model="endDate" /> -->
 			</van-cell-group>
@@ -62,12 +70,14 @@ export default {
         return {
             // query: this.$route.query,
             // scroll: null,
+            dateRangeType: 0,
             currentDatePickerType: "start",
             deviceList: [],
             currentDate: new Date(),
             showDatePicker: false,
             startDate: "",
             endDate: "",
+            title: "",
             datePickerTitle: "开始日期"
         };
     },
@@ -77,16 +87,34 @@ export default {
         });
     },
     watch: {
-        projectList(val) {
-            // this.scroll = new BScroll(this.$refs.scroll, {
-            //     tap: true,
-            //     click: true
-            // });
-        }
+        projectList(val) {}
     },
     methods: {
         goBack() {
             this.$emit("close-popup");
+        },
+        chooseDateRange(type) {
+            this.dateRangeType = type;
+            switch (type) {
+                case 1:
+                    this.startDate = moment()
+                        .add(-1, "days")
+                        .format("YYYY-MM-DD");
+                    this.endDate = moment().format("YYYY-MM-DD");
+                    break;
+                case 2:
+                    this.startDate = moment()
+                        .add(-7, "days")
+                        .format("YYYY-MM-DD");
+                    this.endDate = moment().format("YYYY-MM-DD");
+                    break;
+                case 3:
+                    this.startDate = moment()
+                        .add(-1, "months")
+                        .format("YYYY-MM-DD");
+                    this.endDate = moment().format("YYYY-MM-DD");
+                    break;
+            }
         },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
@@ -150,7 +178,7 @@ $dcyColor: #282549;
     text-align: center;
     min-width: 54px;
     margin: 0;
-    margin-right: 15px;
+    margin-left: 15px;
     border-radius: 32px;
     &.large {
         display: block;
@@ -170,7 +198,7 @@ $dcyColor: #282549;
 .my-box {
     position: absolute;
     top: 46px;
-    bottom: 220px;
+    bottom: 260px;
     width: 100%;
     overflow: auto;
     // z-index: 9999;
@@ -201,7 +229,7 @@ $dcyColor: #282549;
     position: fixed;
     bottom: 0;
     width: 100%;
-    height: 220px;
+    height: 260px;
     background: #eef0f3;
     z-index: 10;
 }
@@ -210,6 +238,15 @@ $dcyColor: #282549;
     margin-top: 15px;
     .van-cell {
         color: #666;
+        .title-input {
+            width: 100%;
+            text-align: right;
+            height: 26px;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            line-height: 26px;
+        }
     }
     .van-cell-text {
         max-width: 90px;

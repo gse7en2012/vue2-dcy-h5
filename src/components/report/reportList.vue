@@ -6,36 +6,38 @@
 
 		<div class="wrapper" ref="wrapper">
 			<div class="report-list">
-				<div class="row" v-for="(item,i) in reportList" @click="gotoDetail(item,i)">
+				<div class="row" v-for="(item,i) in reportList">
 					<div class="wrap">
 						<div class="ctx">
 							<p class="info">
-								<span class="title">{{item.title}}</span>
-								<span class="del">
+								<span class="title" @click="gotoDetail(item,i)">{{item.efairyreport_title}}</span>
+								<span class="del" @click="deleteReport(item)">
 									<img src="@/assets/icons/trash.png">
 								</span>
 							</p>
-							<p>
-								<label>报告编号：
-									<span>#1</span>
-								</label>
-								<label>生成时间：
-									<span>06/01-06/03</span>
-								</label>
-							</p>
-							<p>
-								<label>统计时间：
-									<span>2018-08-01 11:22:11</span>
-								</label>
-							</p>
-							<p>
-								<label>点位总数：
-									<span>90</span>
-								</label>
-								<label>项目数：
-									<span>111</span>
-								</label>
-							</p>
+							<div @click="gotoDetail(item,i)">
+								<p>
+									<label>报告编号：
+										<span>#{{item.efairyreport_id}}</span>
+									</label>
+									<label>生成时间：
+										<span>{{item.st}}-{{item.et}}</span>
+									</label>
+								</p>
+								<p>
+									<label>统计时间：
+										<span>{{item.efairyreport_add_time}}</span>
+									</label>
+								</p>
+								<p>
+									<label>点位总数：
+										<span>{{item.efairyreport_device_number}}</span>
+									</label>
+									<label>项目数：
+										<span>{{item.efairyreport_project_number}}</span>
+									</label>
+								</p>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -46,6 +48,8 @@
 
 <script>
 import BScroll from "better-scroll";
+import moment from "moment";
+import { Dialog } from "vant";
 
 export default {
     name: "reportList",
@@ -56,20 +60,42 @@ export default {
         };
     },
     async mounted() {
-        this.reportList = Array.from({ length: 20 }).map((_, i) => {
-            return {
-                title: `${i}.这是项目标题测试自猪猪猪猪长很长很长`,
-                nums: "14",
-                msg: `这是地址啊啊啊啊啊${i}长很长很长长很长很长长很长很长`,
-                choose: false,
-                unread: true,
-                id: i
-            };
+        await this.getReportList();
+        this.$nextTick(() => {
+            this.setupBetterScroll();
         });
-        this.setupBetterScroll();
     },
     methods: {
         onSearch() {},
+        async getReportList() {
+            const data = await this.$service.reportService.getReportList({});
+            this.reportList = data.result.report_list;
+            this.reportList.forEach(item => {
+                item.st = moment(item.efairyreport_start_time).format("MM/DD");
+                item.et = moment(item.efairyreport_end_time).format("MM/DD");
+            });
+        },
+        async deleteReport(report) {
+            const config = {
+                message: `是否删除《${report.efairyreport_title}》`
+            };
+            Dialog.confirm(config)
+                .then(() => {
+                    this.$service.reportService
+                        .deleteReport({
+                            efairyreport_id_list: JSON.stringify([
+                                report.efairyreport_id
+                            ])
+                        })
+                        .then(() => {
+                            this.$toast("删除成功！");
+                            this.getReportList();
+                        });
+                })
+                .catch(() => {
+                    // on cancel
+                });
+        },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
                 tap: true,
@@ -81,7 +107,7 @@ export default {
         },
         gotoDetail(item) {
             // this.$router.push({ name: "reportDetail" });
-            this.$router.push(`/report/${item.id}/detail`);
+            this.$router.push(`/report/${item.efairyreport_id}/detail`);
         }
     }
 };

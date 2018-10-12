@@ -1,13 +1,16 @@
 <template>
 	<div class="main">
 		<div class="edit-bar">
-			<div class="edit-bar-span" @click="editMessage()">
+			<!-- <div class="edit-bar-span" @click="editMessage()">
 				<img src="@/assets/icons/edit.png">{{edit?'取消':'选择'}}
-			</div>
+			</div> -->
+			<van-cell-group>
+				<van-cell :value='"选择地区："+areaQueryText' is-link @click="popupAddress()" />
+			</van-cell-group>
 		</div>
 		<div class="wrapper" ref="wrapper">
 			<div class="project-list">
-				<div class="row" v-for="(item,i) in deviceList" @click="chooseMsg(item,i)">
+				<div class="row" v-for="(item,i) in projectList" @click="chooseMsg(item,i)">
 					<div class="ctrl" :class="{show:edit}">
 						<div class="radio" :class="{chose:item.choose}"></div>
 					</div>
@@ -17,10 +20,10 @@
 						</div> -->
 						<div class="ctx">
 							<p class="info">
-								<span class="title">{{item.title}}</span>
-								<span class="nums">{{item.nums}}<img src="@/assets/icons/nums.png" class="nums-p"></span>
+								<span class="title">{{item.efairyproject_name}}</span>
+								<span class="nums">{{item.efairyproject_total_users}}<img src="@/assets/icons/nums.png" class="nums-p"></span>
 							</p>
-							<p class="msg">设备数 90</p>
+							<p class="msg">设备数 {{item.efairyproject_total_devices}}</p>
 						</div>
 					</div>
 				</div>
@@ -34,6 +37,10 @@
 		</div>
 		<van-popup v-model="popShow" position="right" :overlay="false" class="report-popup">
 			<report-popup v-on:close-popup="closePop" v-bind:project-list="tmp" />
+		</van-popup>
+
+		<van-popup v-model="showAddressPicker" @click-overlay="popupAddress()" position="bottom">
+			<van-picker :columns="columns" @change="onChange" :loading="addressLoading" :item-height="40" show-toolbar title="选择地区" @cancel="onCancel" @confirm="onConfirm" />
 		</van-popup>
 	</div>
 </template>
@@ -52,47 +59,228 @@ export default {
         return {
             // query: this.$route.query,
             active: 0,
-            deviceList: [],
-            edit: false,
+            projectList: [],
+            edit: true,
             chooseAllFlag: false,
             popShow: false,
-            tmp: []
+            tmp: [],
+
+            addressLoading: false,
+            areaList: [],
+            areaQuery: {},
+            areaQueryText: "正在读取...",
+            columns: [],
+            showAddressPicker: false,
+
+            listLoading: false,
+            listPage: 1,
+            listPagesize: 10,
+            listFinished: false,
+            keyword: ""
         };
     },
     async mounted() {
-        this.deviceList = Array.from({ length: 20 }).map((_, i) => {
-            return {
-                title: `${i}.这是标题紫薯很长很长很长很长很长很长很长`,
-                nums: "33",
-                msg: `${i}.这是消息啊啊啊${i}条哟哦哟`,
-                choose: false,
-                unread: true,
-                id: i
-            };
-        });
-        this.$nextTick(() => {
-            // document.title = "生成报告";
-            this.scroll = new BScroll(this.$refs.wrapper, {
-                tap: true,
-                click: true
-            });
+		await this.getAreaList();
+		await this.getProjectList();
+        // this.projectList = Array.from({ length: 20 }).map((_, i) => {
+        //     return {
+        //         title: `${i}.这是标题紫薯很长很长很长很长很长很长很长`,
+        //         nums: "33",
+        //         msg: `${i}.这是消息啊啊啊${i}条哟哦哟`,
+        //         choose: false,
+        //         unread: true,
+        //         id: i
+        //     };
+        // });
 
-            // let wrapper = document.querySelector(".wrapper");
-            // let scroll = new BScroll(wrapper);
-        });
     },
 
     methods: {
-        onClickLeft() {},
+        async getAreaList() {
+            const data = await this.$service.reportService.getAreaList();
+            const provinceList = data.result.province_list;
+            this.areaList = provinceList;
+            this.initAreaList(provinceList);
+        },
+        async getProjectList() {
+            this.projectList = [];
+            this.listPage = 1;
+            this.listFinished = false;
+            const data = await this.$service.reportService.getProjectList({
+                regeo_info: this.areaQuery,
+                keyword: this.keyword,
+                page: this.listPage,
+                size: this.listPagesize
+            });
+            this.projectList = data.result.project_list;
+            if (data.result.project_list.length < this.listPagesize)
+                this.listFinished = true;
+            this.$nextTick(() => {
+                // this.calcHeight =
+                //     document.querySelector(".main").offsetHeight - 197;
+                this.setupBetterScroll();
+            });
+        },
+        initAreaList(data) {
+            this.columns = [];
+            this.columns[0] = {
+                values: data.map(province => province.efairyprovince_name),
+                className: "province"
+            };
+            this.columns[1] = {
+                values: data[0]["city_list"].map(city => city.efairycity_name),
+                className: "city"
+            };
+            this.columns[2] = {
+                values: data[0]["city_list"][0]["district_list"].map(
+                    district => district.efairydistrict_name || "直属"
+                ),
+                className: "district"
+            };
+            this.columns[3] = {
+                values: data[0]["city_list"][0]["district_list"][0][
+                    "township_list"
+                ].map(town => town.efairytownship_name),
+                className: "town"
+            };
+            this.areaQuery = {
+                efairyprovince_id: data[0].efairyprovince_id,
+                efairycity_id: data[0]["city_list"][0].efairycity_id,
+                efairydistrict_id:
+                    data[0]["city_list"][0]["district_list"][0]
+                        .efairydistrict_id,
+                efairytownship_id:
+                    data[0]["city_list"][0]["district_list"][0]["township_list"]
+                        .efairytownship_id
+            };
+            this.areaQueryText = [
+                data[0].efairyprovince_name,
+                data[0]["city_list"][0].efairycity_name,
+                data[0]["city_list"][0]["district_list"][0].efairydistrict_name,
+                data[0]["city_list"][0]["district_list"][0]["township_list"]
+                    .efairytownship_name
+            ].join("");
+
+            // this.$store.dispatch("setProjectAreaSelectedQuery", this.areaQuery);
+        },
+        onCancel() {
+            this.showAddressPicker = false;
+        },
+        onConfirm(values, indexs) {
+            const provinceId = this.areaList[indexs[0]].efairyprovince_id;
+            const cityId = this.areaList[indexs[0]]["city_list"][indexs[1]]
+                .efairycity_id;
+            const districtId = this.areaList[indexs[0]]["city_list"][indexs[1]][
+                "district_list"
+            ][indexs[2]].efairydistrict_id;
+            const townId = this.areaList[indexs[0]]["city_list"][indexs[1]][
+                "district_list"
+            ][indexs[2]]["township_list"][indexs[3]].efairytownship_id;
+
+            this.areaQueryText = values.join("");
+            this.areaQuery = {
+                efairyprovince_id: provinceId,
+                efairycity_id: cityId,
+                efairydistrict_id: districtId,
+                efairytownship_id: townId
+            };
+            this.getProjectList();
+            this.$store.dispatch("setProjectAreaSelectedQuery", this.areaQuery);
+            this.showAddressPicker = false;
+        },
+        onChange(picker, values, index) {
+            let currentProvinceIndex, currentCityIndex, currentDistrictIndex;
+            if (index == 0) {
+                currentProvinceIndex = this.areaList.findIndex(
+                    item => item.efairyprovince_name == values[0]
+                );
+                const cityList = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ].map(city => city.efairycity_name);
+                const districtList = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ][0]["district_list"].map(
+                    district => district.efairydistrict_name
+                );
+                const townList = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ][0]["district_list"][0]["township_list"].map(
+                    town => town.efairytownship_name
+                );
+                picker.setColumnValues(1, cityList);
+                picker.setColumnValues(2, districtList);
+                picker.setColumnValues(3, townList);
+            }
+            if (index == 1) {
+                currentProvinceIndex = this.areaList.findIndex(
+                    item => item.efairyprovince_name == values[0]
+                );
+                currentCityIndex = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ].findIndex(item => item.efairycity_name == values[1]);
+                const districtList = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ][currentCityIndex]["district_list"].map(
+                    district => district.efairydistrict_name
+                );
+                const townList = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ][currentCityIndex]["district_list"][0]["township_list"].map(
+                    town => town.efairytownship_name
+                );
+                picker.setColumnValues(2, districtList);
+                picker.setColumnValues(3, townList);
+            }
+            if (index == 2) {
+                currentProvinceIndex = this.areaList.findIndex(
+                    item => item.efairyprovince_name == values[0]
+                );
+                currentCityIndex = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ].findIndex(item => item.efairycity_name == values[1]);
+                currentDistrictIndex = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ][currentCityIndex]["district_list"].findIndex(
+                    item => item.efairydistrict_name == values[2]
+                );
+                const townList = this.areaList[currentProvinceIndex][
+                    "city_list"
+                ][currentCityIndex]["district_list"][currentDistrictIndex][
+                    "township_list"
+                ].map(town => town.efairytownship_name);
+                picker.setColumnValues(3, townList);
+            }
+		},
+		setupBetterScroll() {
+            if (!this.scroll) {
+                this.scroll = new BScroll(this.$refs.wrapper, {
+                    tap: true,
+                    click: true
+                });
+                this.scroll.on("scrollEnd", pos => {
+                    if (pos.y < this.scroll.maxScrollY + 100) {
+                        // this.loadMoreProjectList();
+                    }
+                });
+            } else {
+                this.scroll.refresh();
+            }
+        },
+        popupAddress() {
+            this.showAddressPicker = !this.showAddressPicker;
+            setTimeout(() => {
+                this.addressLoading = false;
+            }, 1000);
+        },
         showPop() {
-			this.popShow = true;
-			this.$emit('hideBotBar');
-            this.tmp = this.deviceList.filter(item=>item.choose);
-		},
-		closePop(){
-			this.popShow=false;
-			this.$emit('showBotBar');
-		},
+            this.popShow = true;
+            this.$emit("hideBotBar");
+            this.tmp = this.projectList.filter(item => item.choose);
+        },
+        closePop() {
+            this.popShow = false;
+            this.$emit("showBotBar");
+        },
         editMessage() {
             this.edit = !this.edit;
         },
@@ -107,7 +295,7 @@ export default {
             })
                 .then(() => {
                     // on confirm
-                    console.log(this.deviceList.filter(item => item.choose));
+                    console.log(this.projectList.filter(item => item.choose));
                     if (type == 1) {
                     }
                 })
@@ -117,7 +305,7 @@ export default {
         },
         chooseAll() {
             this.chooseAllFlag = !this.chooseAllFlag;
-            this.deviceList.forEach(msg => {
+            this.projectList.forEach(msg => {
                 msg.choose = this.chooseAllFlag;
             });
         }
@@ -130,8 +318,8 @@ $dcyColor: #282549;
 
 .report-popup {
     width: 100%;
-	height: 100%;
-	background: #eef0f3;
+    height: 100%;
+    background: #eef0f3;
 }
 
 .dcy-btn {
@@ -206,10 +394,10 @@ $dcyColor: #282549;
     overflow: hidden;
 }
 
-.nobar{
-	.wrapper{
-		top:88px;
-	}
+.nobar {
+    .wrapper {
+        top: 88px;
+    }
 }
 
 .project-list {

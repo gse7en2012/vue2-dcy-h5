@@ -38,6 +38,7 @@ export default {
         };
     },
     async mounted() {
+
         this.$nextTick(() => {
             // document.title = "报表";
         });
