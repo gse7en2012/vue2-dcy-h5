@@ -3,7 +3,7 @@
 		<van-nav-bar title="单位名称" @click-left="goBack" fixed left-arrow fixed />
 		<section class="page-main">
 			<van-cell-group class="my-cell">
-				<van-field v-model="value" placeholder="请输入单位名称" type="textarea"  rows="2" autosize/>
+				<van-field v-model="company" placeholder="请输入单位名称" type="textarea"  rows="2" autosize/>
 			</van-cell-group>
 			<a class="dcy-btn">确定</a>
 		</section>
@@ -19,11 +19,13 @@ export default {
     data() {
         return {
             // query: this.$route.query,
-            active: 0
+			company:'',
         };
     },
-    async mounted() {},
-
+    async mounted() {
+        this.userInfo = this.$store.state.userInfo;
+        this.company = this.userInfo.efairyuser_company;
+    },
     methods: {
         goBack() {
             this.$router.back();

@@ -10,7 +10,7 @@
 					<div class="wrap">
 						<div class="ctx">
 							<p class="info">
-								<span class="title" @click="gotoDetail(item,i)">{{item.efairyreport_title}}</span>
+								<span class="title" @click="gotoDetail(item,i)">{{item.efairyreport_title||'待编辑'}}</span>
 								<span class="del" @click="deleteReport(item)">
 									<img src="@/assets/icons/trash.png">
 								</span>
@@ -56,8 +56,15 @@ export default {
     data() {
         return {
             reportList: [],
+            scroll: null,
+            refresh: this.$route.query.refresh == 1,
             value: ""
         };
+    },
+    watch: {
+        refresh(val) {
+            this.getReportList();
+        }
     },
     async mounted() {
         await this.getReportList();
@@ -74,10 +81,11 @@ export default {
                 item.st = moment(item.efairyreport_start_time).format("MM/DD");
                 item.et = moment(item.efairyreport_end_time).format("MM/DD");
             });
+            if (this.scroll) this.scroll.finishPullDown();
         },
         async deleteReport(report) {
             const config = {
-                message: `是否删除《${report.efairyreport_title}》`
+                message: `是否删除《${report.efairyreport_title || "待编辑"}》`
             };
             Dialog.confirm(config)
                 .then(() => {
@@ -99,11 +107,18 @@ export default {
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
                 tap: true,
-                click: true
+                click: true,
+                pullDownRefresh: {
+                    threshold: 0,
+                    stop: 0
+                }
             });
-            setTimeout(() => {
-                this.scroll.refresh();
-            }, 1000);
+            this.scroll.on("pullingDown", () => {
+                this.getReportList();
+            });
+            // setTimeout(() => {
+            //     this.scroll.refresh();
+            // }, 1000);
         },
         gotoDetail(item) {
             // this.$router.push({ name: "reportDetail" });
@@ -114,21 +129,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$dcyColor: #282549;
-// $red: #ff0000;
-// $green: #3fb059;
-// $orange: #ff7200;
-// $yellow: #ffb900;
-
-$color-list: #ff0000 #3fb059 #ff7200 #ffb900;
-$color-name-list: red green orange yellow;
-
-@each $color in $color-name-list {
-    $i: index($color-name-list, $color);
-    .#{$color} {
-        color: nth($color-list, $i);
-    }
-}
+@import "@/assets/color.scss";
 
 .nobar {
     .wrapper {

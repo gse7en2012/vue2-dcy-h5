@@ -1,6 +1,6 @@
 <template>
 	<div class="main">
-		<van-nav-bar title="报告详情" @click-left="goBack" left-arrow />
+		<van-nav-bar title="报告详情" @click-left="goToReportIndex" left-arrow />
 		<div class="wrapper" ref="wrapper">
 			<div>
 				<div class="title-box">
@@ -44,14 +44,14 @@
 				<form action="/" class="search-box">
 					<van-search v-model="keyword" placeholder="请输入项目名称" show-action @search="getReportIndexProjectList" background="#fff">
 						<div slot="action" @click="changeOrder()">
-							<span  :class="{point:true,asc:order==0,desc:order!=0}">评分</span>
+							<span :class="{point:true,asc:order==0,desc:order!=0}">评分</span>
 						</div>
 					</van-search>
 				</form>
 				<div class="box" v-if="projectList.length==0">
 					<div class="ctx">没有项目数据</div>
 				</div>
-				<div class="box" v-for="(p,i) in projectList" :key="i">
+				<div class="box" v-for="(p,i) in projectList" :key="i" @click="gotoProjectDetails(p)">
 					<div class="title">
 						{{p.efairyproject_name}}
 						<span class="score orange">评分{{p.efairyproject_security_score}}</span>
@@ -83,7 +83,6 @@
 						</div>
 					</div>
 				</div>
-
 
 			</div>
 		</div>
@@ -129,6 +128,18 @@ export default {
         });
     },
     methods: {
+        goToReportIndex() {
+            this.$router.push({
+                name: "reportIndex",
+                query: { type: 0 ,refresh:1}
+            });
+        },
+        gotoProjectDetails(project) {
+            this.$router.push({
+                name: "reportProject",
+                params: { pid: project.efairyproject_id }
+            });
+        },
         goBack() {
             this.$router.back();
         },
@@ -158,11 +169,11 @@ export default {
                 }
             );
             this.projectList = projectList.result.efairyreport_project_list;
-		},
-		changeOrder(){
-			this.order=1-this.order;
-			this.getReportIndexProjectList();
-		},
+        },
+        changeOrder() {
+            this.order = 1 - this.order;
+            this.getReportIndexProjectList();
+        },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
                 tap: true,
@@ -228,9 +239,9 @@ export default {
                 color: #666;
                 flex: 2;
             }
-			label{
-				margin-left: 5px;
-			}
+            label {
+                margin-left: 5px;
+            }
         }
         &.title {
             font-size: 16px;
@@ -278,14 +289,14 @@ export default {
             bottom: -3px;
         }
     }
-	.desc{
-		&::after{
-			border-bottom:5px solid #ccc;
-		}
-		&::before{
-			border-top:5px solid $dcyColor;
-		}
-	}
+    .desc {
+        &::after {
+            border-bottom: 5px solid #ccc;
+        }
+        &::before {
+            border-top: 5px solid $dcyColor;
+        }
+    }
 }
 
 .box {

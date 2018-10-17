@@ -12,6 +12,24 @@ const userService = {
 			}
 		});
 		return result;
+	},
+	async getLoginCheckCode(phone) {
+		return await axios.get('/checkcode', {
+			params: {
+				efairy_phonenumber: phone
+			}
+		})
+	},
+	async loginViaCheckCode(phone, code) {
+		return await axios.get('/checkcode_login', {
+			params: {
+				efairyuser_phonenumber: phone,
+				check_code: code
+			}
+		})
+	},
+	async getUserInfo(){
+		return await axios.get('/user_info');
 	}
 }
 

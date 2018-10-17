@@ -48,7 +48,7 @@
 				<!-- <van-field label="结束日期" @click="showDatePopup('end')" v-model="endDate" /> -->
 			</van-cell-group>
 
-			<a class="dcy-btn large" @click="alertMsg(3)">生成报告</a>
+			<a class="dcy-btn large" @click="buildReport()">生成报告</a>
 		</div>
 
 		<van-popup v-model="showDatePicker" @click-overlay="closeDatePopup()" position="bottom" lazy-render>
@@ -72,7 +72,6 @@ export default {
             // scroll: null,
             dateRangeType: 0,
             currentDatePickerType: "start",
-            deviceList: [],
             currentDate: new Date(),
             showDatePicker: false,
             startDate: "",
@@ -82,6 +81,7 @@ export default {
         };
     },
     async mounted() {
+		this.chooseDateRange(2);
         this.$nextTick(() => {
             // this.setupBetterScroll();
         });
@@ -135,7 +135,21 @@ export default {
         },
         alertMsg(data) {
             alert(data);
-        },
+		},
+		async buildReport(){
+			const data=await this.$service.reportService.buildReport({
+				efairyreport_title:this.title,
+				efairyproject_id_list:this.projectList.map((item)=>item.efairyproject_id),
+				start_time:this.startDate,
+				end_time:this.endDate
+			});
+			this.$toast('生成报告成功！');
+			this.$router.push({
+				name:'reportDetail',
+				params:{rid:data.result.efairyreport_id}
+			})
+			// console.log(data);
+		},
         showDatePopup(type) {
             this.showDatePicker = true;
             this.currentDatePickerType = type;
@@ -246,6 +260,8 @@ $dcyColor: #282549;
             margin: 0;
             padding: 0;
             line-height: 26px;
+			border:0;
+			background:transparent;
         }
     }
     .van-cell-text {

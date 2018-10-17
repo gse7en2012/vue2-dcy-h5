@@ -19,9 +19,13 @@ import myIndex from '@/components/my/myIndex';
 import myAbout from '@/components/my/myAbout';
 import myAddress from '@/components/my/myAddress';
 import myCompany from '@/components/my/myCompany';
+import myPhone from '@/components/my/myPhone';
+import myEmail from '@/components/my/myEmail';
 
 import reportIndex from '@/components/report/reportIndex';
 import reportDetail from '@/components/report/reportDetail';
+import reportProject from '@/components/report/reportProject';
+import reportDeviceDetail from '@/components/report/reportDeviceDetail';
 
 import loginPage from '@/components/landPage';
 import VueCookies from '../service/cookies';
@@ -147,6 +151,16 @@ const dcyRoutes = [{
 		component: myAddress
 	},
 	{
+		path: '/my/phone',
+		name: 'myPhone',
+		component: myPhone
+	},
+	{
+		path: '/my/email',
+		name: 'myEmail',
+		component: myEmail
+	},
+	{
 		path: '/my/company',
 		name: 'myCompany',
 		component: myCompany
@@ -168,6 +182,22 @@ const dcyRoutes = [{
 		meta: {
 			nokeepAlive: true,
 		},
+	},
+	{
+		path: '/report/:rid/detail/:pid/project',
+		name: 'reportProject',
+		component: reportProject,
+		meta: {
+			nokeepAlive: true,
+		},
+	},
+	{
+		path: '/report/:rid/detail/:pid/project/:did/detail',
+		name: 'reportDeviceDetail',
+		component: reportDeviceDetail,
+		meta: {
+			nokeepAlive: true
+		}
 	}
 ];
 

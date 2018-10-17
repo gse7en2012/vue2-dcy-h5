@@ -4,11 +4,14 @@ import router from './router';
 import vueg from 'vueg';
 import service from './service';
 import theme from './theme/theme.json';
+import westro from './theme/westro.json';
 import ECharts from 'vue-echarts/components/ECharts.vue';
 
 
 // import VueCookies from 'vue-cookies'
 // Vue.use(VueCookies);
+
+
 
 
 import store from './store';
@@ -18,9 +21,10 @@ import 'vueg/css/transition-min.css'
 // import 'echarts/lib/component/tooltip'
 
 // 注册组件后即可使用
-Vue.component('chart', ECharts);
+Vue.component('v-chart', ECharts);
 Vue.prototype.$service = service;
 ECharts.registerTheme('ovilia-green', theme);
+ECharts.registerTheme('westro', westro);
 Vue.use(vueg, router, {
 	sameDepthDisable: true,
 	// duration: 5.2,
@@ -84,6 +88,40 @@ Vue.use(Tab)
 	.use(Actionsheet)
 	.use(DatetimePicker);
 
+
+
+//rc
+
+
+import rongCloudInit from "@/components/rongCloud/init";
+
+//appkey
+// 测试版：vnroth0kvdmso
+// 正式版：m7ua80gbmpi3m
+
+// connectRongCloud();
+
+function connectRongCloud() {
+	var params = {
+		appKey: "8w7jv4qb78a9y",
+		token: "qyN3mb4PjM+ZXDOdW4f8KpltMLEfik9DxpqXaALr0RGROd6gPSiwQtBYfRPwWMBLjb+Q/sj37frDI5cUnfVAKg=="
+	};
+
+	var userId = "";
+
+	var callbacks = {
+		getInstance: function (instance) {},
+		getCurrentUser: function (userInfo) {
+			console.log(userInfo);
+		},
+		receiveNewMessage: function (message) {
+			//show(message);
+			console.log(message);
+		}
+	};
+
+	rongCloudInit(params, callbacks);
+}
 
 
 

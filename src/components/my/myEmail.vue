@@ -1,9 +1,9 @@
 <template>
 	<div class="main">
-		<van-nav-bar title="单位地址" @click-left="goBack" fixed left-arrow fixed />
+		<van-nav-bar title="我的邮箱" @click-left="goBack" fixed left-arrow fixed />
 		<section class="page-main">
 			<van-cell-group class="my-cell">
-				<van-field v-model="address" placeholder="请输入单位地址" type="textarea" rows="2" autosize />
+				<van-field v-model="email" placeholder="请输入邮箱地址" type="textarea"  rows="2" autosize/>
 			</van-cell-group>
 			<a class="dcy-btn">确定</a>
 		</section>
@@ -15,19 +15,17 @@ import { Dialog } from "vant";
 import BScroll from "better-scroll";
 
 export default {
-    name: "myAddress",
+    name: "myEmail",
     data() {
         return {
             // query: this.$route.query,
-            userInfo: {},
-            address: ""
+			email:'',
         };
     },
     async mounted() {
         this.userInfo = this.$store.state.userInfo;
-        this.address = this.userInfo.efairyuser_company_address;
+        this.email = this.userInfo.efairyuser_email;
     },
-
     methods: {
         goBack() {
             this.$router.back();
@@ -39,14 +37,14 @@ export default {
 <style lang="scss" scoped>
 $dcyColor: #282549;
 
-.my-cell {
-    margin-top: 10px;
+.my-cell{
+	margin-top: 10px;;
 }
 
 .dcy-btn {
-    display: block;
-    line-height: 44px;
-    line-height: 44px;
+	display: block;
+	line-height: 44px;
+	line-height: 44px;
     font-size: 16px;
     color: #fff;
     background: $dcyColor;

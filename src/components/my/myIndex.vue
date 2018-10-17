@@ -7,12 +7,18 @@
 					<img src='@/assets/icons/bg.png' class="bg">
 					<div class="box">
 						<div class="avatar-box">
-							<img src="@/assets/icons/avatar.png" class="avatar">
+							<img src="@/assets/icons/avatar.png" :src="userInfo.efairyuser_headimg_url" class="avatar">
 						</div>
-						<div class="info">
+						<!--<div class="info">
 							<div>
 								<p class="r1">立即登录</p>
 								<p class="r2">还需绑定手机号，否则不允操作哦</p>
+							</div>
+						</div>-->
+						<div class="info">
+							<div>
+								<p class="r1">{{userInfo.efairyuser_nickname}}</p>
+								<p class="r2">{{userInfo.showPhone}}</p>
 							</div>
 						</div>
 					</div>
@@ -33,14 +39,14 @@
 							</div>
 						</template>
 					</van-cell>
-					<van-cell title="联系号码" is-link>
+					<van-cell title="联系号码" is-link :to="{path:'/my/phone'}">
 						<template slot="icon">
 							<div class="icon-wrapper">
 								<img src="@/assets/icons/my_phone.png" class="icon">
 							</div>
 						</template>
 					</van-cell>
-					<van-cell title="联系邮箱" is-link>
+					<van-cell title="联系邮箱" is-link :to="{path:'/my/email'}">
 						<template slot="icon">
 							<div class="icon-wrapper">
 								<img src="@/assets/icons/my_mail.png" class="icon">
@@ -67,7 +73,7 @@
 				</van-cell-group>
 			</div>
 		</section>
-		<bottom-tab/>
+		<bottom-tab />
 	</div>
 </template>
 
@@ -83,14 +89,12 @@ export default {
     data() {
         return {
             // query: this.$route.query,
-            active: 0,
-            deviceList: [],
-            edit: false,
-            chooseAllFlag: false
+            userInfo: {}
         };
     },
     async mounted() {
         // document.title = "我的";
+        this.getUserInfo();
         this.scroll = new BScroll(this.$refs.wrapper, {
             tap: true,
             click: true
@@ -98,7 +102,18 @@ export default {
     },
 
     methods: {
-        onClickLeft() {}
+        onClickLeft() {},
+        async getUserInfo() {
+            const data = await this.$service.userService.getUserInfo();
+            console.log(data);
+            this.userInfo = data.result;
+            this.userInfo.showPhone =
+                this.userInfo.efairyuser_phonenumber.slice(0, 3) +
+                "****" +
+                this.userInfo.efairyuser_phonenumber.slice(7, 11);
+
+            this.$store.commit("saveUserInfo", this.userInfo);
+        }
     }
 };
 </script>

@@ -34,7 +34,7 @@ export default {
     data() {
         return {
             // query: this.$route.query,
-            active: 0
+            active: this.$route.query.type
         };
     },
     async mounted() {

@@ -5,7 +5,7 @@
 			<van-tab title="密码登录">
 				<div class="ctx password">
 					<div class="row">
-						<input type="tel" placeholder="用户名" v-model="phone">
+						<input type="tel" placeholder="手机号" v-model="phone">
 						<span class="icon"><img src="@/assets/icons/account.png" class="account"></span>
 					</div>
 					<div class="row">
@@ -25,16 +25,16 @@
 			<van-tab title="验证码登录">
 				<div class="ctx password">
 					<div class="row">
-						<input type="tel" placeholder="用户名">
+						<input type="tel" placeholder="手机号" v-model="phone">
 						<span class="icon"><img src="@/assets/icons/account.png" class="account"></span>
 					</div>
 					<div class="row">
-						<input type="tel" placeholder="验证码" class="code">
+						<input type="tel" v-model="code" placeholder="验证码" class="code">
 						<span class="icon"><img src="@/assets/icons/password.png" class="pass"></span>
 						<a class="d-btn" @click="sendCode()" :class="{disabled:isSendCode}">{{codeText}}</a>
 					</div>
 					<div class="row">
-						<a class="btn">立即登录</a>
+						<a class="btn" @click="loginViaCode()">立即登录</a>
 					</div>
 					<div class="row">
 						<p class="tips">点击登录，即表示已阅读并同意
@@ -58,25 +58,71 @@ export default {
             // query: this.$route.query,
             loading: false,
             active: 0,
-            codeText: "发送验证码",
+			codeText: "发送验证码",
+			code:'',
             isSendCode: false,
             phone: "13751066522",
-            password: "66666"
+            password: "66666",
+            count: 60,
+            sendCodeTimer: null
         };
     },
-    async mounted() {
-
-    },
+    async mounted() {},
 
     methods: {
         onClickLeft() {},
-        sendCode() {
+        async sendCode() {
+            if (this.isSendCode) return;
+            if (!this.phone) return this.$toast("请输入手机号码");
             this.isSendCode = true;
+            try {
+                const data = await this.$service.userService.getLoginCheckCode(
+                    this.phone
+                );
+                const remainTime = data.result.remaining_times;
+                console.log(remainTime);
+                this.$toast("验证码发送成功");
+                this.setUpTimer();
+            } catch (e) {
+                this.$toast("操作失败，请重试！");
+            }
+        },
+        setUpTimer() {
+            if (this.sendCodeTimer) clearInterval(this.sendCodeTimer);
+            this.sendCodeTimer = setInterval(() => {
+                if (this.count == 0) {
+                    this.isSendCode = false;
+                    this.codeText = "发送验证码";
+                    clearInterval(this.sendCodeTimer);
+                    return;
+                }
+                this.count--;
+                this.codeText = `${this.count}s后重发`;
+            }, 1000);
         },
         gotoRule() {
             this.$router.push({ name: "rulePage" });
         },
+        async loginViaCode() {
+            if (!this.code) return this.$toast("请输入验证码");
+            if (!this.phone) return this.$toast("请输入手机号码");
+            this.loading = true;
+            try {
+                const data = await this.$service.userService.loginViaCheckCode(
+                    this.phone,
+                    this.code
+                );
+                this.loading = false;
+                this.$store.commit("accountLogin", data.result);
+                this.$router.push({ name: "projectIndex" });
+            } catch (e) {
+                this.loading = false;
+                this.$toast(e.msg);
+            }
+        },
         async loginViaPass() {
+            if (!this.password) return this.$toast("请输入密码");
+            if (!this.phone) return this.$toast("请输入手机号码");
             this.loading = true;
             try {
                 const data = await this.$service.userService.loginViaPassword(

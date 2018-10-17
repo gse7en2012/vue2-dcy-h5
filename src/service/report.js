@@ -31,6 +31,26 @@ const reportService = {
 		return await axios.get('/report_project_list', {
 			params: opts
 		})
+	},
+	async getReportProjectDetail(opts) {
+		return await axios.get('/report_project_detail_info', {
+			params: opts
+		})
+	},
+	async getReportDeviceList(opts) {
+		return await axios.get('/report_project_device_list', {
+			params: opts
+		})
+	},
+	async getReportDeviceDetail(opts) {
+		return await axios.get('/report_project_device_info', {
+			params: opts
+		})
+	},
+	async getReportDeviceAlarmList(opts) {
+		return await axios.get('/report_project_device_alarm_list', {
+			params: opts
+		})
 	}
 }
 

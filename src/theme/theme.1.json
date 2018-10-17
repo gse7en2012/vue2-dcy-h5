@@ -1,10 +1,8 @@
 {
     "color": [
-        "#332d66",
-        "#5d51bb",
-		"#7566ec",
-		"#9a90ef",
-		"#7b73be"
+        "#4ea397",
+        "#22c3aa",
+        "#7bd9a5"
     ],
     "backgroundColor": "rgba(0,0,0,0)",
     "textStyle": {},

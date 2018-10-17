@@ -12,16 +12,17 @@ export default new Vuex.Store({
 		count: 0,
 		userAccountInfo: null,
 		isAjaxLoading: false,
-		tmpDeviceName:'',
+		tmpDeviceName: '',
 		deviclAlarmListChooseList: [], //选择报警列表
 		projectAreaSelectedQuery: null, //项目地区信息
-		isLogin:false
+		isLogin: false,
+		userInfo:{}
 	},
 	getters: {
 		deviclAlarmListChooseList(state) {
 			return state.deviclAlarmListChooseList;
 		},
-		checkLogin(){
+		checkLogin() {
 			console.log(Vue.$cookies);
 			return 3;
 		}
@@ -52,6 +53,9 @@ export default new Vuex.Store({
 			state.rcToken = null;
 			state.userId = null;
 			state.userAccountInfo = null;
+		},
+		saveUserInfo: (state, data) => {
+			state.userInfo = data;
 		}
 	},
 	actions: {
@@ -61,8 +65,8 @@ export default new Vuex.Store({
 		setProjectAreaSelectedQuery(ctx, data) {
 			ctx.state.projectAreaSelectedQuery = data;
 		},
-		saveCurrentDeviceName(ctx,data){
-			ctx.state.tmpDeviceName=data;
+		saveCurrentDeviceName(ctx, data) {
+			ctx.state.tmpDeviceName = data;
 		}
 	}
 })

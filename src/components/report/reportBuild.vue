@@ -82,17 +82,6 @@ export default {
     async mounted() {
 		await this.getAreaList();
 		await this.getProjectList();
-        // this.projectList = Array.from({ length: 20 }).map((_, i) => {
-        //     return {
-        //         title: `${i}.这是标题紫薯很长很长很长很长很长很长很长`,
-        //         nums: "33",
-        //         msg: `${i}.这是消息啊啊啊${i}条哟哦哟`,
-        //         choose: false,
-        //         unread: true,
-        //         id: i
-        //     };
-        // });
-
     },
 
     methods: {

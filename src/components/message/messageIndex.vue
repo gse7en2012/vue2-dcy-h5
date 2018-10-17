@@ -1,6 +1,6 @@
 <template>
 	<div class="main">
-		<van-nav-bar title="消息列表" @click-left="onClickLeft" fixed/>
+		<van-nav-bar title="消息列表" @click-left="onClickLeft" fixed />
 		<section class="page-main">
 			<div class="edit-bar">
 				<div class="edit-bar-span" @click="editMessage()">
@@ -9,7 +9,7 @@
 			</div>
 			<div class="wrapper" ref="wrapper">
 				<div class="device-list">
-					<div class="row" v-for="(item,i) in deviceList" @click="chooseMsg(item,i)">
+					<div class="row" v-for="(item,i) in msgList" @click="chooseMsg(item,i)">
 
 						<div class="ctrl" :class="{show:edit}">
 							<div class="radio" :class="{chose:item.choose}"></div>
@@ -20,10 +20,10 @@
 							</div>
 							<div class="ctx">
 								<p class="info">
-									<span class="title">{{item.title}}</span>
-									<span class="date">{{item.time}}</span>
+									<span class="title">{{item.efairydevice_name}}</span>
+									<span class="date">{{item.efairydevicemsg_time}}</span>
 								</p>
-								<p class="msg" :class="{show:edit}">{{item.msg}}</p>
+								<p class="msg" :class="{show:edit}">{{item.efairydevicemsg_content}}</p>
 							</div>
 						</div>
 
@@ -39,7 +39,7 @@
 			</div>
 
 		</section>
-		<bottom-tab/>
+		<bottom-tab />
 	</div>
 </template>
 
@@ -47,6 +47,12 @@
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
 import bottomTab from "@/components/bottomTab";
+import rongCloudInit from "@/components/rongCloud/init";
+
+// 测试版：vnroth0kvdmso
+// 正式版：m7ua80gbmpi3m
+
+const rcAppKey = "vnroth0kvdmso";
 
 export default {
     name: "messageIndex",
@@ -57,22 +63,15 @@ export default {
         return {
             // query: this.$route.query,
             active: 0,
-            deviceList: [],
+            msgList: [],
             edit: false,
-            chooseAllFlag: false
+            chooseAllFlag: false,
+            rcToken: this.$store.state.rcToken
         };
     },
     async mounted() {
-        this.deviceList = Array.from({ length: 20 }).map((_, i) => {
-            return {
-                title: `${i}.这是标题紫薯很长很长很长很长很长很长很长`,
-                time: "2018-09-11 11:22:33",
-                msg: `${i}.这是消息主题内容啊啊啊啊啊${i}条哟哦哟33333333333`,
-                choose: false,
-                unread: true,
-                id: i
-            };
-        });
+        this.initRc();
+
         this.$nextTick(() => {
             // document.title = "消息列表";
             this.setupBetterScroll();
@@ -81,6 +80,46 @@ export default {
 
     methods: {
         onClickLeft() {},
+        initRc() {
+            const rcAppToken = this.rcToken;
+            // connectRongCloud();
+            // function connectRongCloud() {
+            const params = {
+                appKey: rcAppKey,
+                token: rcAppToken
+            };
+
+            const callbacks = {
+                getInstance: instance => {},
+                getCurrentUser: userInfo => {
+                    console.log(userInfo);
+                },
+                receiveNewMessage: message => {
+                    //show(message);
+                    const msg = message.content.extra;
+                    this.addNewMsg(msg);
+                }
+            };
+
+            rongCloudInit(params, callbacks);
+            // }
+        },
+        addNewMsg(msg) {
+            let isExist = false;
+            this.msgList.forEach(item => {
+                if (item.efairydevicemsg_from_id == msg.efairydevicemsg_from_id) {
+					console.log(item.efairydevicemsg_from_id,msg.efairydevicemsg_from_id);
+                    isExist = true;
+                    item.unread = true;
+                    item.efairydevicemsg_content = msg.efairydevicemsg_content;
+                }
+			});
+			console.log(isExist);
+            if (!isExist) {
+                msg.unread = true;
+                this.msgList.push(msg);
+            }
+        },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
                 tap: true,
