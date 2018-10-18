@@ -377,6 +377,7 @@ export default {
                 color: #999;
                 border-top: 1px dashed #eee;
                 margin: 10px 0 5px;
+				word-break: break-all;
             }
             .title {
                 font-weight: normal;

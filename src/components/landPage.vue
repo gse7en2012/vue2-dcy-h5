@@ -5,12 +5,19 @@
 			<van-tab title="密码登录">
 				<div class="ctx password">
 					<div class="row">
-						<input type="tel" placeholder="手机号" v-model="phone">
+						<input type="tel" placeholder="手机号" v-model="phone" maxlength="11">
 						<span class="icon"><img src="@/assets/icons/account.png" class="account"></span>
 					</div>
 					<div class="row">
-						<input type="password" placeholder="密码" v-model="password">
+						<input :type="!viewPassword?'password':'text'" placeholder="密码" v-model="password">
 						<span class="icon"><img src="@/assets/icons/password.png" class="pass"></span>
+						<span class="icon right" @click="toggleViewPassword()">
+							<img src="@/assets/icons/view_show.png" class="view" v-if="!viewPassword">
+							<img src="@/assets/icons/view_hide.png" class="view" v-if="viewPassword">
+						</span>
+						<span class="icon right close" @click="password=''">
+							&times;
+						</span>
 					</div>
 					<div class="row">
 						<a class="btn" @click="loginViaPass()">立即登录</a>
@@ -25,7 +32,7 @@
 			<van-tab title="验证码登录">
 				<div class="ctx password">
 					<div class="row">
-						<input type="tel" placeholder="手机号" v-model="phone">
+						<input type="tel" placeholder="手机号" v-model="phone" maxlength="11">
 						<span class="icon"><img src="@/assets/icons/account.png" class="account"></span>
 					</div>
 					<div class="row">
@@ -58,26 +65,52 @@ export default {
             // query: this.$route.query,
             loading: false,
             active: 0,
-			codeText: "发送验证码",
-			code:'',
+            codeText: "发送验证码",
+            code: "",
             isSendCode: false,
             phone: "13751066522",
             password: "66666",
             count: 60,
-            sendCodeTimer: null
+			sendCodeTimer: null,
+			viewPassword:false
         };
     },
-    async mounted() {},
+    watch: {
+        phone(nval, oval) {
+            // this.phone=this.phone.slice(0,2)+'-'+this.phone.slice(2,6)+'-'+this.phone.slice(7,10);
+        }
+    },
+    async mounted() {
+        // alert(localStorage);
+        // alert(localStorage.getItem('dcyAccessToken'));
+    },
 
     methods: {
-        onClickLeft() {},
+		onClickLeft() {},
+		toggleViewPassword(){
+			this.viewPassword=!this.viewPassword
+		},
+        change() {
+            console.log("c");
+            let tmp = this.phone;
+            tmp = tmp
+                .split("")
+                .map((item, index) => {
+                    if (index == 2) return item + "-";
+                    if (index == 6) return item + "-";
+                    return item;
+                })
+                .join("");
+            console.log(tmp);
+            this.phone = tmp;
+        },
         async sendCode() {
             if (this.isSendCode) return;
             if (!this.phone) return this.$toast("请输入手机号码");
             this.isSendCode = true;
             try {
                 const data = await this.$service.userService.getLoginCheckCode(
-                    this.phone
+                    this.phone.replace(/-/g, "")
                 );
                 const remainTime = data.result.remaining_times;
                 console.log(remainTime);
@@ -109,7 +142,7 @@ export default {
             this.loading = true;
             try {
                 const data = await this.$service.userService.loginViaCheckCode(
-                    this.phone,
+                    this.phone.replace(/-/g, ""),
                     this.code
                 );
                 this.loading = false;
@@ -126,7 +159,7 @@ export default {
             this.loading = true;
             try {
                 const data = await this.$service.userService.loginViaPassword(
-                    this.phone,
+                    this.phone.replace(/-/g, ""),
                     this.password
                 );
                 this.loading = false;
@@ -207,6 +240,17 @@ export default {
             height: 100%;
             left: 15px;
             top: 0;
+            &.right {
+                left: auto;
+                right: 15px;
+            }
+			&.close{
+				right:34px;
+				font-size: 16px;
+				color:$dcyColor;
+				line-height: 44px;
+				font-size: 24px;
+			}
             img {
                 display: block;
                 position: absolute;
@@ -218,6 +262,9 @@ export default {
                 height: 18px;
             }
             .pass {
+                width: 18px;
+            }
+            .view {
                 width: 18px;
             }
         }

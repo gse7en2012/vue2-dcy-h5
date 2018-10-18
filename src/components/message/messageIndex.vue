@@ -3,14 +3,20 @@
 		<van-nav-bar title="消息列表" @click-left="onClickLeft" fixed />
 		<section class="page-main">
 			<div class="edit-bar">
-				<div class="edit-bar-span" @click="editMessage()">
+				<div class="edit-bar-span" @click="editMessage()" v-if="msgList.length!=0">
 					<img src="@/assets/icons/edit.png">{{edit?'取消':'编辑'}}
 				</div>
 			</div>
 			<div class="wrapper" ref="wrapper">
 				<div class="device-list">
+					<div class="row" v-if="msgList.length==0">
+						<div class="wrap">
+							<div class="ctx">
+								<p class="msg" style="text-align:center;margin:10px 0;">没有新的消息</p>
+							</div>
+						</div>
+					</div>
 					<div class="row" v-for="(item,i) in msgList" @click="chooseMsg(item,i)">
-
 						<div class="ctrl" :class="{show:edit}">
 							<div class="radio" :class="{chose:item.choose}"></div>
 						</div>
@@ -107,14 +113,19 @@ export default {
         addNewMsg(msg) {
             let isExist = false;
             this.msgList.forEach(item => {
-                if (item.efairydevicemsg_from_id == msg.efairydevicemsg_from_id) {
-					console.log(item.efairydevicemsg_from_id,msg.efairydevicemsg_from_id);
+                if (
+                    item.efairydevicemsg_from_id == msg.efairydevicemsg_from_id
+                ) {
+                    console.log(
+                        item.efairydevicemsg_from_id,
+                        msg.efairydevicemsg_from_id
+                    );
                     isExist = true;
                     item.unread = true;
                     item.efairydevicemsg_content = msg.efairydevicemsg_content;
                 }
-			});
-			console.log(isExist);
+            });
+            console.log(isExist);
             if (!isExist) {
                 msg.unread = true;
                 this.msgList.push(msg);
@@ -134,8 +145,16 @@ export default {
         },
 
         chooseMsg(item, indexOfItem) {
-            if (!this.edit) return;
-            this.$set(item, "choose", !item.choose);
+            if (this.edit) {
+                this.$set(item, "choose", !item.choose);
+            } else {
+                this.$router.push({
+                    name: "deviceChat",
+                    params: {
+                        did: item.efairydevicemsg_from_id
+                    }
+                });
+            }
         },
         alertMsg(title, msg, type) {
             Dialog.confirm({

@@ -7,7 +7,8 @@
 			<div id="amap"></div>
 			<div class="project-list-box" ref="wrapper">
 				<div>
-					<div class="row" v-for="(item,i) in projectList" @click="moveMapCenter(item.efairyproject_location_lng,item.efairyproject_location_lat)">
+					<!-- <div class="row" v-for="(item,i) in projectList" @click="moveMapCenter(item.efairyproject_location_lng,item.efairyproject_location_lat)"> -->
+					<div class="row" v-for="(item,i) in projectList" @click="drawDrivingLine(item)">
 						<div class="wrap">
 							<div class="icon">
 								<img src='@/assets/icons/green.png'>
@@ -39,6 +40,8 @@ import AMap from "AMap";
 import AMapUI from "AMapUI";
 import marker from "@/assets/icons/marker.png";
 
+import wx from "weixin-js-sdk";
+
 export default {
     name: "projectMap",
     components: {
@@ -54,6 +57,7 @@ export default {
             projectList: [],
             areaQuery: null,
             mapObj: null,
+            mapDriving: null,
             listLoading: false,
             listPage: 1,
             listPagesize: 10,
@@ -92,8 +96,8 @@ export default {
                 size: this.listPagesize
             });
             this.projectList = data.result.project_list;
-			this.initMap();
-			this.drawMapMarker();
+            this.initMap();
+            this.drawMapMarker();
             this.initMapLocation();
 
             this.projectList = data.result.project_list;
@@ -123,9 +127,8 @@ export default {
                 this.listFinished = true;
             this.$nextTick(() => {
                 this.scroll.refresh();
-			});
-			this.drawMapMarker();
-
+            });
+            this.drawMapMarker();
         },
 
         initMapLocation() {
@@ -155,11 +158,22 @@ export default {
                 zoom: 10,
                 mapStyle: "amap://styles/fresh"
             });
-		},
+        },
+        drawDrivingLine(item) {
+            wx.openLocation({
+                latitude: item.efairyproject_location_lat, // 纬度，浮点数，范围为90 ~ -90
+                longitude: item.efairyproject_location_lng, // 经度，浮点数，范围为180 ~ -180。
+                name: item.efairyproject_name, // 位置名
+                address: item.efairyproject_address, // 地址详情说明
+                scale: 12, // 地图缩放级别,整形值,范围从1~28。默认为最大
+                infoUrl: "" // 在查看位置界面底部显示的超链接,可点击跳转
+			});
+			return;
 
-		drawMapMarker(){
-			 this.mapObj.clearMap();
-			 this.projectList.forEach((item, i) => {
+        },
+        drawMapMarker() {
+            this.mapObj.clearMap();
+            this.projectList.forEach((item, i) => {
                 const mapIcon = new AMap.Icon({
                     size: new AMap.Size(30, 38),
                     imageSize: new AMap.Size(30, 38),
@@ -205,7 +219,7 @@ export default {
                     );
                 }
             });
-		},
+        },
         moveMapCenter(lng, lat) {
             this.mapObj.panTo(new AMap.LngLat(lng, lat));
         }

@@ -60,6 +60,7 @@ const dcyRoutes = [{
 		component: projectMap,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -68,6 +69,7 @@ const dcyRoutes = [{
 		component: deviceList,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -76,6 +78,7 @@ const dcyRoutes = [{
 		component: deviceDetail,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -84,6 +87,7 @@ const dcyRoutes = [{
 		component: deviceCharts,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -92,6 +96,7 @@ const dcyRoutes = [{
 		component: deviceChat,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -100,6 +105,7 @@ const dcyRoutes = [{
 		component: deviceAlarmList,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -108,6 +114,7 @@ const dcyRoutes = [{
 		component: deviceAlarmHandle,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -116,6 +123,7 @@ const dcyRoutes = [{
 		component: deviceAlarmFixed,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -124,6 +132,7 @@ const dcyRoutes = [{
 		component: deviceConfig,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 
@@ -138,42 +147,66 @@ const dcyRoutes = [{
 	{
 		path: '/message/detail',
 		name: 'messageDetail',
-		component: messageDetail
+		component: messageDetail,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/my',
 		name: 'myIndex',
-		component: myIndex
+		component: myIndex,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/my/address',
 		name: 'myAddress',
-		component: myAddress
+		component: myAddress,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/my/phone',
 		name: 'myPhone',
-		component: myPhone
+		component: myPhone,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/my/email',
 		name: 'myEmail',
-		component: myEmail
+		component: myEmail,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/my/company',
 		name: 'myCompany',
-		component: myCompany
+		component: myCompany,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/my/about',
 		name: 'myAbout',
-		component: myAbout
+		component: myAbout,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/report',
 		name: 'reportIndex',
-		component: reportIndex
+		component: reportIndex,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/report/:rid/detail',
@@ -181,6 +214,7 @@ const dcyRoutes = [{
 		component: reportDetail,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -189,6 +223,7 @@ const dcyRoutes = [{
 		component: reportProject,
 		meta: {
 			nokeepAlive: true,
+			requireAuth: true,
 		},
 	},
 	{
@@ -196,7 +231,8 @@ const dcyRoutes = [{
 		name: 'reportDeviceDetail',
 		component: reportDeviceDetail,
 		meta: {
-			nokeepAlive: true
+			nokeepAlive: true,
+			requireAuth: true,
 		}
 	}
 ];
@@ -235,6 +271,7 @@ dcyRouter.beforeEach((to, from, next) => {
 	//check
 	// checkRouterForwardOrBack(to,from);
 	// checkWeixinToken(to, from);
+
 	if (to.matched.some(r => r.meta.requireAuth)) {
 		if (store.state.accessToken) {
 			next();

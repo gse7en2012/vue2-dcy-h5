@@ -16,7 +16,7 @@
 				<van-cell :value='"选择地区："+areaQueryText' is-link @click="popupAddress()" />
 			</van-cell-group>
 
-			<div class="wrapper" ref="wrapper" >
+			<div class="wrapper" ref="wrapper">
 				<div class="project-list">
 					<div class="no-result" v-if="projectList.length==0&&!showLoading">
 						<img src="@/assets/icons/noresult.png">
@@ -61,7 +61,7 @@
 				<van-picker :columns="columns" @change="onChange" :loading="addressLoading" :item-height="40" show-toolbar title="选择地区" @cancel="onCancel" @confirm="onConfirm" />
 			</van-popup>
 
-			<bottom-tab/>
+			<bottom-tab />
 		</section>
 	</div>
 
@@ -103,15 +103,14 @@ export default {
             listPage: 1,
             listPagesize: 10,
             listFinished: false,
-            keyword: ""
+            keyword: "",
+            areaPlaceholder: "请选择",
+            areaNoName: "直辖"
         };
     },
     async mounted() {
         await this.getAreaList();
-		await this.getProjectList();
-
-		console.log(this.$cookies);
-
+        await this.getProjectList();
     },
     methods: {
         async getAreaList() {
@@ -124,6 +123,7 @@ export default {
             this.projectList = [];
             this.listPage = 1;
             this.listFinished = false;
+            if (this.scroll) this.scroll.finishPullUp();
             const data = await this.$service.projectService.getProjectList({
                 regeo_info: this.areaQuery,
                 keyword: this.keyword,
@@ -155,25 +155,40 @@ export default {
             );
             if (data.result.project_list.length < this.listPagesize)
                 this.listFinished = true;
-            this.$nextTick(() => {
-                this.scroll.refresh();
-            });
+
+            this.scroll.finishPullUp();
+            // this.$nextTick(() => {
+            //     this.scroll.refresh();
+            // });
         },
         onCancel() {
             this.showAddressPicker = false;
         },
         onConfirm(values, indexs) {
             const provinceId = this.areaList[indexs[0]].efairyprovince_id;
-            const cityId = this.areaList[indexs[0]]["city_list"][indexs[1]]
-                .efairycity_id;
-            const districtId = this.areaList[indexs[0]]["city_list"][indexs[1]][
-                "district_list"
-            ][indexs[2]].efairydistrict_id;
-            const townId = this.areaList[indexs[0]]["city_list"][indexs[1]][
-                "district_list"
-            ][indexs[2]]["township_list"][indexs[3]].efairytownship_id;
+            let cityId, districtId, townId;
+            if (values[1] != this.areaPlaceholder) {
+                cityId = this.areaList[indexs[0]]["city_list"][indexs[1] - 1]
+                    .efairycity_id;
+                if (values[2] != this.areaPlaceholder) {
+                    districtId = this.areaList[indexs[0]]["city_list"][
+                        indexs[1] - 1
+                    ]["district_list"][indexs[2] - 1].efairydistrict_id;
+                    if (values[3] != this.areaPlaceholder) {
+                        townId = this.areaList[indexs[0]]["city_list"][
+                            indexs[1] - 1
+                        ]["district_list"][indexs[2] - 1]["township_list"][
+                            indexs[3] - 1
+                        ].efairytownship_id;
+                    }
+                }
+            }
 
-            this.areaQueryText = values.join("");
+            this.areaQueryText = values
+                .map(item => {
+                    if (item != this.areaPlaceholder) return item;
+                })
+                .join("");
             this.areaQuery = {
                 efairyprovince_id: provinceId,
                 efairycity_id: cityId,
@@ -190,61 +205,61 @@ export default {
                 currentProvinceIndex = this.areaList.findIndex(
                     item => item.efairyprovince_name == values[0]
                 );
-                const cityList = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ].map(city => city.efairycity_name);
-                const districtList = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ][0]["district_list"].map(
-                    district => district.efairydistrict_name
-                );
-                const townList = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ][0]["district_list"][0]["township_list"].map(
-                    town => town.efairytownship_name
+                const cityList = [this.areaPlaceholder].concat(
+                    this.areaList[currentProvinceIndex]["city_list"].map(
+                        city => city.efairycity_name
+                    )
                 );
                 picker.setColumnValues(1, cityList);
-                picker.setColumnValues(2, districtList);
-                picker.setColumnValues(3, townList);
+                picker.setColumnValues(2, [this.areaPlaceholder]);
+                picker.setColumnValues(3, [this.areaPlaceholder]);
             }
             if (index == 1) {
-                currentProvinceIndex = this.areaList.findIndex(
-                    item => item.efairyprovince_name == values[0]
-                );
-                currentCityIndex = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ].findIndex(item => item.efairycity_name == values[1]);
-                const districtList = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ][currentCityIndex]["district_list"].map(
-                    district => district.efairydistrict_name
-                );
-                const townList = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ][currentCityIndex]["district_list"][0]["township_list"].map(
-                    town => town.efairytownship_name
-                );
-                picker.setColumnValues(2, districtList);
-                picker.setColumnValues(3, townList);
+                if (values[1] == this.areaPlaceholder) {
+                    picker.setColumnValues(2, [this.areaPlaceholder]);
+                    picker.setColumnValues(3, [this.areaPlaceholder]);
+                } else {
+                    currentProvinceIndex = this.areaList.findIndex(
+                        item => item.efairyprovince_name == values[0]
+                    );
+                    currentCityIndex = this.areaList[currentProvinceIndex][
+                        "city_list"
+                    ].findIndex(item => item.efairycity_name == values[1]);
+                    const districtList = [this.areaPlaceholder].concat(
+                        this.areaList[currentProvinceIndex]["city_list"][
+                            currentCityIndex
+                        ]["district_list"].map(
+                            district => district.efairydistrict_name
+                        )
+                    );
+                    picker.setColumnValues(2, districtList);
+                    picker.setColumnValues(3, [this.areaPlaceholder]);
+                }
             }
             if (index == 2) {
-                currentProvinceIndex = this.areaList.findIndex(
-                    item => item.efairyprovince_name == values[0]
-                );
-                currentCityIndex = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ].findIndex(item => item.efairycity_name == values[1]);
-                currentDistrictIndex = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ][currentCityIndex]["district_list"].findIndex(
-                    item => item.efairydistrict_name == values[2]
-                );
-                const townList = this.areaList[currentProvinceIndex][
-                    "city_list"
-                ][currentCityIndex]["district_list"][currentDistrictIndex][
-                    "township_list"
-                ].map(town => town.efairytownship_name);
-                picker.setColumnValues(3, townList);
+                if (values[2] == this.areaPlaceholder) {
+                    picker.setColumnValues(3, [this.areaPlaceholder]);
+                } else {
+                    currentProvinceIndex = this.areaList.findIndex(
+                        item => item.efairyprovince_name == values[0]
+                    );
+                    currentCityIndex = this.areaList[currentProvinceIndex][
+                        "city_list"
+                    ].findIndex(item => item.efairycity_name == values[1]);
+                    currentDistrictIndex = this.areaList[currentProvinceIndex][
+                        "city_list"
+                    ][currentCityIndex]["district_list"].findIndex(
+                        item => item.efairydistrict_name == values[2]
+                    );
+                    const townList = [this.areaPlaceholder].concat(
+                        this.areaList[currentProvinceIndex]["city_list"][
+                            currentCityIndex
+                        ]["district_list"][currentDistrictIndex][
+                            "township_list"
+                        ].map(town => town.efairytownship_name)
+                    );
+                    picker.setColumnValues(3, townList);
+                }
             }
         },
         initAreaList(data) {
@@ -254,38 +269,24 @@ export default {
                 className: "province"
             };
             this.columns[1] = {
-                values: data[0]["city_list"].map(city => city.efairycity_name),
+                values: [this.areaPlaceholder].concat(
+                    data[0]["city_list"].map(city => city.efairycity_name)
+                ),
                 className: "city"
             };
             this.columns[2] = {
-                values: data[0]["city_list"][0]["district_list"].map(
-                    district => district.efairydistrict_name || "直属"
-                ),
+                vaules: ["--"],
                 className: "district"
             };
             this.columns[3] = {
-                values: data[0]["city_list"][0]["district_list"][0][
-                    "township_list"
-                ].map(town => town.efairytownship_name),
+                vaules: ["--"],
                 className: "town"
             };
+
             this.areaQuery = {
-                efairyprovince_id: data[0].efairyprovince_id,
-                efairycity_id: data[0]["city_list"][0].efairycity_id,
-                efairydistrict_id:
-                    data[0]["city_list"][0]["district_list"][0]
-                        .efairydistrict_id,
-                efairytownship_id:
-                    data[0]["city_list"][0]["district_list"][0]["township_list"]
-                        .efairytownship_id
+                efairyprovince_id: data[0].efairyprovince_id
             };
-            this.areaQueryText = [
-                data[0].efairyprovince_name,
-                data[0]["city_list"][0].efairycity_name,
-                data[0]["city_list"][0]["district_list"][0].efairydistrict_name,
-                data[0]["city_list"][0]["district_list"][0]["township_list"]
-                    .efairytownship_name
-            ].join("");
+            this.areaQueryText = [data[0].efairyprovince_name].join("");
 
             this.$store.dispatch("setProjectAreaSelectedQuery", this.areaQuery);
         },
@@ -294,12 +295,17 @@ export default {
             if (!this.scroll) {
                 this.scroll = new BScroll(this.$refs.wrapper, {
                     tap: true,
-                    click: true
-                });
-                this.scroll.on("scrollEnd", pos => {
-                    if (pos.y < this.scroll.maxScrollY + 100) {
-                        this.loadMoreProjectList();
+                    click: true,
+                    pullUpLoad: {
+                        threshold: 0,
+                        stop: 0
                     }
+                });
+                this.scroll.on("pullingUp", pos => {
+                    this.loadMoreProjectList();
+                    setTimeout(() => {
+                        this.scroll.refresh();
+                    }, 0);
                 });
             } else {
                 this.scroll.refresh();
@@ -316,9 +322,6 @@ export default {
         },
         popupAddress() {
             this.showAddressPicker = !this.showAddressPicker;
-            setTimeout(() => {
-                this.addressLoading = false;
-            }, 1000);
         }
     }
 };
@@ -345,9 +348,9 @@ export default {
     // margin-top: 10px;
     // overflow: hidden;
     // width: 100%;
-	// position: relative;
+    // position: relative;
 
-	position: fixed;
+    position: fixed;
     top: 140px;
     overflow: hidden;
     width: 100%;

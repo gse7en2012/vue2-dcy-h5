@@ -69,14 +69,14 @@
 								<img :src="img.content" :class="{'ver':img.isWide}" @click="previewUploadImg(i)">
 							</div>
 
-								<van-uploader :after-read="onReadUploadImg" class="item add" v-if="uploadList.length<=8" />
-							</div>
+							<van-uploader :after-read="onReadUploadImg" class="item add" v-if="uploadList.length<=8" />
 						</div>
 					</div>
-
-					<a class="dcy-btn" @click="postHandle()">提交</a>
-
 				</div>
+
+				<a class="dcy-btn" @click="postHandle()">提交</a>
+
+			</div>
 		</section>
 
 		<van-actionsheet v-model="show" :actions="actions" @select="onSelect" />
@@ -89,7 +89,10 @@
 import { Dialog, ImagePreview } from "vant";
 import BScroll from "better-scroll";
 import moment from "moment";
+import axios from "axios";
 
+const axiosInstance = axios.create({});
+const QINIUDOMAIN = "https://efairyqiniu.tokabu.com";
 export default {
     name: "deviceAlarmHandle",
     data() {
@@ -99,11 +102,13 @@ export default {
             showList: [],
             idSeed: 1,
             uploadList: [],
+            uploadImgList: [],
             uploadImgFlag: false,
             showMoreFlag: false,
             currentDate: "",
             imgPrevie: null,
             desc: "",
+            qiniuToken: null,
             //actions
             actions: [{ name: "是", status: 1 }, { name: "否", status: 0 }],
             alarmActions: [
@@ -127,8 +132,8 @@ export default {
     async mounted() {
         // document.title = "我的";
         this.list = this.$store.getters.deviclAlarmListChooseList || [];
-        console.log(this.list);
         this.showList.push(this.list[0]);
+        this.getQiniuToken();
         this.setupBetterScroll();
     },
 
@@ -176,19 +181,37 @@ export default {
                         efairyalarmrecord_is_insite_handle: this.isScene.status,
                         efairyalarmrecord_content: this.desc
                     },
-                    alarmrecord_imgurl_list: this.uploadList.map(
-                        item => item.content
-                    )
+                    alarmrecord_imgurl_list: this.uploadImgList
                 }
-            );
-            console.log(data);
+			);
+			this.$toast('处理成功！');
+			this.$router.back();
         },
-        onReadUploadImg(file) {
+        async onReadUploadImg(file) {
             file.id = this.idSeed++;
             this.getImgWidthAndHeight(file);
+            this.uploadToQiniu(file);
+
             setTimeout(() => {
                 this.uploadList.push(file);
             }, 0);
+        },
+        async getQiniuToken() {
+            const token = await this.$service.userService.getQiniuToken();
+            this.qiniuToken = token.result.upload_token;
+        },
+        async uploadToQiniu(file) {
+            const data = new FormData();
+            data.append("token", this.qiniuToken);
+            data.append("file", file.file);
+            const response = await axiosInstance({
+                method: "POST",
+                url: "http://up-z2.qiniup.com",
+                data: data
+            });
+			const img = QINIUDOMAIN + '/'+response.data.key;
+            this.uploadImgList.push(img);
+            return img;
         },
         previewUploadImg(i) {
             this.imgPrevie = ImagePreview({
@@ -202,7 +225,8 @@ export default {
                     message: "是否删除该照片"
                 })
                 .then(() => {
-                    this.uploadList.splice(i, 1);
+					this.uploadList.splice(i, 1);
+					this.uploadImgList.splice(i, 1);
                 });
         },
         getImgWidthAndHeight(file) {

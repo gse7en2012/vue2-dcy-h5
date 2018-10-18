@@ -8,76 +8,76 @@
 						<div class="avatar-box">
 							<img :src="details.efairyuser_headimg_url" class="avatar">
 						</div>
-							<div class="info">
-								<p class="l1">{{deviceName}}</p>
-								<p class="l2">处理人员：{{details.efairyuser_nickname}}</p>
-							</div>
-						</div>
-
-					</div>
-
-					<div class="box">
-						<!-- <van-cell-group class="op-list"> -->
-						<van-cell>
-							<span class="van-cell-text">报警类型</span>
-							<div class="van-cell-box">
-								<span>{{details.efairydevicealarmstatistics_c_alarm}}</span>
-							</div>
-						</van-cell>
-
-						<van-cell>
-							<span class="van-cell-text">报警值/阈值</span>
-							<div class="van-cell-box">
-								<span>{{details.efairydevicealarmstatistics_highest_value}}</span>
-							</div>
-						</van-cell>
-
-						<van-cell>
-							<span class="van-cell-text">报警时间</span>
-							<div class="van-cell-box">
-								<span>{{details.efairydevicealarmstatistics_start_time}}</span>
-							</div>
-						</van-cell>
-
-						<van-cell>
-							<span class="van-cell-text">处理时间</span>
-							<div class="van-cell-box">
-								<span>{{details.efairyalarmrecord_add_time}}</span>
-							</div>
-						</van-cell>
-
-						<van-cell>
-							<span class="van-cell-text">排查现场</span>
-							<div class="van-cell-box">
-								<span>{{details.efairyalarmrecord_is_insite_handle==1?'是':'否'}}</span>
-							</div>
-						</van-cell>
-						<van-cell>
-							<span class="van-cell-text">排查隐患</span>
-							<div class="van-cell-box">
-								<span>{{details.efairyalarmrecord_is_handle==1?'是':'否'}}</span>
-							</div>
-						</van-cell>
-					</div>
-
-					<div class="box">
-						<div class="ctx">
-							<p class="desc-txt">{{details.efairyalarmrecord_content}}</p>
+						<div class="info">
+							<p class="l1">{{deviceName}}</p>
+							<p class="l2">处理人员：{{details.efairyuser_nickname}}</p>
 						</div>
 					</div>
 
-					<div class="box">
-						<div class="title">处理图片</div>
-						<div class="ctx">
-							<p v-if="!details.efairyalarmrecordimage_list||details.efairyalarmrecordimage_list.length==0">没有图片</p>
-							<div class="img-uploader">
-								<div class="item" v-for="(img,i) in details.efairyalarmrecordimage_list" :key="i">
-									<img :src="img.content" :class="{'ver':img.isWide}" @click="previewUploadImg(i)">
-							</div>
-								</div>
+				</div>
+
+				<div class="box">
+					<!-- <van-cell-group class="op-list"> -->
+					<van-cell>
+						<span class="van-cell-text">报警类型</span>
+						<div class="van-cell-box">
+							<span>{{details.efairydevicealarmstatistics_c_alarm}}</span>
+						</div>
+					</van-cell>
+
+					<van-cell>
+						<span class="van-cell-text">报警值/阈值</span>
+						<div class="van-cell-box">
+							<span>{{details.efairydevicealarmstatistics_highest_value}}</span>
+						</div>
+					</van-cell>
+
+					<van-cell>
+						<span class="van-cell-text">报警时间</span>
+						<div class="van-cell-box">
+							<span>{{details.efairydevicealarmstatistics_start_time}}</span>
+						</div>
+					</van-cell>
+
+					<van-cell>
+						<span class="van-cell-text">处理时间</span>
+						<div class="van-cell-box">
+							<span>{{details.efairyalarmrecord_add_time}}</span>
+						</div>
+					</van-cell>
+
+					<van-cell>
+						<span class="van-cell-text">排查现场</span>
+						<div class="van-cell-box">
+							<span>{{details.efairyalarmrecord_is_insite_handle==1?'是':'否'}}</span>
+						</div>
+					</van-cell>
+					<van-cell>
+						<span class="van-cell-text">排查隐患</span>
+						<div class="van-cell-box">
+							<span>{{details.efairyalarmrecord_is_handle==1?'是':'否'}}</span>
+						</div>
+					</van-cell>
+				</div>
+
+				<div class="box">
+					<div class="ctx">
+						<p class="desc-txt">{{details.efairyalarmrecord_content}}</p>
+					</div>
+				</div>
+
+				<div class="box">
+					<div class="title">处理图片</div>
+					<div class="ctx">
+						<p v-if="!details.efairyalarmrecordimage_list||details.efairyalarmrecordimage_list.length==0">没有图片</p>
+						<div class="img-uploader">
+							<div class="item" v-for="(img,i) in details.efairyalarmrecordimage_list" :key="i">
+								<img :src="img" @click="previewUploadImg(i)">
 							</div>
 						</div>
 					</div>
+				</div>
+			</div>
 		</section>
 
 	</div>
@@ -91,8 +91,8 @@ export default {
     name: "deviceAlarmFixed",
     data() {
         return {
-			fixedId: this.$route.query.fixedId,
-			deviceName:this.$route.query.deviceName,
+            fixedId: this.$route.query.fixedId,
+            deviceName: this.$route.query.deviceName,
             details: {}
         };
     },
@@ -117,7 +117,7 @@ export default {
         },
         previewUploadImg(i) {
             this.imgPrevie = ImagePreview({
-                images: this.uploadList.map(item => item.content),
+                images: this.details.efairyalarmrecordimage_list,
                 startPosition: i
             });
         },

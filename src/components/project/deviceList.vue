@@ -34,9 +34,10 @@
 								<p class="status-box">
 									<span class="left" :class="{green:item.efairydevice_is_online==1}">{{item.efairydevice_is_online==1?'在线':'离线'}}</span>
 									<span class="right">
-										<img src='@/assets/icons/device_status1.png' v-if="item.efairydevice_csq_level==2">
-										<img src='@/assets/icons/device_status2.png' v-if="item.efairydevice_csq_level==1">
-										<img src='@/assets/icons/device_status3.png' v-if="item.efairydevice_csq_level==0"> 信号
+										<img src='@/assets/icons/device_status4.png' v-if="item.efairydevice_alarm_id==0">
+										<img src='@/assets/icons/device_status1.png' v-if="item.efairydevice_alarm_id!=0&&item.efairydevice_csq_level==2">
+										<img src='@/assets/icons/device_status2.png' v-if="item.efairydevice_alarm_id!=0&&item.efairydevice_csq_level==1">
+										<img src='@/assets/icons/device_status3.png' v-if="item.efairydevice_alarm_id!=0&&item.efairydevice_csq_level==0"> 信号
 									</span>
 								</p>
 							</div>
@@ -108,11 +109,11 @@ export default {
                 { name: "全部", id: -1 },
                 { name: "正常", id: 6 },
                 { name: "故障", id: 3 },
-                { name: "屏蔽", id: 5 },
+                // { name: "屏蔽", id: 5 },
                 { name: "火警", id: 1 },
                 { name: "预警", id: 2 },
                 { name: "离线", id: 0 },
-                { name: "启动", id: 4 }
+                // { name: "启动", id: 4 }
             ]
         };
     },
