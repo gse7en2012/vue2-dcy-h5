@@ -1,7 +1,7 @@
 <template>
 	<div class="main">
 		<form action="/" class="search-box">
-			<van-search v-model="value" placeholder="请输入关键词" @search="onSearch" background="#fff" />
+			<van-search v-model="value" placeholder="请输入报告标题" @search="onSearch" background="#fff" />
 		</form>
 
 		<div class="wrapper" ref="wrapper">

@@ -3,7 +3,7 @@
 		<van-nav-bar title="设备列表" @click-left="goBack" left-arrow />
 		<form action="/" class="search-box">
 			<div class="fliter" @click="show=true">{{current.name}}</div>
-			<van-search v-model="keyword" placeholder="请输入项目名称" background="#fff" @search="getDeviceList">
+			<van-search v-model="keyword" placeholder="请输入设备名称" background="#fff" @search="getDeviceList">
 				<!-- <div slot="action" @click="showprojectMapPopup()">
 					<img src="@/assets/icons/map.png" class="map">
 				</div> -->

@@ -12,7 +12,7 @@
 					暂无数据
 				</div>
 				<div class="device-list" v-if="currentStatus.status==0">
-					<div class="row" v-for="(item,i) in alarmList" @click="chooseMsg(item,i)" :key="item.efairydevicealarmstatistics_id">
+					<div class="row" v-for="(item,i) in alarmList" @click="chooseMsg(item,i)">
 						<div class="ctrl" :class="{show:edit}">
 							<div class="radio" :class="{chose:item.choose}"></div>
 						</div>
@@ -36,7 +36,7 @@
 				</div>
 
 				<div class="device-handled-list" v-if="currentStatus.status==1">
-					<div class="row" v-for="(item,i) in alarmList" @click="gotoFixedDetail(item)" :key="item.efairydevicealarmstatistics_id">
+					<div class="row" v-for="(item,i) in alarmList" @click="gotoFixedDetail(item)">
 						<div class="wrap">
 							<div class="ctx">
 								<p class="title">
@@ -67,7 +67,7 @@
 			</div>
 			<div class="edit-button-box" :class="{show:edit}">
 				<div class="dcy-radio" @click="chooseAll()">
-					<div class="radio" :class="{chose:chooseAllFlag}"></div>全选
+					<div class="radio" :class="{chose:chooseAllFlag}"></div>全选 （选中{{choseCount}}条）
 				</div>
 				<a class="dcy-btn" @click="commitDeviceAlarmList()">提交</a>
 			</div>
@@ -97,6 +97,7 @@ export default {
             edit: true,
             deviceId: this.$route.params.did,
             chooseAllFlag: false,
+            choseCount: 0,
             alarmList: [],
             listFinished: false,
             show: false,
@@ -110,11 +111,8 @@ export default {
                 { name: "全部", id: -1 },
                 { name: "正常", id: 6 },
                 { name: "故障", id: 3 },
-                { name: "屏蔽", id: 5 },
                 { name: "火警", id: 1 },
-                { name: "预警", id: 2 },
-                { name: "离线", id: 0 },
-                { name: "启动", id: 4 }
+                { name: "预警", id: 2 }
             ],
             statusActions: [
                 { name: "未处理", status: 0 },
@@ -127,8 +125,18 @@ export default {
             }
         };
     },
+    watch: {
+        alarmList(newVal, oldVal) {
+            // this.choseCount = this.alarmList.filter(msg => msg.choose).length;
+        }
+    },
     async mounted() {
         await this.getDeviceAlarmList();
+        if (this.$route.query.status == 1) {
+            this.currentStatus = { name: "已处理", status: 1 };
+            this.onSelectStatusAction(this.currentStatus);
+        }
+
         this.$nextTick(() => {
             this.setupBetterScroll();
         });
@@ -172,6 +180,14 @@ export default {
             this.alarmList = this.alarmList.concat(list);
             this.lastId =
                 list[list.length - 1]["efairydevicealarmstatistics_id"];
+            if (this.chooseAllFlag) {
+                this.alarmList.forEach(item => {
+                    item.choose = true;
+                });
+                this.choseCount = this.alarmList.filter(
+                    msg => msg.choose
+                ).length;
+            }
         },
         async getDeviceAlarmHandledList() {
             if (this.showLoading) return;
@@ -216,11 +232,17 @@ export default {
             item.status == 1
                 ? this.getDeviceAlarmHandledList()
                 : this.getDeviceAlarmList();
+            const newQuery = JSON.parse(JSON.stringify(this.$route.query)); //读取query参数
+            newQuery.status = item.status;
+            this.$router.push({
+                query: newQuery
+            });
             this.scroll && this.scroll.refresh();
         },
         chooseMsg(item, indexOfItem) {
             if (!this.edit) return;
             this.$set(item, "choose", !item.choose);
+            this.choseCount = this.alarmList.filter(msg => msg.choose).length;
         },
         commitDeviceAlarmList() {
             this.$store.dispatch(
@@ -235,6 +257,7 @@ export default {
             this.alarmList.forEach(msg => {
                 msg.choose = this.chooseAllFlag;
             });
+            this.choseCount = this.alarmList.filter(msg => msg.choose).length;
         },
         gotoFixedDetail(item) {
             this.$router.push({
@@ -377,7 +400,7 @@ export default {
                 color: #999;
                 border-top: 1px dashed #eee;
                 margin: 10px 0 5px;
-				word-break: break-all;
+                word-break: break-all;
             }
             .title {
                 font-weight: normal;

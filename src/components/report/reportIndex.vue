@@ -1,7 +1,7 @@
 <template>
 	<div class="main">
 		<!-- <van-nav-bar title="项目列表" left-arrow @click-left="onClickLeft" fixed /> -->
-		<van-nav-bar title="报表" @click-left="onClickLeft" fixed />
+		<van-nav-bar title="报告" @click-left="onClickLeft" fixed />
 
 		<section class="page-main">
 			<van-tabs v-model="active">

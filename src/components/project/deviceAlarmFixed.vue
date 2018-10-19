@@ -214,6 +214,7 @@ export default {
         border: 0;
         margin: 0;
         min-height: 80px;
+		word-break: break-all;
     }
 }
 

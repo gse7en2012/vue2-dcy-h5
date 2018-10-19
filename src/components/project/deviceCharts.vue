@@ -27,7 +27,7 @@
 					<span class="sub">数据发送频率1分钟/次</span>
 				</div>
 				<div class="chart-box">
-					<chart :options="bar" class="my-chart" theme="ovilia-green"/>
+					<v-chart :options="bar" class="my-chart" theme="ovilia-green" />
 				</div>
 
 				<div class="block-title">
@@ -35,7 +35,7 @@
 					<span class="sub">数据发送频率1分钟/次</span>
 				</div>
 				<div class="chart-box">
-					<chart :options="line" class="my-chart" theme="ovilia-green"/>
+					<v-chart :options="line" class="my-chart" theme="ovilia-green" />
 				</div>
 			</div>
 		</div>
@@ -57,6 +57,7 @@ import BScroll from "better-scroll";
 import "echarts/lib/chart/bar";
 import "echarts/lib/chart/line";
 import "echarts/lib/chart/pie";
+import moment from "moment";
 // import 'zrender/lib/svg/svg'
 
 export default {
@@ -120,17 +121,27 @@ export default {
         };
     },
     async mounted() {
+		this.getDeviceCharts();
         this.$nextTick(() => {
             // document.title = "项目列表";
             // this.calcHeight =
             //     document.querySelector(".main").offsetHeight -
             //     this.$refs.wrapper.offsetTop;
             this.setupBetterScroll();
-        });
+		});
+
     },
     methods: {
         goBack() {
             this.$router.back();
+        },
+        async getDeviceCharts() {
+            const data = await this.$service.projectService.getDeviceChart({
+                efairydevice_id: this.$route.params.did,
+                start_time: "2018-10-01",
+                end_time: "2018-10-07"
+            });
+            console.log(data);
         },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
@@ -167,9 +178,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-@import '@/assets/color.scss';
-
+@import "@/assets/color.scss";
 
 .op-list {
     // margin-top: 15px;
@@ -182,8 +191,8 @@ export default {
     }
     .van-cell-box {
         flex: 1;
-		display: flex;
-		flex-flow: row-reverse;
+        display: flex;
+        flex-flow: row-reverse;
     }
 }
 

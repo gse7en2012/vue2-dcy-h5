@@ -20,6 +20,11 @@ const projectService = {
 			params: opts
 		})
 	},
+	async getDeviceChart(opts){
+		return await axios.get('/device_waveform_data',{
+			params: opts
+		})
+	},
 	async getDeviceChatMsgList(opts) {
 		return await axios.get('/device_msg_list', {
 			params: opts

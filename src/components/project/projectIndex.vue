@@ -105,7 +105,6 @@ export default {
             listFinished: false,
             keyword: "",
             areaPlaceholder: "请选择",
-            areaNoName: "直辖"
         };
     },
     async mounted() {

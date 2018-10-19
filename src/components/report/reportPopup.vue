@@ -24,8 +24,8 @@
 
 					<div class="van-cell-box">
 						<a class="dcy-btn" :class="{cur:dateRangeType==1}" @click="chooseDateRange(1)">本日</a>
-						<a class="dcy-btn" :class="{cur:dateRangeType==2}" @click="chooseDateRange(2)">本周</a>
-						<a class="dcy-btn" :class="{cur:dateRangeType==3}" @click="chooseDateRange(3)">本月</a>
+						<a class="dcy-btn" :class="{cur:dateRangeType==2}" @click="chooseDateRange(2)">近7天</a>
+						<a class="dcy-btn" :class="{cur:dateRangeType==3}" @click="chooseDateRange(3)">近30天</a>
 					</div>
 
 				</van-cell>
@@ -52,7 +52,7 @@
 		</div>
 
 		<van-popup v-model="showDatePicker" @click-overlay="closeDatePopup()" position="bottom" lazy-render>
-			<van-datetime-picker v-model="currentDate" type="date" @confirm="setTime" :title="datePickerTitle" />
+			<van-datetime-picker v-model="currentDate" type="date" @confirm="setTime" @cancel="closeDatePopup" :title="datePickerTitle" />
 		</van-popup>
 
 	</div>

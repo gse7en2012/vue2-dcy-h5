@@ -261,7 +261,7 @@ const checkRouterForwardOrBack = (to, from) => {
 const checkWeixinToken = (to, from) => {
 	if (!VueCookies.get('efairywxuser_id')) {
 		// const redirectUri=encodeURIComponent(location.origin+'/wechatapi/oauth_callback');
-		const path = encodeURIComponent(to.path);
+		const path = encodeURIComponent('/#'+to.path);
 		const redirectUri = encodeURIComponent(`http://wechatts.cciotsz.com/wechatapi/oauth_callback?return_uri=${path}`);
 		window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_userinfo&state=${Number(new Date())}#wechat_redirect`;
 	}
