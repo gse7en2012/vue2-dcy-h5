@@ -4,6 +4,7 @@ import store from '../store';
 
 import projectIndex from '@/components/project/projectIndex';
 import projectMap from '@/components/project/projectMap';
+import deviceMap from '@/components/project/deviceMap';
 import deviceList from '@/components/project/deviceList';
 import deviceDetail from '@/components/project/deviceDetail';
 import deviceCharts from '@/components/project/deviceCharts';
@@ -21,6 +22,7 @@ import myAddress from '@/components/my/myAddress';
 import myCompany from '@/components/my/myCompany';
 import myPhone from '@/components/my/myPhone';
 import myEmail from '@/components/my/myEmail';
+import myInfo from '@/components/my/myInfo';
 
 import reportIndex from '@/components/report/reportIndex';
 import reportDetail from '@/components/report/reportDetail';
@@ -67,6 +69,15 @@ const dcyRoutes = [{
 		path: '/project/:pid/devices',
 		name: 'deviceList',
 		component: deviceList,
+		meta: {
+			nokeepAlive: true,
+			requireAuth: true,
+		},
+	},
+	{
+		path: '/project/:pid/devices/map',
+		name: 'deviceMap',
+		component: deviceMap,
 		meta: {
 			nokeepAlive: true,
 			requireAuth: true,
@@ -193,6 +204,14 @@ const dcyRoutes = [{
 		},
 	},
 	{
+		path: '/my/info',
+		name: 'myInfo',
+		component: myInfo,
+		meta: {
+			requireAuth: true,
+		},
+	},
+	{
 		path: '/my/about',
 		name: 'myAbout',
 		component: myAbout,
@@ -261,7 +280,7 @@ const checkRouterForwardOrBack = (to, from) => {
 const checkWeixinToken = (to, from) => {
 	if (!VueCookies.get('efairywxuser_id')) {
 		// const redirectUri=encodeURIComponent(location.origin+'/wechatapi/oauth_callback');
-		const path = encodeURIComponent('/#'+to.path);
+		const path = encodeURIComponent('/#' + to.path);
 		const redirectUri = encodeURIComponent(`http://wechatts.cciotsz.com/wechatapi/oauth_callback?return_uri=${path}`);
 		window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_userinfo&state=${Number(new Date())}#wechat_redirect`;
 	}

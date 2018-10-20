@@ -124,6 +124,12 @@ export default {
                         name: "报警类型",
                         type: "bar",
                         barWidth: "40%",
+                        label: {
+                            normal: {
+                                show: true,
+                                position: "inside"
+                            }
+                        },
                         data: dataList
                     }
                 ]

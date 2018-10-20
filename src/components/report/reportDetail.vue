@@ -4,9 +4,13 @@
 		<div class="wrapper" ref="wrapper">
 			<div>
 				<div class="title-box">
-					<div class="title-editable">
-						{{basicInfo.efairyreport_title||'待编辑'}}
-						<span class="right">编辑</span>
+					<div class="title-editable" v-if="!editTitle">
+						<span contenteditable="true">{{basicInfo.efairyreport_title||'待编辑'}}</span>
+						<span class="right" @click="editTitleFn()">编辑</span>
+					</div>
+					<div class="title-editable" v-show="editTitle">
+						<input type="text" v-model="basicInfo.efairyreport_title" ref="tinput" placeholder="输入新标题">
+						<span class="right" @click="saveTitle()">保存</span>
 					</div>
 				</div>
 				<div class="main-box">
@@ -17,15 +21,15 @@
 					</div>
 					<div class="row">
 						<span class="l">报警点位</span>
-						<span class="r red">{{basicInfo.efairyreport_project_statistics.total_alarm_device_rows}}/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
+						<span class="r"><i class="red">{{basicInfo.efairyreport_project_statistics.total_alarm_device_rows}}</i>/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
 					</div>
 					<div class="row">
 						<span class="l">预警点位</span>
-						<span class="r yellow">{{basicInfo.efairyreport_project_statistics.total_early_warning_device_rows}}/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
+						<span class="r"><i class="orange">{{basicInfo.efairyreport_project_statistics.total_early_warning_device_rows}}</i>/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
 					</div>
 					<div class="row">
 						<span class="l">故障点位</span>
-						<span class="r">{{basicInfo.efairyreport_project_statistics.total_trouble_device_rows||0}}/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
+						<span class="r"><i class="yellow">{{basicInfo.efairyreport_project_statistics.total_trouble_device_rows||0}}</i>/{{basicInfo.efairyreport_project_statistics.total_device_rows}}</span>
 					</div>
 					<div class="row">
 						<span class="l">项目总数</span>
@@ -51,26 +55,26 @@
 				<div class="box" v-if="projectList.length==0">
 					<div class="ctx">没有项目数据</div>
 				</div>
-				<div class="box" v-for="(p,i) in projectList" :key="i" @click="gotoProjectDetails(p)">
-					<div class="title">
+				<div class="box" v-for="(p,i) in projectList" :key="i">
+					<div class="title"  @click="gotoProjectDetails(p)">
 						{{p.efairyproject_name}}
 						<span class="score orange">评分{{p.efairyproject_security_score}}</span>
 					</div>
 					<div class="ctx">
 						<div class="intro">
-							项目负责人：
-							<span>{{p.efairyproject_user_name}}</span>
+							<i  @click="gotoProjectDetails(p)">项目负责人：</i>
+							<span  @click="gotoProjectDetails(p)">{{p.efairyproject_user_name}}</span>
 							<a class="icon" :href="'tel:'+p.efairyproject_user_phonenumber"><img src="@/assets/icons/phone_big.png" /></a>
 						</div>
 
-						<div class="table" v-if="p.efairyproject_device_statistics.device_statistics_list.length!=0">
+						<div class="table" v-if="p.efairyproject_device_statistics.device_statistics_list.length!=0"  @click="gotoProjectDetails(p)">
 							<table>
 								<tr>
 									<th>设备类型</th>
 									<th>点位总数</th>
 									<th>报警点位数</th>
 									<th>预警点位数</th>
-									<th>故障点位</th>
+									<th>故障点位数</th>
 								</tr>
 								<tr v-for="(d,i) in p.efairyproject_device_statistics.device_statistics_list">
 									<td>{{d.efairydevice_device_type}}</td>
@@ -103,6 +107,7 @@ export default {
             // query: this.$route.query,
             value: "",
             tmp: [],
+            editTitle: false,
             projectList: [],
             basicInfo: {
                 efairyreport_project_statistics: {},
@@ -131,7 +136,7 @@ export default {
         goToReportIndex() {
             this.$router.push({
                 name: "reportIndex",
-                query: { type: 0 ,refresh:1}
+                query: { type: 0, refresh: 1 }
             });
         },
         gotoProjectDetails(project) {
@@ -173,6 +178,13 @@ export default {
         changeOrder() {
             this.order = 1 - this.order;
             this.getReportIndexProjectList();
+		},
+		editTitleFn(){
+			this.editTitle=true;
+			this.$refs.tinput.focus();
+		},
+        saveTitle() {
+            this.editTitle = false;
         },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
@@ -189,6 +201,10 @@ export default {
 
 <style lang="scss" scoped>
 @import "@/assets/color.scss";
+
+i{
+	font-style:normal;
+}
 
 .wrapper {
     position: absolute;
@@ -218,6 +234,10 @@ export default {
         .right {
             float: right;
             font-size: 14px;
+        }
+        input {
+            height: 26px;
+            color: #333;
         }
     }
 }

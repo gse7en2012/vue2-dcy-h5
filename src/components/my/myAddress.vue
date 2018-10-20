@@ -5,7 +5,7 @@
 			<van-cell-group class="my-cell">
 				<van-field v-model="address" placeholder="请输入单位地址" type="textarea" rows="2" autosize />
 			</van-cell-group>
-			<a class="dcy-btn">确定</a>
+			<a class="dcy-btn" @click="editInfo()">确定</a>
 		</section>
 	</div>
 </template>
@@ -31,7 +31,13 @@ export default {
     methods: {
         goBack() {
             this.$router.back();
-        }
+		},
+		async editInfo(){
+			const data=await this.$service.userService.editUserInfo({
+				efairyuser_company_address:this.address
+			});
+			this.$toast('修改成功！');
+		}
     }
 };
 </script>

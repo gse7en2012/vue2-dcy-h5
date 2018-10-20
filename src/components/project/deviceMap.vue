@@ -1,26 +1,26 @@
 <template>
 	<div class="main">
 		<!-- <van-nav-bar title="项目列表" left-arrow @click-left="onClickLeft" fixed /> -->
-		<van-nav-bar title="项目地图" @click-left="goBack()" fixed left-arrow class="pop-nav-bar" />
+		<van-nav-bar title="设备地图" @click-left="goBack()" fixed left-arrow class="pop-nav-bar" />
 		<section class="page-main page-main-full">
 
 			<div id="amap"></div>
 			<div class="project-list-box" ref="wrapper">
 				<div>
 					<!-- <div class="row" v-for="(item,i) in projectList" @click="moveMapCenter(item.efairyproject_location_lng,item.efairyproject_location_lat)"> -->
-					<div class="row" v-for="(item,i) in projectList">
+					<div class="row" v-for="(item,i) in deviceList" >
 						<div class="wrap">
 							<div class="icon">
 								<img src='@/assets/icons/green.png'>
 								<span class="index">{{i+1}}</span>
 							</div>
-							<div class="ctx" @click="moveMapCenter(item.efairyproject_location_lng,item.efairyproject_location_lat)">
+							<div class="ctx" @click="moveMapCenter(item.efairydevice_location_lng,item.efairydevice_location_lat)">
 								<p class="info">
-									<span class="title">{{item.efairyproject_name}}</span>
+									<span class="title">{{item.efairydevice_name}}</span>
 								</p>
-								<p class="address">{{item.efairyproject_address}}</p>
+								<p class="address">{{item.efairydevice_address}}</p>
 							</div>
-							<div class="local"  @click="drawDrivingLine(item)">
+							<div class="local" @click="drawDrivingLine(item)">
 								<img src='@/assets/icons/local.png'>
 							</div>
 						</div>
@@ -43,7 +43,7 @@ import marker from "@/assets/icons/marker.png";
 import wx from "weixin-js-sdk";
 
 export default {
-    name: "projectMap",
+    name: "deviceMap",
     components: {
         bottomTab
     },
@@ -54,7 +54,7 @@ export default {
             addressLoading: true,
             showAddressPicker: false,
             value: "",
-            projectList: [],
+            deviceList: [],
             areaQuery: null,
             mapObj: null,
             mapDriving: null,
@@ -65,8 +65,8 @@ export default {
         };
     },
     async mounted() {
-        this.areaQuery = this.$store.state.projectAreaSelectedQuery;
-        this.getProjectList();
+        // this.areaQuery = this.$store.state.projectAreaSelectedQuery;
+        this.getDeviceList();
     },
     methods: {
         goBack() {
@@ -80,50 +80,48 @@ export default {
                 });
                 this.scroll.on("scrollEnd", pos => {
                     if (pos.y < this.scroll.maxScrollY + 100) {
-                        this.loadMoreProjectList();
+                        this.loadMoreDeviceList();
                     }
                 });
             } else {
                 this.scroll.refresh();
             }
         },
-        async getProjectList() {
-            this.projectList = [];
-            const data = await this.$service.projectService.getProjectList({
-                regeo_info: this.areaQuery,
+        async getDeviceList() {
+            this.deviceList = [];
+            const data = await this.$service.projectService.getDeviceList({
+                efairyproject_id: this.$route.params.pid,
                 keyword: this.keyword,
                 page: this.listPage,
                 size: this.listPagesize
+                // efairydevice_alarm_id: this.alarmId
             });
-            this.projectList = data.result.project_list;
+            this.deviceList = data.result.device_list;
+
             this.initMap();
             this.drawMapMarker();
             this.initMapLocation();
-
-            this.projectList = data.result.project_list;
-            if (data.result.project_list.length < this.listPagesize)
-                this.listFinished = true;
             this.$nextTick(() => {
                 this.calcHeight =
                     document.querySelector(".main").offsetHeight - 197;
                 this.setupBetterScroll();
             });
+            if (data.result.device_list.length < this.listPagesize)
+                this.listFinished = true;
         },
-        async loadMoreProjectList() {
+        async loadMoreDeviceList() {
             if (this.listFinished) return;
             this.listLoading = true;
             this.listPage++;
-            const data = await this.$service.projectService.getProjectList({
-                regeo_info: this.areaQuery,
+            const data = await this.$service.projectService.getDeviceList({
+                efairyproject_id: this.$route.params.pid,
                 keyword: this.keyword,
                 page: this.listPage,
                 size: this.listPagesize
             });
             this.listLoading = false;
-            this.projectList = this.projectList.concat(
-                data.result.project_list
-            );
-            if (data.result.project_list.length < this.listPagesize)
+            this.deviceList = this.deviceList.concat(data.result.device_list);
+            if (data.result.device_list.length < this.listPagesize)
                 this.listFinished = true;
             this.$nextTick(() => {
                 this.scroll.refresh();
@@ -155,25 +153,24 @@ export default {
         initMap() {
             this.mapObj = new AMap.Map("amap", {
                 center: [113.000923, 23.575807],
-                zoom: 10,
+                zoom: 12,
                 mapStyle: "amap://styles/fresh"
             });
         },
         drawDrivingLine(item) {
             wx.openLocation({
-                latitude: item.efairyproject_location_lat, // 纬度，浮点数，范围为90 ~ -90
-                longitude: item.efairyproject_location_lng, // 经度，浮点数，范围为180 ~ -180。
-                name: item.efairyproject_name, // 位置名
-                address: item.efairyproject_address, // 地址详情说明
+                latitude: item.efairydevice_location_lat, // 纬度，浮点数，范围为90 ~ -90
+                longitude: item.efairydevice_location_lng, // 经度，浮点数，范围为180 ~ -180。
+                name: item.efairydevice_name, // 位置名
+                address: item.efairydevice_address, // 地址详情说明
                 scale: 12, // 地图缩放级别,整形值,范围从1~28。默认为最大
                 infoUrl: "" // 在查看位置界面底部显示的超链接,可点击跳转
-			});
-			return;
-
+            });
+            return;
         },
         drawMapMarker() {
             this.mapObj.clearMap();
-            this.projectList.forEach((item, i) => {
+            this.deviceList.forEach((item, i) => {
                 const mapIcon = new AMap.Icon({
                     size: new AMap.Size(30, 38),
                     imageSize: new AMap.Size(30, 38),
@@ -184,8 +181,8 @@ export default {
 
                 const marker = new AMap.Marker({
                     position: new AMap.LngLat(
-                        item.efairyproject_location_lng,
-                        item.efairyproject_location_lat
+                        item.efairydevice_location_lng,
+                        item.efairydevice_location_lat
                     ),
                     offset: new AMap.Pixel(-30, -38),
                     icon: mapIcon
@@ -196,8 +193,8 @@ export default {
                     verticalAlign: "middle",
                     offset: new AMap.Pixel(-15, -24),
                     position: new AMap.LngLat(
-                        item.efairyproject_location_lng,
-                        item.efairyproject_location_lat
+                        item.efairydevice_location_lng,
+                        item.efairydevice_location_lat
                     ),
                     style: {
                         background: "transparent",
@@ -213,8 +210,8 @@ export default {
                 if (i == 0) {
                     this.mapObj.setCenter(
                         new AMap.LngLat(
-                            item.efairyproject_location_lng,
-                            item.efairyproject_location_lat
+                            item.efairydevice_location_lng,
+                            item.efairydevice_location_lat
                         )
                     );
                 }

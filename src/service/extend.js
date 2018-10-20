@@ -21,6 +21,7 @@ axios.interceptors.request.use(
 					config.params.efairyuser_id = store.state.userId;
 					break;
 				case "post":
+				case "put":
 					if (!config.data) config.data = {};
 					config.data.access_token = store.state.accessToken;
 					config.data.efairyuser_id = store.state.userId;

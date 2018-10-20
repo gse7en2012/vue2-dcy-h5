@@ -14,12 +14,6 @@
 							<span>{{projectInfo.efairyproject_user_name}}</span>
 							<a class="icon" :href="'tel:'+projectInfo.efairyproject_user_phonenumber"><img src="@/assets/icons/phone_big.png" /></a>
 						</div>
-						<div class="intro flex">
-							<label>报告总结：</label>
-							<div class="right">
-								<p v-for="(t,i) in projectInfo.efairyproject_report_summary.report_summary_list" :key="i">{{i+1}}.{{t}}</p>
-							</div>
-						</div>
 
 						<div class="table" v-if="projectInfo.efairyproject_device_statistics.device_statistics_list.length!=0">
 							<table>
@@ -28,7 +22,7 @@
 									<th>点位总数</th>
 									<th>报警点位数</th>
 									<th>预警点位数</th>
-									<th>故障点位</th>
+									<th>故障点位数</th>
 								</tr>
 								<tr v-for="(d,i) in projectInfo.efairyproject_device_statistics.device_statistics_list">
 									<td>{{d.efairydevice_device_type}}</td>
@@ -39,6 +33,13 @@
 								</tr>
 							</table>
 						</div>
+
+						<div class="intro flex">
+							<label>报告总结：</label>
+							<div class="right">
+								<p v-for="(t,i) in projectInfo.efairyproject_report_summary.report_summary_list" :key="i">{{i+1}}.{{t}}</p>
+							</div>
+						</div>
 					</div>
 				</div>
 
@@ -46,7 +47,7 @@
 					<van-tab title="报警统计表">
 						<report-project-chart :charts-list="deviceChartList" />
 					</van-tab>
-					<van-tab title="报警/预警点位">
+					<van-tab title="报警点位">
 						<report-project-device-list />
 					</van-tab>
 				</van-tabs>
@@ -74,12 +75,12 @@ export default {
         return {
             // query: this.$route.query,
             deviceChartList: [],
-            reportProjectTitle: "报告项目详情",
+            reportProjectTitle: "项目报告详情",
             active: 0,
             projectInfo: {
                 efairyproject_report_summary: {},
                 efairyproject_device_alarm_statistics: {
-                    device_alarm_statistics_list:[]
+                    device_alarm_statistics_list: []
                 },
                 efairyproject_device_statistics: {
                     device_statistics_list: []
@@ -212,7 +213,7 @@ export default {
         }
     }
     table {
-        margin: 15px 0 10px;
+        margin: 15px 0;
         font-size: 12px;
         border-collapse: collapse;
         border-radius: 4px;

@@ -1,6 +1,6 @@
 <template>
 	<div class="main">
-		<van-nav-bar title="关于电次元" @click-left="goBack" fixed left-arrow fixed />
+		<van-nav-bar title="我的信息" @click-left="goBack" fixed left-arrow fixed />
 		<!-- <section class="page-main" ref="wrapper"> -->
 		<div class="box">
 			<div class="logo-info">
@@ -35,12 +35,9 @@
 <script>
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
-import bottomTab from "@/components/bottomTab";
+
 export default {
-    name: "myAbout",
-    components: {
-        bottomTab
-    },
+    name: "myInfo",
     data() {
         return {
             // query: this.$route.query,

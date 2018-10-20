@@ -3,7 +3,7 @@
 		<van-nav-bar title="我的" @click-left="onClickLeft" fixed />
 		<section class="page-main" ref="wrapper">
 			<div>
-				<div class="personal-info">
+				<div class="personal-info" @click="gotoMyInfo()">
 					<img src='@/assets/icons/bg.png' class="bg">
 					<div class="box">
 						<div class="avatar-box">
@@ -59,6 +59,7 @@
 								<img src="@/assets/icons/my_device.png" class="icon">
 							</div>
 						</template>
+						{{userInfo.efairyuser_device_supplier}}
 					</van-cell>
 				</van-cell-group>
 
@@ -103,6 +104,9 @@ export default {
 
     methods: {
         onClickLeft() {},
+        gotoMyInfo() {
+            this.$router.push({ name: "myInfo" });
+        },
         async getUserInfo() {
             const data = await this.$service.userService.getUserInfo();
             console.log(data);

@@ -28,13 +28,18 @@ const userService = {
 			}
 		})
 	},
-	async getUserInfo(){
+	async editUserInfo(opts) {
+		return await axios.put('/user_info', {
+			efairyuser_info: opts
+		})
+	},
+	async getUserInfo() {
 		return await axios.get('/user_info');
 	},
-	async getJssdkConfig(){
+	async getJssdkConfig() {
 		return await axios.get('/jssdk_config');
 	},
-	async getQiniuToken(){
+	async getQiniuToken() {
 		return await axios.get('/qiniu_token');
 	}
 }

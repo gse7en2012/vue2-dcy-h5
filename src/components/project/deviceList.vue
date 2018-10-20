@@ -3,10 +3,10 @@
 		<van-nav-bar title="设备列表" @click-left="goBack" left-arrow />
 		<form action="/" class="search-box">
 			<div class="fliter" @click="show=true">{{current.name}}</div>
-			<van-search v-model="keyword" placeholder="请输入设备名称" background="#fff" @search="getDeviceList">
-				<!-- <div slot="action" @click="showprojectMapPopup()">
+			<van-search v-model="keyword" placeholder="请输入设备名称"  show-action background="#fff" @search="getDeviceList">
+				<div slot="action" @click="showDeviceMapPopup()">
 					<img src="@/assets/icons/map.png" class="map">
-				</div> -->
+				</div>
 			</van-search>
 		</form>
 		<div class="no-result" v-if="deviceList.length==0&&!showLoading">
@@ -58,6 +58,7 @@
 <script>
 import BScroll from "better-scroll";
 import bottomTab from "@/components/bottomTab";
+
 import { Toast } from "vant";
 import { mapState } from "vuex";
 
@@ -66,7 +67,7 @@ import { mapState } from "vuex";
 export default {
     name: "deviceList",
     components: {
-        bottomTab
+		bottomTab,
     },
     computed: {
         ...mapState({
@@ -124,6 +125,9 @@ export default {
         });
     },
     methods: {
+		showDeviceMapPopup() {
+            this.$router.push({name:'deviceMap'});
+        },
         goBack() {
             this.$router.back();
         },
@@ -206,6 +210,10 @@ export default {
 <style lang="scss" scoped>
 @import "@/assets/color.scss";
 
+.van-search__action{
+	width: 30px;
+}
+
 .search-box {
     // margin-top: 46px;
     display: flex;
@@ -267,6 +275,8 @@ export default {
         display: block;
     }
 }
+
+
 
 .device-list {
     padding-bottom: 30px;
