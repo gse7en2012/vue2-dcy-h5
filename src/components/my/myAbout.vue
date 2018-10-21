@@ -21,11 +21,11 @@
 				<van-switch-cell v-model="checked" title="接收消息提醒" />
 			</van-cell-group>
 
-			<van-cell-group class="my-list">
+			<!-- <van-cell-group class="my-list">
 				<van-switch-cell v-model="checked3" title="报警短信通知" />
 				<van-switch-cell v-model="checked2" title="报警电话通知" />
 				<van-switch-cell v-model="checked4" title="报警微信消息推送" />
-			</van-cell-group>
+			</van-cell-group> -->
 
 		</div>
 		<!-- </section> -->

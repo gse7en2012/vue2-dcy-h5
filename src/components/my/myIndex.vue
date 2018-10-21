@@ -39,7 +39,7 @@
 							</div>
 						</template>
 					</van-cell>
-					<van-cell title="联系号码" is-link :to="{path:'/my/phone'}">
+					<van-cell title="联系号码"  >
 						<template slot="icon">
 							<div class="icon-wrapper">
 								<img src="@/assets/icons/my_phone.png" class="icon">

@@ -41,6 +41,9 @@ const userService = {
 	},
 	async getQiniuToken() {
 		return await axios.get('/qiniu_token');
+	},
+	async editPassword(opts) {
+		return await axios.put('/password', opts)
 	}
 }
 

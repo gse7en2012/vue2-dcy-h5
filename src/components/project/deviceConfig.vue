@@ -32,7 +32,9 @@ export default {
         return {
             // query: this.$route.query,
             show: false,
-            dialogModel: {},
+			dialogModel: {},
+			cdataList:[],
+			rtInfo:{},
             configList: [
                 {
                     name: "心跳间隔",
@@ -84,10 +86,31 @@ export default {
                 done();
             }
         },
+        async getDeviceDetail() {
+            const data = await this.$service.projectService.getDeviceDetail({
+                efairydevice_id: this.deviceId
+            });
+            this.$store.dispatch(
+                "saveCurrentDeviceName",
+                data.result.basic_info.efairydevice_name
+            );
+            this.basicInfo = data.result.basic_info;
+            this.rtInfo = data.result.rt_info;
+            if (data.result.rt_info)
+                this.cdataList = data.result.rt_info.c_data_list || [];
+        },
         showDialog(item) {
             this.show = true;
             this.dialogModel = item;
             // this.$refs[item.id].focus();
+        },
+        async postDeviceMsg(type) {
+            const data = await this.$service.projectService.postDeviceMsg({
+                efairydevice_id: this.deviceId,
+                control_order: type, //67peizhi 128fuwei 129xiaoyin
+                extra_info: {}
+            });
+            this.$toast("操作成功");
         },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
@@ -140,7 +163,7 @@ export default {
 .dialog-title {
     text-align: center;
     margin: 10px auto 5px;
-    font-size: 14px;
+    font-size: 16px;
     color: $dcyColor;
 }
 

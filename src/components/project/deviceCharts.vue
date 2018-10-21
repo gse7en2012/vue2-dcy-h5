@@ -21,8 +21,15 @@
 						</div>
 					</van-cell>
 				</van-cell-group>
+				<div class="chart-box" v-for="(op,i) in optionList">
+					<!-- <div echarts [options]="option" theme="macarons" class="chart chart-row" style="height:300px;" *ngFor="let option of optionList" (chartInit)="onChartInit($event)"></div> -->
+					<div class="block-title">
+						{{op.outsideTitle}}
+					</div>
+					<v-chart :options="op" class="my-chart" theme="ovilia-green" />
+				</div>
 
-				<div class="block-title">
+				<!-- <div class="block-title">
 					实时数据
 					<span class="sub">数据发送频率1分钟/次</span>
 				</div>
@@ -36,12 +43,12 @@
 				</div>
 				<div class="chart-box">
 					<v-chart :options="line" class="my-chart" theme="ovilia-green" />
-				</div>
+				</div> -->
 			</div>
 		</div>
-		<a href="tel:400-0000-688" class="phone">
+		<!-- <a href="tel:400-0000-688" class="phone">
 			<img src="@/assets/icons/phone_big.png">
-		</a>
+		</a> -->
 
 		<van-popup v-model="showDatePicker" @click-overlay="closeDatePopup()" position="bottom" lazy-render>
 			<van-datetime-picker v-model="currentDate" type="date" @confirm="setTime" :title="datePickerTitle" />
@@ -54,10 +61,16 @@
 <script>
 import BScroll from "better-scroll";
 // import ECharts from "vue-echarts/components/ECharts.vue";
+
+import "echarts/lib/component/legend";
+import "echarts/lib/component/title";
+// import "echarts/lib/component/tooltip";
 import "echarts/lib/chart/bar";
 import "echarts/lib/chart/line";
 import "echarts/lib/chart/pie";
+
 import moment from "moment";
+import pako from "pako";
 // import 'zrender/lib/svg/svg'
 
 export default {
@@ -66,83 +79,226 @@ export default {
     //     chart: ECharts
     // },
     data() {
-        function randomize() {
-            return [0, 0, 0].map(v => {
-                return Math.round(300 + Math.random() * 700) / 10;
-            });
-        }
+        const dataHash = {
+            1: ["高度", 0.01, "m"],
+            2: ["温度", 0.1, "℃"],
+            3: ["压力", 0.1, "MPa"],
+            4: ["压力", 0.1, "kPa"],
+            5: ["气体浓度", 0.1, "%LEL"],
+            6: ["气体浓度", 0.1, "%VOL"],
+            7: ["气体浓度", 1, "10^-6体积分数"],
+            8: ["气体浓度", 1, "mg/m3"],
+            9: ["时间", 1, "s"],
+            10: ["电压", 0.1, "V"],
+            11: ["过流", 0.1, "A"],
+            12: ["流量", 0.1, "L/s"],
+            13: ["风量", 0.1, "m3/min"],
+            14: ["风速", 0.1, "m/s"],
+            15: ["漏电", 1, "mA"],
+            16: ["烟参量", 0.1, ""],
+            128: ["输入检测", 1, ""],
+            129: ["输出控制", 1, ""]
+        };
         return {
             // query: this.$route.query,
-            active: 0,
-            addressLoading: true,
-            showAddressPicker: false,
-            showprojectMap: false,
-            value: "",
-            tmp: [],
+            optionList: [],
+            dataHash: dataHash,
+            defaultPointTotal: 200,
             currentDatePickerType: "start",
-            deviceList: [],
             currentDate: new Date(),
             showDatePicker: false,
-            startDate: "",
-            endDate: "",
-            datePickerTitle: "开始日期",
-            line: {
-                xAxis: {
-                    type: "category",
-                    data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-                },
-                yAxis: {
-                    type: "value"
-                },
-                series: [
-                    {
-                        data: [820, 932, 901, 934, 1290, 1330, 1320],
-                        type: "line",
-                        smooth: true
-                    }
-                ]
-            },
-            bar: {
-                legend: {},
-                tooltip: {},
-                dataset: {
-                    source: [
-                        ["Product", "2015", "2016", "2017"],
-                        ["Matcha Latte", ...randomize()],
-                        ["Milk Tea", ...randomize()],
-                        ["Cheese Cocoa", ...randomize()],
-                        ["Walnut Brownie", ...randomize()]
-                    ]
-                },
-                xAxis: { type: "category" },
-                yAxis: {},
-                series: [{ type: "bar" }, { type: "bar" }, { type: "bar" }]
-            }
+            startDate: moment()
+                .add(-3, "d")
+                .format("YYYY-MM-DD"),
+            endDate: moment().format("YYYY-MM-DD"),
+            datePickerTitle: "开始日期"
         };
     },
     async mounted() {
-		this.getDeviceCharts();
+        this.getDeviceCharts();
         this.$nextTick(() => {
             // document.title = "项目列表";
             // this.calcHeight =
             //     document.querySelector(".main").offsetHeight -
             //     this.$refs.wrapper.offsetTop;
             this.setupBetterScroll();
-		});
-
+        });
     },
     methods: {
         goBack() {
             this.$router.back();
         },
         async getDeviceCharts() {
-            const data = await this.$service.projectService.getDeviceChart({
+            this.optionList = [];
+            const res = await this.$service.projectService.getDeviceChart({
                 efairydevice_id: this.$route.params.did,
-                start_time: "2018-10-01",
-                end_time: "2018-10-07"
+                start_time: this.startDate,
+                end_time: this.endDate
             });
-            console.log(data);
+            const data = res.result;
+            if (data.data_stream_list && data.data_stream_list.length > 0) {
+                let historyData = [];
+                let tsList = [];
+                const tmpStore = {};
+
+                //临时hack
+
+                // data.data_stream_list = [data.data_stream_list[data.data_stream_list.length - 1]]
+
+                data.data_stream_list.forEach(ele => {
+                    let eleData = pako.inflate(window.atob(ele), {
+                        to: "string"
+                    });
+                    let eleDataJSON = JSON.parse(eleData);
+                    // console.log(eleDataJSON);
+                    // if (typeof eleDataJSON[0] != 'object') {
+                    //   console.log('eleDataJSON[0] not object');
+                    //   eleDataJSON = JSON.parse(eleDataJSON[0]);
+                    // }
+                    // console.log(eleDataJSON);
+
+                    historyData = historyData.concat(eleDataJSON);
+                });
+                console.log(historyData.length, "before");
+                const splitPoint = Math.floor(
+                    historyData.length / this.defaultPointTotal
+                );
+                if (splitPoint > 0) {
+                    historyData = historyData.filter((item, index) => {
+                        return index % splitPoint == 0;
+                    });
+                }
+                console.log(historyData.length, "after");
+                historyData.forEach(item => {
+                    item = JSON.parse(item);
+                    tsList.push(
+                        moment(item["ts"] * 1000).format("MM/DD HH:mm")
+                    );
+                    try {
+                        item.data.forEach(row => {
+                            if (row["cid"] == 0) return;
+                            if (!tmpStore[row["pt"]]) {
+                                tmpStore[row["pt"]] = {
+                                    series: {}
+                                };
+                            }
+                            if (!tmpStore[row.pt].series[row["cid"]]) {
+                                tmpStore[row.pt].series[row["cid"]] = [];
+                            }
+                            tmpStore[row.pt].series[row["cid"]].push(
+                                (row.rtv * this.dataHash[row["pt"]][1]).toFixed(
+                                    2
+                                )
+                            );
+                        });
+                    } catch (e) {}
+                });
+                //  console.log(tsList);
+                //  console.log(tmpStore);
+
+                this.clearResponseToChartList(tmpStore, tsList);
+                // this.loading=false;
+            }
         },
+        clearResponseToChartList(data, tsList) {
+            console.log(data);
+            Object.keys(data).forEach(item => {
+                const row = data[item];
+                const series = [];
+                Object.keys(row["series"]).forEach(k => {
+                    series.push({
+                        data: row["series"][k].reverse(),
+                        type: "line",
+                        name: "通道" + k
+                        // stack: '总量',
+                    });
+                });
+
+                this.optionList.push(
+                    this.formatChartData(
+                        this.dataHash[item][0],
+                        this.dataHash[item][2],
+                        tsList.reverse(),
+                        series
+                    )
+                );
+            });
+            // console.log(this.optionList)
+        },
+        formatChartData(title, unit, xData, series) {
+            const option = {
+                // title: {
+                //     text: title,
+                //     left: "center"
+                // },
+                outsideTitle: title,
+                tooltip: {
+                    right: "10",
+                    trigger: "axis",
+                    axisPointer: {
+                        type: "cross",
+                        label: {
+                            backgroundColor: "#6a7985"
+                        }
+                    }
+                },
+                legend: {
+                    data: series.map(item => item.name),
+                    x: "left"
+                },
+                grid: {
+                    top: "15%",
+                    left: "3%",
+                    right: "3%",
+                    bottom: "15%",
+                    containLabel: true
+                },
+                dataZoom: [
+                    {
+                        // 这个dataZoom组件，默认控制x轴。
+                        type: "slider", // 这个 dataZoom 组件是 slider 型 dataZoom 组件
+                        start: 0, // 左边在 10% 的位置。
+                        end: 100, // 右边在 60% 的位置。
+                        bottom: 0,
+                        handleSize: "200%"
+                    }
+                ],
+                toolbox: {
+                    orient: "vertical",
+                    feature: {
+                        magicType: {
+                            type: ["line", "bar"]
+                        }
+                    }
+                },
+                xAxis: [
+                    {
+                        type: "category",
+                        boundaryGap: false,
+                        data: xData
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: "value",
+                        name: unit,
+                        min: "dataMin"
+                    }
+                ],
+                series: series || [
+                    {
+                        name: "报警次数",
+                        type: "line",
+                        // stack: '总量',
+                        // areaStyle: { normal: {} },
+                        data: []
+                    }
+                ]
+            };
+            console.log(JSON.stringify(option));
+            return option;
+        },
+
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {
                 tap: true,
@@ -161,17 +317,19 @@ export default {
             this.showDatePicker = false;
         },
         setTime(date) {
-            const formatDate = [
-                date.getFullYear(),
-                date.getMonth() + 1 < 10
-                    ? "0" + (date.getMonth() + 1)
-                    : date.getMonth() + 1,
-                date.getDate() < 10 ? "0" + date.getDate() : date.getDate()
-            ].join("-");
+            // const formatDate = [
+            //     date.getFullYear(),
+            //     date.getMonth() + 1 < 10
+            //         ? "0" + (date.getMonth() + 1)
+            //         : date.getMonth() + 1,
+            //     date.getDate() < 10 ? "0" + date.getDate() : date.getDate()
+            // ].join("-");
+            const formatDate = moment(date).format("YYYY-MM-DD");
             if (this.currentDatePickerType == "start")
                 this.startDate = formatDate;
             if (this.currentDatePickerType == "end") this.endDate = formatDate;
             this.showDatePicker = false;
+            this.getDeviceCharts();
         }
     }
 };
@@ -234,8 +392,9 @@ export default {
 }
 .chart-box {
     background: #fff;
-    padding: 5px 10px;
+    padding: 0;
     box-sizing: border-box;
+    margin: 10px 0;
 }
 
 .my-chart {

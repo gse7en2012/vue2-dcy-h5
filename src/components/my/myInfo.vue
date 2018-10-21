@@ -1,30 +1,23 @@
 <template>
 	<div class="main">
-		<van-nav-bar title="我的信息" @click-left="goBack" fixed left-arrow fixed />
+		<van-nav-bar title="个人信息" @click-left="goBack" fixed left-arrow fixed />
 		<!-- <section class="page-main" ref="wrapper"> -->
 		<div class="box">
-			<div class="logo-info">
-				<img src="@/assets/icons/avatar.png" class="logo" />
-				<p class="ver">V1.0</p>
-			</div>
 
 			<van-cell-group class="my-list">
-				<van-cell title="查看功能特性" is-link />
-				<van-cell title="查看服务条款" is-link />
+				<van-cell title="头像" is-link class="avatar-cell" id="my-cell">
+					<van-uploader :after-read="onReadUploadImg" class="item add" />
+					<img src="@/assets/icons/avatar.png" :src="userInfo.efairyuser_headimg_url" class="avatar">
+				</van-cell>
+				<van-cell title="昵称" is-link :value="userInfo.efairyuser_nickname" :to="{path:'/my/info/name'}" />
 			</van-cell-group>
 
 			<van-cell-group class="my-list">
-				<van-cell title="意见反馈" is-link />
+				<van-cell title="手机"  :value="userInfo.efairyuser_phonenumber" />
 			</van-cell-group>
 
 			<van-cell-group class="my-list">
-				<van-switch-cell v-model="checked" title="接收消息提醒" />
-			</van-cell-group>
-
-			<van-cell-group class="my-list">
-				<van-switch-cell v-model="checked3" title="报警短信通知" />
-				<van-switch-cell v-model="checked2" title="报警电话通知" />
-				<van-switch-cell v-model="checked4" title="报警微信消息推送" />
+				<van-cell title="密码" is-link :to="{path:'/my/info/pass'}"/>
 			</van-cell-group>
 
 		</div>
@@ -35,32 +28,65 @@
 <script>
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
+import axios from "axios";
 
+const axiosInstance = axios.create({});
+const QINIUDOMAIN = "https://efairyqiniu.tokabu.com";
 export default {
     name: "myInfo",
     data() {
         return {
             // query: this.$route.query,
-            active: 0,
-            deviceList: [],
-            edit: false,
-            chooseAllFlag: false,
-            checked: true,
-            checked2: false,
-            checked3: false
+            userInfo: {},
+            qiniuToken: null
         };
     },
     async mounted() {
-        // document.title = "我的";
-        // this.scroll = new BScroll(this.$refs.wrapper, {
-        //     tap: true,
-        //     click: true
-        // });
+        this.getUserInfo();
+        this.getQiniuToken();
     },
 
     methods: {
         goBack() {
             this.$router.back();
+        },
+        async getUserInfo() {
+            const data = await this.$service.userService.getUserInfo();
+            this.userInfo = data.result;
+            this.userInfo.showPhone =
+                this.userInfo.efairyuser_phonenumber.slice(0, 3) +
+                "****" +
+                this.userInfo.efairyuser_phonenumber.slice(7, 11);
+
+            this.$store.commit("saveUserInfo", this.userInfo);
+        },
+        async editInfo() {
+            const data = await this.$service.userService.editUserInfo({
+                efairyuser_headimg_url: this.userInfo.efairyuser_headimg_url
+            });
+            this.$toast("修改成功！");
+        },
+        async getQiniuToken() {
+            const token = await this.$service.userService.getQiniuToken();
+            this.qiniuToken = token.result.upload_token;
+        },
+        async onReadUploadImg(file) {
+			await this.uploadToQiniu(file);
+			this.editInfo();
+        },
+        async uploadToQiniu(file) {
+            const data = new FormData();
+            data.append("token", this.qiniuToken);
+            data.append("file", file.file);
+            const response = await axiosInstance({
+                method: "POST",
+                url: "http://up-z2.qiniup.com",
+                data: data
+            });
+            const img = QINIUDOMAIN + "/" + response.data.key;
+            // this.uploadImgList.push(img);
+            this.userInfo.efairyuser_headimg_url = img;
+            return img;
         }
     }
 };
@@ -71,19 +97,11 @@ $dcyColor: #282549;
 .box {
     padding-top: 56px;
 }
-.logo-info {
-    .logo {
-        width: 40%;
-        margin: 15px auto;
-        border-radius: 50%;
-        display: block;
-    }
-    .ver {
-        color: $dcyColor;
-        text-align: center;
-        margin-bottom: 20px;
-        margin-top: -5px;
-    }
+.van-uploader {
+    width: 100%;
+    height: 50px;
+    position: absolute;
+    left: 0;
 }
 
 .my-list {
@@ -104,6 +122,16 @@ $dcyColor: #282549;
         font-size: 15px;
         height: 45px;
         line-height: 30px;
+    }
+    .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        float: right;
+        &-cell {
+            height: auto;
+            line-height: 50px;
+        }
     }
 }
 </style>

@@ -23,6 +23,8 @@ import myCompany from '@/components/my/myCompany';
 import myPhone from '@/components/my/myPhone';
 import myEmail from '@/components/my/myEmail';
 import myInfo from '@/components/my/myInfo';
+import myName from '@/components/my/myName';
+import myPass from '@/components/my/myPass';
 
 import reportIndex from '@/components/report/reportIndex';
 import reportDetail from '@/components/report/reportDetail';
@@ -207,6 +209,22 @@ const dcyRoutes = [{
 		path: '/my/info',
 		name: 'myInfo',
 		component: myInfo,
+		meta: {
+			requireAuth: true,
+		},
+	},
+	{
+		path: '/my/info/name',
+		name: 'myName',
+		component: myName,
+		meta: {
+			requireAuth: true,
+		},
+	},
+	{
+		path: '/my/info/pass',
+		name: 'myPass',
+		component: myPass,
 		meta: {
 			requireAuth: true,
 		},

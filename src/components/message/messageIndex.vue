@@ -116,12 +116,9 @@ export default {
                 if (
                     item.efairydevicemsg_from_id == msg.efairydevicemsg_from_id
                 ) {
-                    console.log(
-                        item.efairydevicemsg_from_id,
-                        msg.efairydevicemsg_from_id
-                    );
                     isExist = true;
                     item.unread = true;
+                    item.efairydevicemsg_time = msg.efairydevicemsg_time;
                     item.efairydevicemsg_content = msg.efairydevicemsg_content;
                 }
             });
@@ -151,7 +148,8 @@ export default {
                 this.$router.push({
                     name: "deviceChat",
                     params: {
-                        did: item.efairydevicemsg_from_id
+                        did: item.efairydevicemsg_from_id.replace('device_',''),
+                        pid: 0
                     }
                 });
             }

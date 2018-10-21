@@ -12,24 +12,24 @@
 							<img src="@/assets/icons/device_chat.png" v-if="!msg.isMine">
 							<img src="@/assets/icons/avatar.png" v-if="msg.isMine">
 						</div>
-							<div class="ctx">{{msg.ctx.text}}</div>
-							<div class="status" v-if="!msg.isMine">
-								<img src="@/assets/icons/fixed_chat.png" v-if="msg.efairymsg_ishandle==1">
-								<img src="@/assets/icons/warning_chat.png" v-if="msg.efairymsg_ishandle==0">
-						</div>
-							</div>
+						<div class="ctx">{{msg.ctx.text}}</div>
+						<div class="status" v-if="!msg.isMine">
+							<img src="@/assets/icons/fixed_chat.png" v-if="msg.efairymsg_ishandle==1">
+							<img src="@/assets/icons/warning_chat.png" v-if="msg.efairymsg_ishandle==0">
 						</div>
 					</div>
 				</div>
-				<router-link :to="{name:'deviceAlarmList'}" class="alarm-list-btn">
-					报警列表
-				</router-link>
-				<van-tabbar class="device-chat-tabbar">
-					<van-tabbar-item @click="sendMsg()">消音</van-tabbar-item>
-					<van-tabbar-item @click="sendMsg()">复位</van-tabbar-item>
-					<van-tabbar-item @click="gotoConfig()">配置</van-tabbar-item>
-				</van-tabbar>
 			</div>
+		</div>
+		<router-link :to="{name:'deviceAlarmList'}" class="alarm-list-btn">
+			报警列表
+		</router-link>
+		<van-tabbar class="device-chat-tabbar">
+			<van-tabbar-item @click="sendMsg(129)">消音</van-tabbar-item>
+			<van-tabbar-item @click="sendMsg(128)">复位</van-tabbar-item>
+			<van-tabbar-item @click="gotoConfig()">配置</van-tabbar-item>
+		</van-tabbar>
+	</div>
 
 </template>
 
@@ -73,15 +73,25 @@ export default {
                 if (index == 0) this.lastId = item.efairymsg_id;
             });
         },
-        sendMsg() {
+        async postDeviceMsg(type) {
+            const data = await this.$service.projectService.postDeviceMsg({
+                efairydevice_id: this.deviceId,
+                control_order: type, //67peizhi 128fuwei 129xiaoyin
+                extra_info: {}
+            });
+            this.$toast("操作成功");
+        },
+        sendMsg(type) {
+            const txt = type == 129 ? "消音" : "复位";
             this.chatList.push({
                 isMine: 1,
                 efairymsg_add_time: moment().format("YYYY-MM-DD HH:mm:ss"),
                 ctx: {
-                    text: "复位"
+                    text: txt
                 },
                 efairymsg_ishandle: 1
             });
+            this.postDeviceMsg(type);
             this.scroll.refresh();
             setTimeout(() => {
                 this.scroll.scrollTo(0, this.scroll.maxScrollY);

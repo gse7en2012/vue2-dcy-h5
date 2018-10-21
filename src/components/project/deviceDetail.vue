@@ -39,13 +39,26 @@
 					实时状态
 				</div>
 				<van-cell-group class="detail-list">
-					<van-cell title="设备状态">{{statusHash[rtInfo.efairydevice_alarm_id]}}</van-cell>
+					<van-cell title="无线通信状态">
+						<span class="online-dot" :class="{green:rtInfo.efairydevice_is_online}">{{rtInfo.efairydevice_is_online?'在线':'离线'}}</span>
+						<span>
+							<img src='@/assets/icons/device_status4.png' v-if="rtInfo.efairydevice_alarm_id==0">
+							<img src='@/assets/icons/device_status1.png' v-if="rtInfo.efairydevice_alarm_id!=0&&rtInfo.efairydevice_csq_level==2">
+							<img src='@/assets/icons/device_status2.png' v-if="rtInfo.efairydevice_alarm_id!=0&&rtInfo.efairydevice_csq_level==1">
+							<img src='@/assets/icons/device_status3.png' v-if="rtInfo.efairydevice_alarm_id!=0&&rtInfo.efairydevice_csq_level==0"> 信号
+						</span>
+					</van-cell>
+					<van-cell title="报警状态"><span :class="{red:rtInfo.efairydevice_alarm_id==1,yellow:rtInfo.efairydevice_alarm_id==3,orange:rtInfo.efairydevice_alarm_id==2,green:rtInfo.efairydevice_alarm_id==6}">{{statusHash[rtInfo.efairydevice_alarm_id]}}</span>
+					</van-cell>
+					<van-cell title="数据更新时间" :value="rtInfo.rt_data_time||'--'" />
+					<van-cell title="心跳间隔" :value="rtInfo.heartbeat_interval+'s'||'--'" />
+					<van-cell title="音响模式" :value="rtInfo.audio_on?'静音':'音响'" />
+
+					<!-- <van-cell title="设备状态">{{statusHash[rtInfo.efairydevice_alarm_id]}}</van-cell>
 					<van-cell title="是否在线" :value="rtInfo.efairydevice_is_online?'是':'否'" />
 					<van-cell title="信号强度" :value="rtInfo.efairydevice_csq" />
-					<van-cell title="信号等级" :value="levelHash[rtInfo.efairydevice_csq_level]" />
-					<van-cell title="心跳间隔" :value="rtInfo.heartbeat_interval||'--'" />
-					<van-cell title="音响模式" :value="rtInfo.audio_on?'静音':'音响'" />
-					<van-cell title="更新时间" :value="rtInfo.rt_data_time||'--'" />
+					<van-cell title="信号等级" :value="levelHash[rtInfo.efairydevice_csq_level]" /> -->
+
 				</van-cell-group>
 
 				<div class="block-title">
@@ -53,7 +66,9 @@
 				</div>
 				<van-cell-group class="detail-list">
 					<van-cell title="暂无数据" v-if="cdataList.length==0" />
-					<van-cell :title="c.c_name" v-for="(c,i) in cdataList" :key="c.cid" :value="c.c_value" />
+					<van-cell :title="c.c_name" v-for="(c,i) in cdataList" :key="c.cid" @click="showEditAlert(c)">
+						<span :class="{red:c.c_alarm_id==1,yellow:c.c_alarm_id==3,orange:c.c_alarm_id==2}">{{c.c_value}}</span>
+					</van-cell>
 				</van-cell-group>
 
 				<div class="block-title">
@@ -65,7 +80,12 @@
 			</div>
 		</div>
 		<van-actionsheet v-model="show" :actions="phoneList" @select="onSelect" />
-
+		<van-dialog v-model="dShow" show-cancel-button :before-close="beforeClose">
+			<h5 class="dialog-title">输入通道名称</h5>
+			<!-- <van-cell-group class="dialog-van-cell-group"> -->
+			<van-field v-model="dialogModel.c_name" ref="dInput" />
+			<!-- </van-cell-group> -->
+		</van-dialog>
 		<a class="phone" @click="showPhoneList()"><img src="@/assets/icons/phone_big.png"></a>
 
 	</div>
@@ -73,6 +93,7 @@
 </template>
 
 <script>
+import { Dialog } from "vant";
 import BScroll from "better-scroll";
 // 设备状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常，优先级:离线 报警  预警  故障 启动 屏蔽 正常
 
@@ -81,6 +102,7 @@ export default {
 
     data() {
         return {
+            dialogModel: {},
             statusHash: [
                 "离线",
                 "火警",
@@ -94,6 +116,7 @@ export default {
             deviceId: this.$route.params.did,
             value: "",
             show: false,
+            dShow: false,
             phoneList: [],
             basicInfo: {},
             rtInfo: {},
@@ -107,9 +130,40 @@ export default {
         this.$nextTick(() => {
             this.setupBetterScroll();
         });
+        Dialog.alert({
+            title: "提示",
+            message: "通道数据中的通道名称可以点击进行修改哦"
+        });
+
         // document.location.href = "tel:xxx";
     },
     methods: {
+        showEditAlert(item) {
+            this.dShow = true;
+            this.dialogModel = item;
+            console.log(this.$refs["dInput"]);
+        },
+        async editDeviceChannelName(item) {
+            const data = await this.$service.projectService.editDeviceChannelName(
+                {
+                    efairydevice_id: this.deviceId,
+                    efairydevicechannelsetting_cid: item.cid,
+                    efairydevicechannelsetting_setting: {
+                        c_name: item.c_name
+                    }
+                }
+            );
+        },
+        beforeClose(action, done) {
+            if (action === "confirm") {
+                // setTimeout(done, 1000);
+                // console.log(this.configList);
+                this.editDeviceChannelName(this.dialogModel);
+                done();
+            } else {
+                done();
+            }
+        },
         goBack() {
             this.$router.back();
         },
@@ -169,6 +223,13 @@ export default {
     overflow: hidden;
 }
 
+.dialog-title {
+    text-align: center;
+    margin: 10px auto 5px;
+    font-size: 16px;
+    color: $dcyColor;
+}
+
 .main-box {
     background: #fff;
     padding-bottom: 5px;
@@ -206,6 +267,24 @@ export default {
         font-size: 15px;
         height: 45px;
         line-height: 30px;
+    }
+}
+.online-dot {
+    position: relative;
+    &.green {
+        &::after {
+            background: $green;
+        }
+    }
+    &::after {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 8px;
+        left: -12px;
+        top: 5px;
+        content: "";
+        background: #666;
     }
 }
 

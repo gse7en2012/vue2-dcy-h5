@@ -20,8 +20,8 @@ const projectService = {
 			params: opts
 		})
 	},
-	async getDeviceChart(opts){
-		return await axios.get('/device_waveform_data',{
+	async getDeviceChart(opts) {
+		return await axios.get('/device_waveform_data', {
 			params: opts
 		})
 	},
@@ -34,6 +34,17 @@ const projectService = {
 		return await axios.get('/device_unhandle_alarm_msg_list', {
 			params: opts
 		})
+	},
+	async getDeviceSetting(){
+		return await axios.get('/device_setting', {
+			params: opts
+		})
+	},
+	async editDeviceChannelName(opts) {
+		return await axios.post('/device_channel_setting', opts)
+	},
+	async postDeviceMsg(opts){
+		return await axios.post('/device_control', opts)
 	},
 	async getDeviceAlarmHandledList(opts) {
 		return await axios.get('/device_alarm_record_list', {

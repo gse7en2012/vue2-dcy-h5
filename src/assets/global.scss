@@ -107,6 +107,15 @@ body {
 	.van-cell__title {
 		color: $dcyColor;
 	}
+	.van-cell__value{
+		color:#666;
+		span{
+			margin-left:22px;
+		}
+	}
+	img{
+		height: 10px;
+	}
 }
 
 .van-tabbar {
@@ -167,4 +176,8 @@ body {
 		top:0;
 		background: rgba(0,0,0,.2);
 	}
+}
+
+#my-cell .van-cell__right-icon {
+    line-height: 50px;
 }
