@@ -35,7 +35,7 @@ const projectService = {
 			params: opts
 		})
 	},
-	async getDeviceSetting(){
+	async getDeviceSetting(opts){
 		return await axios.get('/device_setting', {
 			params: opts
 		})

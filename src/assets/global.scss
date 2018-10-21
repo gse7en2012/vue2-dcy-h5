@@ -142,12 +142,14 @@ body {
 		color: #444;
 	}
 	.van-cell__value {
-		border: 1px solid #ddd;
+		// border: 1px solid #ddd;
 	}
 	.van-field__control {
 		text-align: right;
 		color: #666;
 		padding-right: 5px;
+		border: 1px solid #ddd;
+		margin-right: 1px;
 	}
 }
 

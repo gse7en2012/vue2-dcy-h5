@@ -2,22 +2,51 @@
 	<div class="main">
 		<van-nav-bar title="设备配置" @click-left="goBack" left-arrow />
 		<div class="wrapper" ref="wrapper">
+
 			<van-cell-group class="op-list">
-				<van-cell @click="showDialog(item)" is-link v-for="(item,i) in configList" :ref="item.id" :key="item.id">
-					<span class="van-cell-text">{{item.name}}</span>
+				<van-cell @click="showHeartBeatDialog()" is-link>
+					<span class="van-cell-text">心跳间隔</span>
 					<div class="van-cell-box">
-						<span>{{item.value}}</span>
+
+						<span>s</span>
+						<span>{{heartModel}}</span>
+					</div>
+				</van-cell>
+				<van-cell @click="showA=true" is-link>
+					<span class="van-cell-text">音响模式</span>
+					<div class="van-cell-box">
+						<span>{{audioModel?'音响':'静音'}}</span>
+					</div>
+				</van-cell>
+			</van-cell-group>
+			<van-cell-group class="op-list">
+				<van-cell @click="showDialog(item)" is-link v-for="(item,i) in configList" :ref="item.cid" :key="item.cid">
+					<span class="van-cell-text">{{item.c_name}}</span>
+					<div class="van-cell-box">
+
+						<span>{{item.unit}}</span>
+						<span>{{item.thv}}</span>
 					</div>
 				</van-cell>
 			</van-cell-group>
 		</div>
-		<a class="dcy-btn">保存配置</a>
+		<a class="dcy-btn" @click="postDeviceMsg()">保存配置</a>
 		<van-dialog v-model="show" show-cancel-button :before-close="beforeClose">
 			<h5 class="dialog-title">修改配置</h5>
 			<van-cell-group class="dialog-van-cell-group">
-				<van-field v-model="dialogModel.value" :label="dialogModel.name" />
+				<van-field v-model="dialogModel.thv" :label="dialogModel.c_name" />
+				<van-cell>可修改范围：({{dialogModel.minRange}}-{{dialogModel.maxRange}})</van-cell>
 			</van-cell-group>
 		</van-dialog>
+		<van-dialog v-model="showB" show-cancel-button>
+			<h5 class="dialog-title">修改配置</h5>
+			<van-cell-group class="dialog-van-cell-group">
+				<van-field v-model="heartModel" label="心跳间隔" />
+			</van-cell-group>
+		</van-dialog>
+
+		<van-actionsheet v-model="showA" :actions="actions" @select="onSelect" />
+
 	</div>
 
 </template>
@@ -32,39 +61,22 @@ export default {
         return {
             // query: this.$route.query,
             show: false,
-			dialogModel: {},
-			cdataList:[],
-			rtInfo:{},
-            configList: [
-                {
-                    name: "心跳间隔",
-                    value: "75s",
-                    id: 1
-                },
-                {
-                    name: "音响模式",
-                    value: "65s",
-                    id: 2
-                },
-                {
-                    name: "漏电通道12报警阈值",
-                    value: "751s",
-                    id: 3
-                },
-                {
-                    name: "漏电通道1报警阈值",
-                    value: "199mA",
-                    id: 4
-                },
-                {
-                    name: "心跳间隔2",
-                    value: "75s",
-                    id: 5
-                }
+            showA: false,
+            showB: false,
+            dialogModel: {},
+            deviceId: this.$route.params.did,
+            configList: [],
+            audioModel: null,
+            heartModel: null,
+            actions: [
+                //不传则返回所有状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常
+                { name: "静音", id: 0 },
+                { name: "音响", id: 1 }
             ]
         };
     },
     async mounted() {
+        this.getDeviceConfigList();
         this.$nextTick(() => {
             // document.title = "项目列表";
             // this.calcHeight =
@@ -80,35 +92,69 @@ export default {
         beforeClose(action, done) {
             if (action === "confirm") {
                 // setTimeout(done, 1000);
-                console.log(this.configList);
+
+                if (
+                    this.dialogModel.maxRange &&
+                    this.dialogModel.thv > this.dialogModel.maxRange
+                ) {
+                    this.$toast("超出范围");
+                    this.dialogModel.thv = this.dialogModel.maxRange;
+                }
+                if (
+                    this.dialogModel.minRange &&
+                    this.dialogModel.thv < this.dialogModel.minRange
+                ) {
+                    this.$toast("超出范围");
+                    this.dialogModel.thv = this.dialogModel.minRange;
+                }
                 done();
             } else {
                 done();
             }
         },
-        async getDeviceDetail() {
-            const data = await this.$service.projectService.getDeviceDetail({
+        onSelect(item) {
+            // 点击选项时默认不会关闭菜单，可以手动关闭
+            this.showA = false;
+            this.audioModel = item.id;
+        },
+        async getDeviceConfigList() {
+            const data = await this.$service.projectService.getDeviceSetting({
                 efairydevice_id: this.deviceId
             });
-            this.$store.dispatch(
-                "saveCurrentDeviceName",
-                data.result.basic_info.efairydevice_name
-            );
-            this.basicInfo = data.result.basic_info;
-            this.rtInfo = data.result.rt_info;
-            if (data.result.rt_info)
-                this.cdataList = data.result.rt_info.c_data_list || [];
+            this.configList = data.result.efairydevicesetting_thv_list;
+            this.audioModel = data.result.efairydevicesetting_audio_on;
+            this.heartModel =
+                data.result.efairydevicesetting_heartbeat_interval;
+            this.configList.forEach(item => {
+                if (item.value_range) {
+                    try {
+                        item.maxRange = item.value_range.find(
+                            item => item.name == "max"
+                        ).value;
+                        item.minRange = item.value_range.find(
+                            item => item.name == "min"
+                        ).value;
+                    } catch (e) {}
+                }
+            });
         },
         showDialog(item) {
             this.show = true;
             this.dialogModel = item;
             // this.$refs[item.id].focus();
         },
-        async postDeviceMsg(type) {
+        showHeartBeatDialog() {
+            this.showB = true;
+        },
+        async postDeviceMsg() {
             const data = await this.$service.projectService.postDeviceMsg({
                 efairydevice_id: this.deviceId,
-                control_order: type, //67peizhi 128fuwei 129xiaoyin
-                extra_info: {}
+                control_order: 67, //67peizhi 128fuwei 129xiaoyin
+                extra_info: {
+					efairydevicesetting_heartbeat_interval: this.heartModel,
+					efairydevicesetting_audio_on:this.audioModel,
+					efairydevicesetting_thv_list:this.configList
+                }
             });
             this.$toast("操作成功");
         },

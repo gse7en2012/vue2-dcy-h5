@@ -150,7 +150,10 @@ export default {
                     params: {
                         did: item.efairydevicemsg_from_id.replace('device_',''),
                         pid: 0
-                    }
+					},
+					query:{
+						msgobj_id:item.efairymsg_from_id
+					}
                 });
             }
         },
