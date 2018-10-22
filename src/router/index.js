@@ -36,8 +36,9 @@ import VueCookies from '../service/cookies';
 
 Vue.use(Router);
 
-// const appId='wx7df072b8e5881faf';
-const appId = 'wx1cb0950621818b8e';
+const appId='wx7df072b8e5881faf';
+const appIdTest = 'wx1cb0950621818b8e';
+
 
 const dcyRoutes = [{
 		path: '',
