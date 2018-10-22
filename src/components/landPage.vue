@@ -71,7 +71,9 @@ export default {
 			phone:'',
 			password:'',
             // phone: "13751066522",
-            // password: "66666",
+			// password: "66666",
+			phone:'',
+			password:'',
             count: 60,
 			sendCodeTimer: null,
 			viewPassword:false
