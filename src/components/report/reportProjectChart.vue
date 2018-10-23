@@ -8,8 +8,8 @@
 							<span class="title">{{item.efairydevice_device_type||"--"}}</span>
 						</p>
 						<div>
-							<v-chart :options="item.pieData" class="pie-chart" theme="westro" auto-resize v-if="item.alarm_times_info_list_t.length>0" />
-							<v-chart :options="item.barData" class="bar-chart" theme="westro" auto-resize v-if="item.alarm_percent_info_list.length>0" />
+							<v-chart :options="item.pieData" class="pie-chart" theme="rp1" auto-resize v-if="item.alarm_times_info_list_t.length>0" />
+							<v-chart :options="item.barData" class="bar-chart" theme="rp2" auto-resize v-if="item.alarm_percent_info_list.length>0" />
 
 							<p v-if="item.alarm_percent_info_list.length==0" class="no-chart-tips">没有图表数据</p>
 						</div>

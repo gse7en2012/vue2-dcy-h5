@@ -16,7 +16,10 @@ export default new Vuex.Store({
 		deviclAlarmListChooseList: [], //选择报警列表
 		projectAreaSelectedQuery: null, //项目地区信息
 		isLogin: false,
-		userInfo:{}
+		userInfo: {},
+		showNewMessage: false,
+		newMessageCount: 0,
+		deviceMsgList:[]
 	},
 	getters: {
 		deviclAlarmListChooseList(state) {
@@ -67,6 +70,14 @@ export default new Vuex.Store({
 		},
 		saveCurrentDeviceName(ctx, data) {
 			ctx.state.tmpDeviceName = data;
+		},
+		pushNewMsgToBottomNav(ctx, data) {
+			ctx.state.showNewMessage = true;
+			ctx.state.newMessageCount++;
+		},
+		cancelNewMsgToBottomNav(ctx, data) {
+			ctx.state.showNewMessage = false;
+			ctx.state.newMessageCount = 0;
 		}
 	}
 })

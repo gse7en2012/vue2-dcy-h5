@@ -39,17 +39,18 @@
 					<div class="dcy-radio" @click="chooseAll()">
 						<div class="radio" :class="{chose:chooseAllFlag}"></div>全选
 					</div>
-					<a class="dcy-btn" @click="alertMsg('全部删除','确定删除将所选设备消息吗？')">删除</a>
-					<a class="dcy-btn" @click="alertMsg('全部已读','确定将所选设备消息标记为已读吗？')">已读</a>
+					<a class="dcy-btn" @click="alertMsg(1,'全部删除','确定删除将所选设备消息吗？')">删除</a>
+					<a class="dcy-btn" @click="alertMsg(2,'全部已读','确定将所选设备消息标记为已读吗？')">已读</a>
 				</div>
 			</div>
 
 		</section>
-		<bottom-tab />
+		<bottom-tab :showNewMessage="showNewMessage" :newMessageCount="newMessageCount" />
 	</div>
 </template>
 
 <script>
+import Bus from "@/service/bus";
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
 import bottomTab from "@/components/bottomTab";
@@ -59,6 +60,7 @@ import rongCloudInit from "@/components/rongCloud/init";
 // 正式版：m7ua80gbmpi3m
 
 const rcAppKey = "vnroth0kvdmso";
+const rcAppkeyProduction = "m7ua80gbmpi3m";
 
 export default {
     name: "messageIndex",
@@ -69,14 +71,16 @@ export default {
         return {
             // query: this.$route.query,
             active: 0,
-            msgList: [],
+            msgList: this.$store.state.deviceMsgList,
             edit: false,
             chooseAllFlag: false,
-            rcToken: this.$store.state.rcToken
+            rcToken: this.$store.state.rcToken,
+            showNewMessage: false,
+            newMessageCount: 1
         };
     },
     async mounted() {
-        this.initRc();
+        // this.initRc();
 
         this.$nextTick(() => {
             // document.title = "消息列表";
@@ -112,6 +116,8 @@ export default {
         },
         addNewMsg(msg) {
             let isExist = false;
+            this.$store.dispatch("pushNewMsgToBottomNav", 2);
+
             this.msgList.forEach(item => {
                 if (
                     item.efairydevicemsg_from_id == msg.efairydevicemsg_from_id
@@ -145,28 +151,43 @@ export default {
             if (this.edit) {
                 this.$set(item, "choose", !item.choose);
             } else {
+                item.unread = false;
+                Bus.$emit("hideNewDeviceMsg");
+                this.$store.dispatch("cancelNewMsgToBottomNav");
                 this.$router.push({
                     name: "deviceChat",
                     params: {
-                        did: item.efairydevicemsg_from_id.replace('device_',''),
+                        did: item.efairydevicemsg_from_id.replace(
+                            "device_",
+                            ""
+                        ),
                         pid: 0
-					},
-					query:{
-						msgobj_id:item.efairymsg_from_id
-					}
+                    },
+                    query: {
+                        msgobj_id: item.efairymsg_from_id
+                    }
                 });
             }
         },
-        alertMsg(title, msg, type) {
+        alertMsg(type, title, msg) {
             Dialog.confirm({
                 title: title,
                 message: msg
             })
                 .then(() => {
                     // on confirm
-                    console.log(this.deviceList.filter(item => item.choose));
-                    if (type == 1) {
+                    if (type == 2) {
+                        this.msgList.forEach(item => {
+                            console.log(item);
+                            item.unread = false;
+                            Bus.$emit("hideNewDeviceMsg");
+                            this.$store.dispatch("cancelNewMsgToBottomNav");
+                        });
                     }
+                    if (type == 1) {
+                        this.msgList = [];
+                    }
+                    this.edit = false;
                 })
                 .catch(() => {
                     // on cancel
@@ -174,7 +195,7 @@ export default {
         },
         chooseAll() {
             this.chooseAllFlag = !this.chooseAllFlag;
-            this.deviceList.forEach(msg => {
+            this.msgList.forEach(msg => {
                 msg.choose = this.chooseAllFlag;
             });
         }
@@ -341,6 +362,7 @@ $dcyColor: #282549;
                         overflow: hidden;
                         text-overflow: ellipsis;
                         display: -webkit-box;
+                        word-break: break-all;
                         -webkit-line-clamp: 1;
                         -webkit-box-orient: vertical;
                         margin-right: 5px;

@@ -43,6 +43,9 @@ const projectService = {
 	async editDeviceChannelName(opts) {
 		return await axios.post('/device_channel_setting', opts)
 	},
+	async editMultiDeviceChannelName(opts) {
+		return await axios.post('/device_multi_channel_setting', opts)
+	},
 	async postDeviceMsg(opts){
 		return await axios.post('/device_control', opts)
 	},

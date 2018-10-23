@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import Bus from "@/service/bus";
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
 export default {
@@ -67,14 +68,14 @@ export default {
             active: 0,
             codeText: "发送验证码",
             code: "",
-			isSendCode: false,
-			phone:'',
-			password:'',
-            // phone: "13751066522",
-			// password: "66666",
+            isSendCode: false,
+            phone: "",
+            password: "",
+            phone: "13751066522",
+            password: "66666",
             count: 60,
-			sendCodeTimer: null,
-			viewPassword:false
+            sendCodeTimer: null,
+            viewPassword: false
         };
     },
     watch: {
@@ -88,10 +89,10 @@ export default {
     },
 
     methods: {
-		onClickLeft() {},
-		toggleViewPassword(){
-			this.viewPassword=!this.viewPassword
-		},
+        onClickLeft() {},
+        toggleViewPassword() {
+            this.viewPassword = !this.viewPassword;
+        },
         change() {
             console.log("c");
             let tmp = this.phone;
@@ -137,7 +138,8 @@ export default {
         },
         gotoRule() {
             this.$router.push({ name: "rulePage" });
-        },
+		},
+
         async loginViaCode() {
             if (!this.code) return this.$toast("请输入验证码");
             if (!this.phone) return this.$toast("请输入手机号码");
@@ -147,7 +149,8 @@ export default {
                     this.phone.replace(/-/g, ""),
                     this.code
                 );
-                this.loading = false;
+				this.loading = false;
+				 Bus.$emit("loginSuccess", "login via code");
                 this.$store.commit("accountLogin", data.result);
                 this.$router.push({ name: "projectIndex" });
             } catch (e) {
@@ -165,6 +168,7 @@ export default {
                     this.password
                 );
                 this.loading = false;
+                Bus.$emit("loginSuccess", "login via pass");
                 this.$store.commit("accountLogin", data.result);
                 this.$router.push({ name: "projectIndex" });
             } catch (e) {
@@ -246,13 +250,13 @@ export default {
                 left: auto;
                 right: 15px;
             }
-			&.close{
-				right:34px;
-				font-size: 16px;
-				color:$dcyColor;
-				line-height: 44px;
-				font-size: 24px;
-			}
+            &.close {
+                right: 34px;
+                font-size: 16px;
+                color: $dcyColor;
+                line-height: 44px;
+                font-size: 24px;
+            }
             img {
                 display: block;
                 position: absolute;

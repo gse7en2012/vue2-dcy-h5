@@ -13,11 +13,15 @@
 			</van-cell-group>
 
 			<van-cell-group class="my-list">
-				<van-cell title="手机"  :value="userInfo.efairyuser_phonenumber" />
+				<van-cell title="手机" :value="userInfo.efairyuser_phonenumber" />
 			</van-cell-group>
 
 			<van-cell-group class="my-list">
-				<van-cell title="密码" is-link :to="{path:'/my/info/pass'}"/>
+				<van-cell title="密码" is-link :to="{path:'/my/info/pass'}" />
+			</van-cell-group>
+
+			<van-cell-group class="my-list">
+				<van-cell title="退出登录"  @click="logout()" style="text-align:center;color:#ff0000"/>
 			</van-cell-group>
 
 		</div>
@@ -59,7 +63,11 @@ export default {
                 this.userInfo.efairyuser_phonenumber.slice(7, 11);
 
             this.$store.commit("saveUserInfo", this.userInfo);
-        },
+		},
+		logout(){
+			this.$store.commit('accountLogout');
+			this.$router.push({name:'loginPage'})
+		},
         async editInfo() {
             const data = await this.$service.userService.editUserInfo({
                 efairyuser_headimg_url: this.userInfo.efairyuser_headimg_url
@@ -71,8 +79,8 @@ export default {
             this.qiniuToken = token.result.upload_token;
         },
         async onReadUploadImg(file) {
-			await this.uploadToQiniu(file);
-			this.editInfo();
+            await this.uploadToQiniu(file);
+            this.editInfo();
         },
         async uploadToQiniu(file) {
             const data = new FormData();

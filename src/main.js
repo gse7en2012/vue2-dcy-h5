@@ -5,6 +5,8 @@ import vueg from 'vueg';
 import service from './service';
 import theme from './theme/theme.json';
 import westro from './theme/westro.json';
+import rp1 from './theme/themeReport1.json';
+import rp2 from './theme/themeReport2.json';
 import ECharts from 'vue-echarts/components/ECharts.vue';
 
 
@@ -41,6 +43,8 @@ Vue.directive('focus', {
 Vue.prototype.$service = service;
 ECharts.registerTheme('ovilia-green', theme);
 ECharts.registerTheme('westro', westro);
+ECharts.registerTheme('rp1', rp1);
+ECharts.registerTheme('rp2', rp2);
 Vue.use(vueg, router, {
 	sameDepthDisable: true,
 	// duration: 5.2,

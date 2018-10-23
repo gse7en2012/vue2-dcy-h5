@@ -63,20 +63,31 @@
 
 				<div class="block-title">
 					通道数据
+					<span class="right" v-if="!channelNameEditing" @click="editChannelName()"><img class="icon" src="@/assets/icons/edit.png">编辑</span>
+					<span class="right" v-if="channelNameEditing" @click="channelNameEditing=false"><img class="icon" src="@/assets/icons/close.png">取消</span>
+					<span class="right" v-if="channelNameEditing" @click="editDeviceMultiChannelName()"><img class="icon" src="@/assets/icons/right.png">提交</span>
 				</div>
-				<van-cell-group class="detail-list">
-					<van-cell title="暂无数据" v-if="cdataList.length==0" />
-					<van-cell :title="c.c_name" v-for="(c,i) in cdataList" :key="c.cid" @click="showEditAlert(c)">
+				<van-cell-group class="detail-list special-list">
+					<div class="list-row" v-if="cdataList.length==0" >暂无数据</div>
+					<div class="list-row" v-for="(c,i) in cdataList">
+						<div class="left">
+							<span v-if="!channelNameEditing">{{c.c_name}}</span>
+							<van-field v-model="c.c_name" v-if="channelNameEditing" class="edit-input" @click="addIntoModList(c)" />
+						</div>
+						<div class="right" :class="{red:c.c_alarm_id==1,yellow:c.c_alarm_id==3,orange:c.c_alarm_id==2}">{{c.c_value}}</div>
+					</div>
+					<!-- <van-field v-model="c.c_name" v-for="(c,i) in cdataList"/> -->
+					<!-- <van-cell :title="c.c_name" v-for="(c,i) in cdataList" :key="c.cid">
 						<span :class="{red:c.c_alarm_id==1,yellow:c.c_alarm_id==3,orange:c.c_alarm_id==2}">{{c.c_value}}</span>
-					</van-cell>
+					</van-cell> -->
 				</van-cell-group>
 
-				<div class="block-title">
+				<!-- <div class="block-title">
 					用户列表
 				</div>
 				<van-cell-group class="detail-list">
 					<van-cell :title="user.efairyuser_nickname" v-for="(user,i) in userList" :key="user.efairyuser_id" :value="user.efairyuser_phonenumber" />
-				</van-cell-group>
+				</van-cell-group> -->
 			</div>
 		</div>
 		<van-actionsheet v-model="show" :actions="phoneList" @select="onSelect" />
@@ -99,7 +110,14 @@ import BScroll from "better-scroll";
 
 export default {
     name: "deviceDetail",
-
+    watch: {
+        // cdataList: {
+        //     handler(newVal, oldVal) {
+        //         console.log(newVal,oldVal);
+        //     },
+        //     deep: true
+        // }
+    },
     data() {
         return {
             dialogModel: {},
@@ -121,7 +139,9 @@ export default {
             basicInfo: {},
             rtInfo: {},
             userList: [],
-            cdataList: []
+            cdataList: [],
+            channelNameEditing: false,
+            modList: []
         };
     },
     async mounted() {
@@ -130,18 +150,30 @@ export default {
         this.$nextTick(() => {
             this.setupBetterScroll();
         });
-        Dialog.alert({
-            title: "提示",
-            message: "通道数据中的通道名称可以点击进行修改哦"
-        });
+        // Dialog.alert({
+        //     title: "提示",
+        //     message: "通道数据中的通道名称可以点击进行修改哦"
+        // });
 
         // document.location.href = "tel:xxx";
     },
     methods: {
+        editChannelName() {
+            this.channelNameEditing = true;
+            document.querySelectorAll("input")[0].focus();
+        },
+        addIntoModList(item) {
+            // this.modList.push({
+            //     efairydevicechannelsetting_cid: item.cid,
+            //     efairydevicechannelsetting_setting: {
+            //         c_name: item.c_name
+            //     }
+            // });
+            item.isMode = true;
+        },
         showEditAlert(item) {
             this.dShow = true;
             this.dialogModel = item;
-            console.log(this.$refs["dInput"]);
         },
         async editDeviceChannelName(item) {
             const data = await this.$service.projectService.editDeviceChannelName(
@@ -153,6 +185,28 @@ export default {
                     }
                 }
             );
+        },
+        async editDeviceMultiChannelName(item) {
+            this.modList = this.cdataList
+                .filter(item => {
+                    return item.isMode;
+                })
+                .map(item => {
+                    return {
+                        efairydevicechannelsetting_cid: item.cid,
+                        efairydevicechannelsetting_setting: {
+                            c_name: item.c_name
+                        }
+                    };
+                });
+            console.log(this.modList);
+            const data = await this.$service.projectService.editMultiDeviceChannelName(
+                {
+                    efairydevice_id: this.deviceId,
+                    channel_setting_list: this.modList
+                }
+            );
+            this.$toast("修改成功！");
         },
         beforeClose(action, done) {
             if (action === "confirm") {
@@ -308,12 +362,69 @@ export default {
         border-bottom-right-radius: 4px;
         background: $dcyColor;
     }
+    .right {
+        float: right;
+        font-size: 13px;
+        margin-left: 15px;
+        .icon {
+            height: 12px;
+            position: relative;
+            top: 1px;
+            margin-right: 5px;
+        }
+    }
 }
 
 .detail-list {
     .van-cell {
         font-size: 14px;
         line-height: 20px;
+    }
+}
+
+.special-list {
+    .van-cell {
+        padding: 0;
+    }
+    .list-row {
+        color: #333;
+        display: flex;
+        position: relative;
+        // border-bottom: 1px solid #eee;
+        padding: 8px 15px;
+        font-size: 14px;
+        line-height: 20px;
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+            -webkit-transform-origin: 0 0;
+            transform-origin: 0 0;
+            pointer-events: none;
+            box-sizing: border-box;
+            border: 0 solid #e5e5e5;
+        }
+        &:not(:last-child)::after {
+            left: 15px;
+            right: 0;
+            width: auto;
+            -webkit-transform: scale(1, 0.5);
+            transform: scale(1, 0.5);
+            border-bottom-width: 1px;
+        }
+        .left {
+            flex: 1;
+        }
+        .right {
+            color: #666;
+            flex: 1;
+            text-align: right;
+        }
     }
 }
 
