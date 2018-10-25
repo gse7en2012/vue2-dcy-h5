@@ -56,18 +56,18 @@
 					<div class="ctx">没有项目数据</div>
 				</div>
 				<div class="box" v-for="(p,i) in projectList" :key="i">
-					<div class="title"  @click="gotoProjectDetails(p)">
+					<div class="title" @click="gotoProjectDetails(p)">
 						{{p.efairyproject_name}}
-						<span class="score orange">评分{{p.efairyproject_security_score}}</span>
+						<span class="score" :class="{green:p.efairyproject_security_score>80,orange:p.efairyproject_security_score<=80&&p.efairyproject_security_score>60,red:p.efairyproject_security_score<=60}">评分{{p.efairyproject_security_score}}</span>
 					</div>
 					<div class="ctx">
 						<div class="intro">
-							<i  @click="gotoProjectDetails(p)">项目负责人：</i>
-							<span  @click="gotoProjectDetails(p)">{{p.efairyproject_user_name}}</span>
+							<i @click="gotoProjectDetails(p)">项目负责人：</i>
+							<span @click="gotoProjectDetails(p)">{{p.efairyproject_user_name}}</span>
 							<a class="icon" :href="'tel:'+p.efairyproject_user_phonenumber"><img src="@/assets/icons/phone_big.png" /></a>
 						</div>
 
-						<div class="table" v-if="p.efairyproject_device_statistics.device_statistics_list.length!=0"  @click="gotoProjectDetails(p)">
+						<div class="table" v-if="p.efairyproject_device_statistics.device_statistics_list.length!=0" @click="gotoProjectDetails(p)">
 							<table>
 								<tr>
 									<th>设备类型</th>
@@ -178,11 +178,11 @@ export default {
         changeOrder() {
             this.order = 1 - this.order;
             this.getReportIndexProjectList();
-		},
-		editTitleFn(){
-			this.editTitle=true;
-			this.$refs.tinput.focus();
-		},
+        },
+        editTitleFn() {
+            this.editTitle = true;
+            this.$refs.tinput.focus();
+        },
         saveTitle() {
             this.editTitle = false;
         },
@@ -202,8 +202,8 @@ export default {
 <style lang="scss" scoped>
 @import "@/assets/color.scss";
 
-i{
-	font-style:normal;
+i {
+    font-style: normal;
 }
 
 .wrapper {

@@ -5,17 +5,18 @@
 		</van-nav-bar>
 		<div class="wrapper" ref="wrapper">
 			<div class="chat-box">
-				<div class="block" v-for="(msg,i) in chatList" :id="'msg'+msg.efairymsg_id">
+				<div class="block" v-for="(msg,i) in chatList" :id="'msg'+msg.efairymsg_id" @click="gotoMsgDetail(msg)">
 					<div class="chat-time">{{msg.efairymsg_add_time}}</div>
 					<div class="chat-message" :class="{my:msg.isMine}">
 						<div class="avatar">
 							<img src="@/assets/icons/device_chat.png" v-if="!msg.isMine">
-							<img src="@/assets/icons/avatar.png" v-if="msg.isMine">
+							<img src="@/assets/icons/avatar.png" v-if="msg.isMine&&!userInfo.efairyuser_headimg_url">
+							<img :src="userInfo.efairyuser_headimg_url" v-if="msg.isMine&&userInfo.efairyuser_headimg_url">
 						</div>
 						<div class="ctx">{{msg.ctx.text}}</div>
 						<div class="status" v-if="!msg.isMine">
-							<img src="@/assets/icons/fixed_chat.png" v-if="msg.efairymsg_ishandle==1">
-							<img src="@/assets/icons/warning_chat.png" v-if="msg.efairymsg_ishandle==0">
+							<img src="@/assets/icons/fixed_chat.png" v-if="msg.efairymsg_msgtype==1&&msg.efairymsg_ishandle==1">
+							<img src="@/assets/icons/warning_chat.png" v-if="msg.efairymsg_msgtype==1&&msg.efairymsg_ishandle==0">
 						</div>
 					</div>
 				</div>
@@ -45,6 +46,7 @@ export default {
             query: this.$route.query,
             deviceId: this.$route.params.did,
             userMsgId: this.$store.state.userMsgId,
+            userInfo: {},
             chatList: [],
             lastId: 0,
             page: 1,
@@ -53,7 +55,9 @@ export default {
         };
     },
     async mounted() {
+        console.log(this.userMsgId);
         this.getChatMsgList();
+        this.getUserInfo();
         this.$nextTick(() => {
             this.setupBetterScroll();
         });
@@ -70,19 +74,52 @@ export default {
             this.chatList = data.result.msg_list.reverse();
             this.chatList.forEach((item, index) => {
                 item.ctx = JSON.parse(item.efairymsg_content);
+                item.isMine = item.efairymsg_from_id == this.userMsgId;
                 if (index == 0) this.lastId = item.efairymsg_id;
             });
         },
         async postDeviceMsg(type) {
+            const txt = type == 129 ? "远程消音" : "远程复位";
             const data = await this.$service.projectService.postDeviceMsg({
                 efairydevice_id: this.deviceId,
                 control_order: type, //67peizhi 128fuwei 129xiaoyin
                 extra_info: {}
             });
+            this.chatList.push({
+                isMine: 0,
+                efairymsg_add_time: moment().format("YYYY-MM-DD HH:mm:ss"),
+                ctx: {
+                    text: txt + "成功"
+                }
+            });
             this.$toast("操作成功");
+            this.scroll.refresh();
+            setTimeout(() => {
+                this.scroll.scrollTo(0, this.scroll.maxScrollY);
+            }, 0);
+        },
+        async getUserInfo() {
+            const data = await this.$service.userService.getUserInfo();
+            this.userInfo = data.result;
+        },
+        gotoMsgDetail(msg) {
+            if (msg.efairymsg_msgtype && msg.efairymsg_ishandle)
+                this.$router.push({
+                    name: "deviceAlarmList",
+                    query: {
+                        status: 1
+                    }
+                });
+            if (msg.efairymsg_msgtype && !msg.efairymsg_ishandle)
+                this.$router.push({
+                    name: "deviceAlarmList",
+                    query: {
+                        status: 0
+                    }
+                });
         },
         sendMsg(type) {
-            const txt = type == 129 ? "消音" : "复位";
+            const txt = type == 129 ? "远程消音" : "远程复位";
             this.chatList.push({
                 isMine: 1,
                 efairymsg_add_time: moment().format("YYYY-MM-DD HH:mm:ss"),
@@ -133,6 +170,7 @@ export default {
             const chatList = data.result.msg_list.reverse();
             chatList.forEach((item, index) => {
                 item.ctx = JSON.parse(item.efairymsg_content);
+                item.isMine = item.efairymsg_from_id == this.userMsgId;
                 if (index == 0) this.lastId = item.efairymsg_id;
             });
             this.chatList = chatList.concat(this.chatList);

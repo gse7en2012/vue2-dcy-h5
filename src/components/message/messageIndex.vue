@@ -71,7 +71,7 @@ export default {
         return {
             // query: this.$route.query,
             active: 0,
-            msgList: this.$store.state.deviceMsgList,
+            msgList: this.$store.getters.getDeviceMsg,
             edit: false,
             chooseAllFlag: false,
             rcToken: this.$store.state.rcToken,
@@ -81,7 +81,9 @@ export default {
     },
     async mounted() {
         // this.initRc();
-
+        this.msgList.forEach(item => {
+            item.unread = false;
+        });
         this.$nextTick(() => {
             // document.title = "消息列表";
             this.setupBetterScroll();
@@ -130,8 +132,9 @@ export default {
             });
             console.log(isExist);
             if (!isExist) {
-                msg.unread = true;
-                this.msgList.push(msg);
+				msg.unread = true;
+				if(this.msgList.length>10) this.msgList.pop();
+                this.msgList.unshift(msg);
             }
         },
         setupBetterScroll() {

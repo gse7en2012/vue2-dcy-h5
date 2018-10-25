@@ -48,12 +48,12 @@ export default {
         return {
             isWeixin: false,
             rcToken: this.$store.state.rcToken,
-            msgList: this.$store.state.deviceMsgList
+            msgList: this.$store.getters.getDeviceMsg
         };
     },
     async mounted() {
         Bus.$on("loginSuccess", msg => {
-			this.initRc();
+            this.initRc();
         });
         if (this.rcToken) this.initRc();
         this.setUpWxconfig();
@@ -80,7 +80,7 @@ export default {
         initRc() {
             const rcAppToken = this.rcToken;
             const params = {
-                appKey: rcAppkeyProduction,
+                appKey: rcAppKey,
                 token: rcAppToken
             };
 
@@ -102,8 +102,8 @@ export default {
         addNewMsg(msg) {
             let isExist = false;
             // this.$store.dispatch("pushNewMsgToBottomNav", 2);
-            Bus.$emit("getNewDeviceMsg", 2);
-            this.$store.dispatch("pushNewMsgToBottomNav", 2);
+            Bus.$emit("getNewDeviceMsg", msg);
+
             this.msgList.forEach(item => {
                 if (
                     item.efairydevicemsg_from_id == msg.efairydevicemsg_from_id
@@ -116,8 +116,16 @@ export default {
             });
             if (!isExist) {
                 msg.unread = true;
-                this.msgList.push(msg);
+                if (this.msgList && this.msgList.length > 10) {
+                    this.msgList.pop();
+                }
+                this.msgList.unshift(msg);
             }
+            this.msgList.sort((a, b) => {
+                return b.efairydevicemsg_time > a.efairydevicemsg_time;
+            });
+            this.$store.dispatch("pushNewMsgToBottomNav");
+            this.$store.dispatch("setMsgToCache", this.msgList);
         },
         checkIsWeixin() {
             // return true;

@@ -25,7 +25,7 @@
 							</p>
 							<p>
 								<label>火警/预警/故障：
-									<i class="red">{{item.efairydevice_alarm_times}}</i>/<i class="yellow">{{item.efairydevice_alarm_times}}</i>
+									<i class="red">{{item.efairydevice_alarm_times}}</i>/<i class="orange">{{item.efairydevice_alarm_times}}</i>/<i class="yellow">{{item.efairydevice_trouble_times||0}}</i>
 								</label>
 							</p>
 							<p>

@@ -15,6 +15,13 @@
 							<a class="icon" :href="'tel:'+projectInfo.efairyproject_user_phonenumber"><img src="@/assets/icons/phone_big.png" /></a>
 						</div>
 
+						<div class="intro flex">
+							<label>报告总结：</label>
+							<div class="right">
+								<p v-for="(t,i) in projectInfo.efairyproject_report_summary.report_summary_list" :key="i">{{i+1}}.{{t}}</p>
+							</div>
+						</div>
+
 						<div class="table" v-if="projectInfo.efairyproject_device_statistics.device_statistics_list.length!=0">
 							<table>
 								<tr>
@@ -34,12 +41,6 @@
 							</table>
 						</div>
 
-						<div class="intro flex">
-							<label>报告总结：</label>
-							<div class="right">
-								<p v-for="(t,i) in projectInfo.efairyproject_report_summary.report_summary_list" :key="i">{{i+1}}.{{t}}</p>
-							</div>
-						</div>
 					</div>
 				</div>
 

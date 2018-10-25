@@ -20,7 +20,10 @@
 						<div class="intro">
 							<span class="left">报警次数</span>
 							<span class="right red">{{deviceInfo.efairydevice_alarm_times}}</span>
-
+						</div>
+						<div class="intro">
+							<span class="left">故障次数</span>
+							<span class="right yellow">{{deviceInfo.efairydevice_trouble_times||0}}</span>
 						</div>
 						<div class="intro">
 							<span class="left">设备地址</span>
@@ -54,7 +57,7 @@
 							<td>{{item.efairydevicealarmstatistics_pt_name}}</td>
 							<td>{{item.efairydevicealarmstatistics_start_time}} 至 {{item.efairydevicealarmstatistics_end_time}}</td>
 							<td>{{item.efairydevicealarmstatistics_highest_score}}</td>
-							<td>{{riskHash[item.risk_evaluation]}}</td>
+							<td :class="{red:item.risk_evaluation==1,orange:item.risk_evaluation==2}">{{riskHash[item.risk_evaluation]}}</td>
 						</tr>
 					</table>
 				</div>
@@ -85,7 +88,7 @@ export default {
             // query: this.$route.query,
             deviceChartList: [],
             riskHash: ["风险评估", "高度危险", "中度危险", "危险"],
-            reportProjectTitle: "报告设备详情",
+            reportProjectTitle: "设备报告详情",
             active: 0,
             deviceInfo: {
                 efairydevice_user_info_list: [
@@ -108,13 +111,13 @@ export default {
             actions1: [
                 //不传则返回所有状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常
                 { name: "报警类型", id: null },
-                { name: "正常", id: 6 },
+                // { name: "正常", id: 6 },
                 { name: "故障", id: 3 },
-                { name: "屏蔽", id: 5 },
+                // { name: "屏蔽", id: 5 },
                 { name: "火警", id: 1 },
-                { name: "预警", id: 2 },
-                { name: "离线", id: 0 },
-                { name: "启动", id: 4 }
+                { name: "预警", id: 2 }
+                // { name: "离线", id: 0 },
+                // { name: "启动", id: 4 }
             ],
             show2: false,
             current2: { name: "风险评估" },

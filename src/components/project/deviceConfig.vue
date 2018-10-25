@@ -151,12 +151,13 @@ export default {
                 efairydevice_id: this.deviceId,
                 control_order: 67, //67peizhi 128fuwei 129xiaoyin
                 extra_info: {
-					efairydevicesetting_heartbeat_interval: this.heartModel,
-					efairydevicesetting_audio_on:this.audioModel,
-					efairydevicesetting_thv_list:this.configList
+                    efairydevicesetting_heartbeat_interval: this.heartModel,
+                    efairydevicesetting_audio_on: this.audioModel,
+                    efairydevicesetting_thv_list: this.configList
                 }
             });
             this.$toast("操作成功");
+            this.goBack();
         },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {

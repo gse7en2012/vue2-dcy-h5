@@ -91,7 +91,11 @@ export default {
     },
     methods: {
         goBack() {
-            this.$emit("close-popup");
+			this.startDate='';
+			this.endDate='';
+			this.title='';
+			this.$emit("close-popup");
+
         },
         chooseDateRange(type) {
             this.dateRangeType = type;
@@ -151,6 +155,7 @@ export default {
 			// console.log(data);
 		},
         showDatePopup(type) {
+			this.dateRangeType=0;
             this.showDatePicker = true;
             this.currentDatePickerType = type;
             this.datePickerTitle = type == "start" ? "开始日期" : "结束日期";

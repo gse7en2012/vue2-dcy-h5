@@ -18,7 +18,7 @@
 						<div class="info">
 							<div>
 								<p class="r1">{{userInfo.efairyuser_nickname}}</p>
-								<p class="r2">{{userInfo.showPhone}}</p>
+								<p class="r2">{{levelHash[userInfo.efairyuser_login_role_level]}}</p>
 							</div>
 						</div>
 					</div>
@@ -45,6 +45,7 @@
 								<img src="@/assets/icons/my_phone.png" class="icon">
 							</div>
 						</template>
+						{{userInfo.efairyuser_phonenumber}}
 					</van-cell>
 					<van-cell title="联系邮箱" is-link :to="{path:'/my/email'}">
 						<template slot="icon">
@@ -89,8 +90,10 @@ export default {
     },
     data() {
         return {
+			//0-超级管理员 1-总监+ 2-总监 3-项目管理员 4-普通用户
             // query: this.$route.query,
-            userInfo: {}
+			userInfo: {},
+			levelHash:['超级管理员','总监+','总监','项目管理员','普通用户']
         };
     },
     async mounted() {

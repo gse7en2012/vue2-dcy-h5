@@ -109,7 +109,6 @@ export default {
             actions: [
                 //不传则返回所有状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常
                 { name: "全部", id: -1 },
-                { name: "正常", id: 6 },
                 { name: "故障", id: 3 },
                 { name: "火警", id: 1 },
                 { name: "预警", id: 2 }

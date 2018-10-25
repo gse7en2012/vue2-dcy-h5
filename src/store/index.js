@@ -19,7 +19,8 @@ export default new Vuex.Store({
 		userInfo: {},
 		showNewMessage: false,
 		newMessageCount: 0,
-		deviceMsgList:[]
+		// deviceMsgList: [],
+		deviceMsgList: localStorage.getItem('dcyDevMsg')
 	},
 	getters: {
 		deviclAlarmListChooseList(state) {
@@ -28,6 +29,10 @@ export default new Vuex.Store({
 		checkLogin() {
 			console.log(Vue.$cookies);
 			return 3;
+		},
+		getDeviceMsg(state) {
+			if (state.deviceMsgList) return JSON.parse(state.deviceMsgList);
+			return [];
 		}
 	},
 	mutations: {
@@ -37,25 +42,31 @@ export default new Vuex.Store({
 			state.isAjaxLoading = payload.isLoading
 		},
 		accountLogin: (state, data) => {
-			localStorage.dcyAccessToken = data.access_token;
-			localStorage.dcyRcToken = data.rc_token;
-			localStorage.dcyUserId = data.user_info.efairyuser_id;
-			localStorage.dcyUserMsgId = data.user_info.efairyuser_msgobj_id;
+			localStorage['dcyAccessToken'] = data.access_token;
+			localStorage['dcyRcToken'] = data.rc_token;
+			localStorage['dcyUserId'] = data.user_info.efairyuser_id;
+			localStorage['dcyUserMsgId'] = data.user_info.efairyuser_msgobj_id;
+			localStorage['dcyDevMsg'] = JSON.stringify([]);
 			state.accessToken = data.access_token;
 			state.userId = data.user_info.efairyuser_id;
 			state.userMsgId = data.user_info.efairyuser_msgobj_id;
 			state.rcToken = data.rc_token;
 			state.userAccountInfo = data.user_info;
+			state.deviceMsgList = [];
 
 		},
 		accountLogout: (state) => {
 			localStorage.removeItem('dcyAccessToken');
 			localStorage.removeItem('dcyRcToken');
 			localStorage.removeItem('dcyUserId');
+			localStorage.removeItem('dcyUserMsgId');
+			localStorage.removeItem('dcyDevMsg');
 			state.accessToken = null;
 			state.rcToken = null;
 			state.userId = null;
 			state.userAccountInfo = null;
+			state.userMsgId = null;
+			state.deviceMsgList = [];
 		},
 		saveUserInfo: (state, data) => {
 			state.userInfo = data;
@@ -78,6 +89,19 @@ export default new Vuex.Store({
 		cancelNewMsgToBottomNav(ctx, data) {
 			ctx.state.showNewMessage = false;
 			ctx.state.newMessageCount = 0;
+		},
+		setMsgToCache(ctx, data) {
+			ctx.state.deviceMsgList = data;
+			localStorage['dcyDevMsg'] = JSON.stringify(data);
+			// const list = ctx.state.deviceMsgList;
+			// if (!list) {
+			// 	ctx.state.deviceMsgList = [];
+			// 	localStorage['dcyDevMsg'] = [];
+			// }
+			// if (list.length > 10) {
+			// 	list.shift();
+			// }
+			// list.push(data);
 		}
 	}
 })

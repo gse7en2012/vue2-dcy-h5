@@ -17,12 +17,14 @@
 			</van-cell-group>
 
 			<van-cell-group class="my-list">
-				<van-cell title="密码" is-link :to="{path:'/my/info/pass'}" />
+				<van-cell title="修改密码" is-link :to="{path:'/my/info/pass'}" />
 			</van-cell-group>
 
-			<van-cell-group class="my-list">
+			<!-- <van-cell-group class="my-list">
 				<van-cell title="退出登录"  @click="logout()" style="text-align:center;color:#ff0000"/>
-			</van-cell-group>
+			</van-cell-group> -->
+
+			<a class="dcy-btn"  @click="logout()">退出登录</a>
 
 		</div>
 		<!-- </section> -->
@@ -63,11 +65,11 @@ export default {
                 this.userInfo.efairyuser_phonenumber.slice(7, 11);
 
             this.$store.commit("saveUserInfo", this.userInfo);
-		},
-		logout(){
-			this.$store.commit('accountLogout');
-			this.$router.push({name:'loginPage'})
-		},
+        },
+        logout() {
+            this.$store.commit("accountLogout");
+            this.$router.push({ name: "loginPage" });
+        },
         async editInfo() {
             const data = await this.$service.userService.editUserInfo({
                 efairyuser_headimg_url: this.userInfo.efairyuser_headimg_url
@@ -141,5 +143,19 @@ $dcyColor: #282549;
             line-height: 50px;
         }
     }
+}
+
+.dcy-btn {
+	display: block;
+	line-height: 44px;
+	line-height: 44px;
+    font-size: 16px;
+    color: #fff;
+    background: $dcyColor;
+    text-align: center;
+    width: 95%;
+    margin: 15px auto;
+    border-radius: 32px;
+    font-weight: 300;
 }
 </style>
