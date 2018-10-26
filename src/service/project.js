@@ -35,7 +35,7 @@ const projectService = {
 			params: opts
 		})
 	},
-	async getDeviceSetting(opts){
+	async getDeviceSetting(opts) {
 		return await axios.get('/device_setting', {
 			params: opts
 		})
@@ -46,7 +46,7 @@ const projectService = {
 	async editMultiDeviceChannelName(opts) {
 		return await axios.post('/device_multi_channel_setting', opts)
 	},
-	async postDeviceMsg(opts){
+	async postDeviceMsg(opts) {
 		return await axios.post('/device_control', opts)
 	},
 	async getDeviceAlarmHandledList(opts) {
@@ -59,6 +59,14 @@ const projectService = {
 	},
 	async getDeviceAlarmFixedDetail(opts) {
 		return await axios.get('/device_alarm_record', {
+			params: opts
+		})
+	},
+	async cacheAlramListId(opts) {
+		return await axios.post('/cache_device_alarm_statistics_id_list', opts)
+	},
+	async getCacheAlarmListId(opts) {
+		return await axios.get('/device_unhandle_alarm_statistics_list_by_id', {
 			params: opts
 		})
 	}

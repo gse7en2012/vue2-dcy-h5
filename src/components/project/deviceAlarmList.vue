@@ -106,6 +106,7 @@ export default {
             currentStatus: { name: "未处理", status: 0 },
             pageSize: 10,
             lastId: 0,
+            totalRows: 0,
             actions: [
                 //不传则返回所有状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常
                 { name: "全部", id: -1 },
@@ -174,6 +175,8 @@ export default {
                 query
             );
             const list = data.result.alarm_msg_list;
+            this.totalRows = data.result.total_rows;
+
             if (list.length < this.pageSize) this.listFinished = true;
             if (list.length == 0) return;
             this.alarmList = this.alarmList.concat(list);
@@ -183,9 +186,7 @@ export default {
                 this.alarmList.forEach(item => {
                     item.choose = true;
                 });
-                this.choseCount = this.alarmList.filter(
-                    msg => msg.choose
-                ).length;
+                this.choseCount = this.totalRows;
             }
         },
         async getDeviceAlarmHandledList() {
@@ -243,11 +244,29 @@ export default {
             this.$set(item, "choose", !item.choose);
             this.choseCount = this.alarmList.filter(msg => msg.choose).length;
         },
-        commitDeviceAlarmList() {
+        async commitDeviceAlarmList() {
+            const idList = this.alarmList
+                .filter(item => item.choose)
+                .map(item => item.efairydevicealarmstatistics_id);
+            const query = {
+                efairydevice_id: this.deviceId,
+                efairydevicealarmstatistics_id_list: idList,
+                is_check_all: this.chooseAllFlag ? 1 : 0
+            };
+            if (this.current.id != -1) query.alarm_id = this.current.id;
+
+            const serviceIdList = await this.$service.projectService.cacheAlramListId(
+                query
+            );
+
+			// const serviceIdList={efairydevicealarmstatistics_id_list:idList}
+			console.log(serviceIdList.efairydevicealarmstatistics_id_list)
             this.$store.dispatch(
                 "changeDeviclAlarmListChooseList",
-                this.alarmList.filter(item => item.choose)
+                serviceIdList.result.efairydevicealarmstatistics_id_list
             );
+            this.$store.state.isChooseAllAlarmList = this.chooseAllFlag;
+
             this.$router.push({ name: "deviceAlarmHandle" });
         },
 
@@ -256,7 +275,7 @@ export default {
             this.alarmList.forEach(msg => {
                 msg.choose = this.chooseAllFlag;
             });
-            this.choseCount = this.alarmList.filter(msg => msg.choose).length;
+            this.choseCount = this.totalRows;
         },
         gotoFixedDetail(item) {
             this.$router.push({

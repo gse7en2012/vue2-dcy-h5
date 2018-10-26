@@ -22,7 +22,7 @@
 						<img src="@/assets/icons/noresult.png">
 					</div>
 					<div class="row" v-for="(item,i) in projectList" @click="goToDetail(item,i)">
-						<div class="wrap">
+						<div class="wrap" :class="{viewed:item.isClicked}">
 							<div class="icon">
 								<img src='@/assets/icons/project.png'>
 							</div>
@@ -104,7 +104,7 @@ export default {
             listPagesize: 10,
             listFinished: false,
             keyword: "",
-            areaPlaceholder: "请选择",
+            areaPlaceholder: "请选择"
         };
     },
     async mounted() {
@@ -119,22 +119,22 @@ export default {
             this.initAreaList(provinceList);
         },
         async getProjectList() {
-            this.projectList = [];
             this.listPage = 1;
             this.listFinished = false;
             if (this.scroll) this.scroll.finishPullUp();
+            if (this.scroll) this.scroll.finishPullDown();
             const data = await this.$service.projectService.getProjectList({
                 regeo_info: this.areaQuery,
                 keyword: this.keyword,
                 page: this.listPage,
                 size: this.listPagesize
             });
+            this.projectList = [];
             this.projectList = data.result.project_list;
             if (data.result.project_list.length < this.listPagesize)
                 this.listFinished = true;
+            this.$toast("加载完成");
             this.$nextTick(() => {
-                // this.calcHeight =
-                //     document.querySelector(".main").offsetHeight - 197;
                 this.setupBetterScroll();
             });
         },
@@ -298,6 +298,10 @@ export default {
                     pullUpLoad: {
                         threshold: 0,
                         stop: 0
+                    },
+                    pullDownRefresh: {
+                        threshold: 0,
+                        stop: 0
                     }
                 });
                 this.scroll.on("pullingUp", pos => {
@@ -305,6 +309,10 @@ export default {
                     setTimeout(() => {
                         this.scroll.refresh();
                     }, 0);
+                });
+
+                this.scroll.on("pullingDown", () => {
+                    this.getProjectList();
                 });
             } else {
                 this.scroll.refresh();
@@ -314,6 +322,8 @@ export default {
             this.$router.push("/project/map");
         },
         goToDetail(project) {
+            // project.isClicked = true;
+            this.$set(project, "isClicked", true);
             this.$router.push(`/project/${project.efairyproject_id}/devices`);
         },
         closePop() {
@@ -380,6 +390,9 @@ export default {
             display: flex;
             transition: all 0.3s ease-in-out;
             padding: 3px 0;
+            &.viewed {
+                background: #efefef;
+            }
             .icon {
                 width: 80px;
                 position: relative;

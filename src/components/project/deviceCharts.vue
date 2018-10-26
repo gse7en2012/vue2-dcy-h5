@@ -21,6 +21,9 @@
 						</div>
 					</van-cell>
 				</van-cell-group>
+				<div class="chart-box" v-if="optionList.length==0">
+					<p style="text-align:center;padding: 30px;color: #333;">没有数据</p>
+				</div>
 				<div class="chart-box" v-for="(op,i) in optionList">
 					<!-- <div echarts [options]="option" theme="macarons" class="chart chart-row" style="height:300px;" *ngFor="let option of optionList" (chartInit)="onChartInit($event)"></div> -->
 					<div class="block-title">
@@ -317,17 +320,31 @@ export default {
             this.showDatePicker = false;
         },
         setTime(date) {
-            // const formatDate = [
-            //     date.getFullYear(),
-            //     date.getMonth() + 1 < 10
-            //         ? "0" + (date.getMonth() + 1)
-            //         : date.getMonth() + 1,
-            //     date.getDate() < 10 ? "0" + date.getDate() : date.getDate()
-            // ].join("-");
             const formatDate = moment(date).format("YYYY-MM-DD");
-            if (this.currentDatePickerType == "start")
+            if (this.currentDatePickerType == "start") {
                 this.startDate = formatDate;
-            if (this.currentDatePickerType == "end") this.endDate = formatDate;
+                if (this.endDate) {
+                    if (moment(date).isAfter(moment(this.endDate))) {
+                        this.endDate = moment(date).format("YYYY-MM-DD");
+                    }
+                    if (moment(date).diff(moment(this.endDate), "days") < -7) {
+						this.endDate = moment(date).add(7,'days').format("YYYY-MM-DD");
+						this.$toast('最多支持查询7天跨度')
+                    }
+                }
+            }
+            if (this.currentDatePickerType == "end") {
+				this.endDate = formatDate;
+				if (this.startDate) {
+                    if (moment(date).isBefore(moment(this.startDate))) {
+                        this.startDate = moment(date).format("YYYY-MM-DD");
+                    }
+                    if (moment(date).diff(moment(this.startDate), "days") > 7) {
+						this.startDate = moment(date).add(-7,'days').format("YYYY-MM-DD");
+						this.$toast('最多支持查询7天跨度')
+                    }
+                }
+            }
             this.showDatePicker = false;
             this.getDeviceCharts();
         }

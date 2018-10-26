@@ -7,21 +7,24 @@
 					<div class="title row">
 						<span class="l">{{deviceName}}</span>
 					</div>
-					<div class="section" v-for="(item,i) in showList" :key="i">
-						<div class="row">
-							<span class="l">报警值/阈值</span>
-							<span class="r">{{item.efairydevicealarmstatistics_highest_value}}</span>
-						</div>
-						<div class="row">
-							<span class="l">报警时间</span>
-							<span class="r ">{{item.efairydevicealarmstatistics_start_time}}</span>
-						</div>
-						<div class="row">
-							<span class="l">{{item.efairydevicealarmstatistics_c_name}}</span>
-							<span class="r red">{{item.efairydevicealarmstatistics_c_alarm}}</span>
+					<div class="sub-wrapper" :class="{show:showMoreFlag}" ref="swrapper">
+						<div>
+							<div class="section" v-for="(item,i) in showList" :key="i">
+								<div class="row">
+									<span class="l">报警值/阈值</span>
+									<span class="r">{{item.efairydevicealarmstatistics_highest_value}}</span>
+								</div>
+								<div class="row">
+									<span class="l">报警时间</span>
+									<span class="r ">{{item.efairydevicealarmstatistics_start_time}}</span>
+								</div>
+								<div class="row">
+									<span class="l">{{item.efairydevicealarmstatistics_c_name}}</span>
+									<span class="r red">{{item.efairydevicealarmstatistics_c_alarm}}</span>
+								</div>
+							</div>
 						</div>
 					</div>
-
 					<p class="more-tips" @click="toggleMore()">
 						{{showMoreFlag?'收起更多':'查看更多'}}
 						<img src="@/assets/icons/more.png" :class="{'rev':showMoreFlag}">
@@ -126,13 +129,18 @@ export default {
             isFixed: { name: "否", status: 0 },
             alarmType: { name: "请选择", id: -1 },
             show: false,
-            showAlarmAction: false
+            showAlarmAction: false,
+            page: 1,
+            size: 10
         };
     },
     async mounted() {
         // document.title = "我的";
         this.list = this.$store.getters.deviclAlarmListChooseList || [];
-        this.showList.push(this.list[0]);
+        this.idList = this.$store.getters.deviclAlarmListChooseList || [];
+
+        console.log(this.list);
+        this.getList();
         this.getQiniuToken();
         this.setupBetterScroll();
     },
@@ -141,14 +149,29 @@ export default {
         goBack() {
             this.$router.back();
         },
+        async getList() {
+            const idList = this.idList.slice(
+                (this.page - 1) * this.size,
+                this.page * this.size
+            );
+            const data = await this.$service.projectService.getCacheAlarmListId(
+                {
+                    efairydevicealarmstatistics_id_list: JSON.stringify(idList)
+                }
+            );
+            this.showList = data.result.alarm_msg_list;
+            if (!this.subScroll) this.setupSubBetterScroll();
+            if (!this.showMoreFlag) this.subScroll.disable();
+        },
+        async loadMoreList() {},
         toggleMore() {
             if (!this.showMoreFlag) {
-                this.showList = this.list.map(item => item);
                 this.showMoreFlag = true;
+                this.subScroll.enable();
             } else {
-                this.showList = [];
-                this.showList.push(this.list[0]);
                 this.showMoreFlag = false;
+                this.subScroll.scrollTo(0, 0);
+                this.subScroll.disable();
             }
         },
         showActions(type) {
@@ -183,9 +206,9 @@ export default {
                     },
                     alarmrecord_imgurl_list: this.uploadImgList
                 }
-			);
-			this.$toast('处理成功！');
-			this.$router.back();
+            );
+            this.$toast("处理成功！");
+            this.$router.back();
         },
         async onReadUploadImg(file) {
             file.id = this.idSeed++;
@@ -209,7 +232,7 @@ export default {
                 url: "http://up-z2.qiniup.com",
                 data: data
             });
-			const img = QINIUDOMAIN + '/'+response.data.key;
+            const img = QINIUDOMAIN + "/" + response.data.key;
             this.uploadImgList.push(img);
             return img;
         },
@@ -225,8 +248,8 @@ export default {
                     message: "是否删除该照片"
                 })
                 .then(() => {
-					this.uploadList.splice(i, 1);
-					this.uploadImgList.splice(i, 1);
+                    this.uploadList.splice(i, 1);
+                    this.uploadImgList.splice(i, 1);
                 });
         },
         getImgWidthAndHeight(file) {
@@ -247,6 +270,27 @@ export default {
             setTimeout(() => {
                 this.scroll.refresh();
             }, 1000);
+        },
+        setupSubBetterScroll() {
+            if (!this.subScroll) {
+                this.subScroll = new BScroll(this.$refs.swrapper, {
+                    tap: true,
+                    click: true,
+                    stopPropagation: true,
+                    pullUpLoad: {
+                        threshold: 0,
+                        stop: 0
+                    }
+                });
+                this.subScroll.on("pullingUp", pos => {
+                    console.log(333);
+                    setTimeout(() => {
+                        this.subScroll.refresh();
+                    }, 0);
+                });
+            } else {
+                this.subScroll.refresh();
+            }
         }
     }
 };
@@ -265,11 +309,17 @@ export default {
         &:last-of-type {
             border-bottom: 0;
         }
+        .row {
+            &:nth-of-type(1) {
+                margin-top: 5px;
+            }
+        }
     }
     .row {
         display: flex;
         padding: 5px 0;
         color: #666;
+
         span {
             flex: 1;
             font-size: 14px;
@@ -309,6 +359,15 @@ export default {
         }
     }
 }
+
+.sub-wrapper {
+    height: 100px;
+    overflow: hidden;
+    &.show {
+        height: 300px;
+    }
+}
+
 .box {
     margin: 8px;
     overflow: hidden;

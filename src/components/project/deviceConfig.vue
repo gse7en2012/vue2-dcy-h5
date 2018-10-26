@@ -22,10 +22,13 @@
 			<van-cell-group class="op-list">
 				<van-cell @click="showDialog(item)" is-link v-for="(item,i) in configList" :ref="item.cid" :key="item.cid">
 					<span class="van-cell-text">{{item.c_name}}</span>
-					<div class="van-cell-box">
-
+					<div class="van-cell-box" v-if="item.value_type==1">
 						<span>{{item.unit}}</span>
 						<span>{{item.thv}}</span>
+					</div>
+					<div class="van-cell-box" v-if="item.value_type==2">
+						<span>{{item.value_range[Number(item.thv)]['name']}}</span>
+						<!-- <span>{{item.thv}}</span> -->
 					</div>
 				</van-cell>
 			</van-cell-group>
@@ -35,7 +38,7 @@
 			<h5 class="dialog-title">修改配置</h5>
 			<van-cell-group class="dialog-van-cell-group">
 				<van-field v-model="dialogModel.thv" :label="dialogModel.c_name" />
-				<van-cell>可修改范围：({{dialogModel.minRange}}-{{dialogModel.maxRange}})</van-cell>
+				<van-cell>输入0可关闭通道，可修改范围：{{dialogModel.minRange}}-{{dialogModel.maxRange}}</van-cell>
 			</van-cell-group>
 		</van-dialog>
 		<van-dialog v-model="showB" show-cancel-button>
@@ -46,6 +49,8 @@
 		</van-dialog>
 
 		<van-actionsheet v-model="showA" :actions="actions" @select="onSelect" />
+
+		<van-actionsheet v-model="showEditItem" :actions="actionsItem" @select="onSelectItem" />
 
 	</div>
 
@@ -62,7 +67,9 @@ export default {
             // query: this.$route.query,
             show: false,
             showA: false,
-            showB: false,
+			showB: false,
+			showEditItem:false,
+			currentEditingItem:null,
             dialogModel: {},
             deviceId: this.$route.params.did,
             configList: [],
@@ -72,7 +79,8 @@ export default {
                 //不传则返回所有状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常
                 { name: "静音", id: 0 },
                 { name: "音响", id: 1 }
-            ]
+			],
+			actionsItem:[]
         };
     },
     async mounted() {
@@ -116,7 +124,11 @@ export default {
             // 点击选项时默认不会关闭菜单，可以手动关闭
             this.showA = false;
             this.audioModel = item.id;
-        },
+		},
+		onSelectItem(item){
+			this.showEditItem=false;
+			this.currentEditingItem.thv=item.value;
+		},
         async getDeviceConfigList() {
             const data = await this.$service.projectService.getDeviceSetting({
                 efairydevice_id: this.deviceId
@@ -139,8 +151,15 @@ export default {
             });
         },
         showDialog(item) {
-            this.show = true;
-            this.dialogModel = item;
+            if (item.value_type == 1) {
+                this.show = true;
+                this.dialogModel = item;
+			}
+			if(item.value_type==2){
+				this.showEditItem=true;
+				this.actionsItem=item.value_range;
+				this.currentEditingItem=item;
+			}
             // this.$refs[item.id].focus();
         },
         showHeartBeatDialog() {

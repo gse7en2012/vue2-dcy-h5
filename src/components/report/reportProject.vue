@@ -6,7 +6,7 @@
 				<div class="box">
 					<div class="title">
 						{{projectInfo.efairyproject_name}}
-						<span class="score orange">评分{{projectInfo.efairyproject_security_score}}</span>
+						<span class="score " :class="{green:projectInfo.efairyproject_security_score>80,orange:projectInfo.efairyproject_security_score<=80&&projectInfo.efairyproject_security_score>60,red:projectInfo.efairyproject_security_score<=60}">评分{{projectInfo.efairyproject_security_score}}</span>
 					</div>
 					<div class="ctx">
 						<div class="intro">

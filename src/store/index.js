@@ -20,7 +20,8 @@ export default new Vuex.Store({
 		showNewMessage: false,
 		newMessageCount: 0,
 		// deviceMsgList: [],
-		deviceMsgList: localStorage.getItem('dcyDevMsg')
+		deviceMsgList: localStorage.getItem('dcyDevMsg'),
+		isChooseAllAlarmList:false
 	},
 	getters: {
 		deviclAlarmListChooseList(state) {
@@ -31,8 +32,15 @@ export default new Vuex.Store({
 			return 3;
 		},
 		getDeviceMsg(state) {
-			if (state.deviceMsgList) return JSON.parse(state.deviceMsgList);
-			return [];
+			console.log(state.deviceMsgList);
+			try {
+				if (state.deviceMsgList) return JSON.parse(state.deviceMsgList);
+				return [];
+			} catch (e) {
+				console.log(e);
+				return [];
+			}
+
 		}
 	},
 	mutations: {
@@ -47,6 +55,7 @@ export default new Vuex.Store({
 			localStorage['dcyUserId'] = data.user_info.efairyuser_id;
 			localStorage['dcyUserMsgId'] = data.user_info.efairyuser_msgobj_id;
 			localStorage['dcyDevMsg'] = JSON.stringify([]);
+			localStorage.removeItem('dcyClkList');
 			state.accessToken = data.access_token;
 			state.userId = data.user_info.efairyuser_id;
 			state.userMsgId = data.user_info.efairyuser_msgobj_id;
@@ -61,6 +70,7 @@ export default new Vuex.Store({
 			localStorage.removeItem('dcyUserId');
 			localStorage.removeItem('dcyUserMsgId');
 			localStorage.removeItem('dcyDevMsg');
+			localStorage.removeItem('dcyClkList');
 			state.accessToken = null;
 			state.rcToken = null;
 			state.userId = null;

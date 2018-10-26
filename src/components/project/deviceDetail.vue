@@ -64,15 +64,15 @@
 				<div class="block-title">
 					通道数据
 					<span class="right" v-if="!channelNameEditing" @click="editChannelName()"><img class="icon" src="@/assets/icons/edit.png">编辑</span>
-					<span class="right" v-if="channelNameEditing" @click="channelNameEditing=false"><img class="icon" src="@/assets/icons/close.png">取消</span>
+					<span class="right" v-if="channelNameEditing" @click="cancelEditChannelName()"><img class="icon" src="@/assets/icons/close.png">取消</span>
 					<span class="right" v-if="channelNameEditing" @click="editDeviceMultiChannelName()"><img class="icon" src="@/assets/icons/right.png">提交</span>
 				</div>
 				<van-cell-group class="detail-list special-list">
-					<div class="list-row" v-if="cdataList.length==0" >暂无数据</div>
+					<div class="list-row" v-if="cdataList.length==0">暂无数据</div>
 					<div class="list-row" v-for="(c,i) in cdataList">
 						<div class="left">
 							<span v-if="!channelNameEditing">{{c.c_name}}</span>
-							<van-field v-model="c.c_name" v-if="channelNameEditing" class="edit-input" @click="addIntoModList(c)" />
+							<van-field v-model="c.c_name_new" v-if="channelNameEditing" class="edit-input" />
 						</div>
 						<div class="right" :class="{red:c.c_alarm_id==1,yellow:c.c_alarm_id==3,orange:c.c_alarm_id==2}">{{c.c_value}}</div>
 					</div>
@@ -189,17 +189,16 @@ export default {
         async editDeviceMultiChannelName(item) {
             this.modList = this.cdataList
                 .filter(item => {
-                    return item.isMode;
+                    return item.c_name!=item.c_name_new;
                 })
                 .map(item => {
                     return {
                         efairydevicechannelsetting_cid: item.cid,
                         efairydevicechannelsetting_setting: {
-                            c_name: item.c_name
+                            c_name: item.c_name_new
                         }
                     };
                 });
-            console.log(this.modList);
             const data = await this.$service.projectService.editMultiDeviceChannelName(
                 {
                     efairydevice_id: this.deviceId,
@@ -243,9 +242,16 @@ export default {
                     phone: item.efairyuser_phonenumber
                 };
             });
-            if (data.result.rt_info)
-                this.cdataList = data.result.rt_info.c_data_list || [];
-        },
+            if (data.result.rt_info) {
+				this.cdataList = data.result.rt_info.c_data_list || [];
+				this.cdataList.forEach(item=>{
+					item.c_name_new=item.c_name;
+				})
+            }
+		},
+		cancelEditChannelName(){
+			this.channelNameEditing=false;
+		},
         onSelect(item) {
             this.show = false;
             document.location.href = "tel:" + item.phone;

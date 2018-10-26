@@ -3,7 +3,7 @@
 		<van-nav-bar title="设备列表" @click-left="goBack" left-arrow />
 		<form action="/" class="search-box">
 			<div class="fliter" @click="show=true">{{current.name}}</div>
-			<van-search v-model="keyword" placeholder="请输入设备名称"  show-action background="#fff" @search="getDeviceList">
+			<van-search v-model="keyword" placeholder="请输入设备名称" show-action background="#fff" @search="getDeviceList">
 				<div slot="action" @click="showDeviceMapPopup()">
 					<img src="@/assets/icons/map.png" class="map">
 				</div>
@@ -17,7 +17,7 @@
 				<div class="device-list">
 					<div class="row" v-for="(item,i) in deviceList" @click="gotoDeviceDetail(item,i)">
 
-						<div class="wrap">
+						<div class="wrap" :class="{viewed:item.isClicked}">
 							<div class="icon">
 								<img src='@/assets/icons/device_icon.png'>
 							</div>
@@ -67,7 +67,7 @@ import { mapState } from "vuex";
 export default {
     name: "deviceList",
     components: {
-		bottomTab,
+        bottomTab
     },
     computed: {
         ...mapState({
@@ -113,7 +113,7 @@ export default {
                 // { name: "屏蔽", id: 5 },
                 { name: "火警", id: 1 },
                 { name: "预警", id: 2 },
-                { name: "离线", id: 0 },
+                { name: "离线", id: 0 }
                 // { name: "启动", id: 4 }
             ]
         };
@@ -125,16 +125,18 @@ export default {
         });
     },
     methods: {
-		showDeviceMapPopup() {
-            this.$router.push({name:'deviceMap'});
+        showDeviceMapPopup() {
+            this.$router.push({ name: "deviceMap" });
         },
         goBack() {
             this.$router.back();
         },
         async getDeviceList() {
             this.listPage = 1;
-            this.deviceList = [];
+
             this.listFinished = false;
+            if (this.scroll) this.scroll.finishPullUp();
+            if (this.scroll) this.scroll.finishPullDown();
             const data = await this.$service.projectService.getDeviceList({
                 efairyproject_id: this.$route.params.pid,
                 keyword: this.keyword,
@@ -142,18 +144,25 @@ export default {
                 size: this.listPagesize,
                 efairydevice_alarm_id: this.alarmId
             });
+            this.deviceList = [];
             this.deviceList = data.result.device_list;
             this.deviceList.forEach(item => {
                 item.state = this.deviceStateList[item.efairydevice_alarm_id];
                 item.className = this.deviceClassHash[
                     item.efairydevice_alarm_id
                 ];
+                this.checkItemIsInClickedList(item);
+            });
+            this.$toast("加载完成");
+            this.$nextTick(() => {
+                this.setupBetterScroll();
             });
         },
         async loadMoreDeviceList() {
             if (this.listFinished) return;
             this.listLoading = true;
             this.listPage++;
+            if (this.scroll) this.scroll.finishPullUp();
             const data = await this.$service.projectService.getDeviceList({
                 efairyproject_id: this.$route.params.pid,
                 keyword: this.keyword,
@@ -166,6 +175,7 @@ export default {
                 item.className = this.deviceClassHash[
                     item.efairydevice_alarm_id
                 ];
+                this.checkItemIsInClickedList(item);
             });
             this.deviceList = this.deviceList.concat(data.result.device_list);
             this.listLoading = false;
@@ -180,20 +190,56 @@ export default {
             if (!this.scroll) {
                 this.scroll = new BScroll(this.$refs.wrapper, {
                     tap: true,
-                    click: true
-                });
-                this.scroll.on("scrollEnd", pos => {
-                    if (pos.y < this.scroll.maxScrollY + 300) {
-                        if (this.deviceList.length == 0) return;
-                        this.loadMoreDeviceList();
+                    click: true,
+                    pullUpLoad: {
+                        threshold: 0,
+                        stop: 0
+                    },
+                    pullDownRefresh: {
+                        threshold: 0,
+                        stop: 0
                     }
+                });
+                this.scroll.on("pullingUp", pos => {
+                    if (this.deviceList.length == 0) return;
+                    this.loadMoreDeviceList();
+                    setTimeout(() => {
+                        this.scroll.refresh();
+                    }, 0);
+                });
+
+                this.scroll.on("pullingDown", () => {
+                    this.getDeviceList();
                 });
             } else {
                 this.scroll.refresh();
             }
         },
         gotoDeviceDetail(item) {
-            this.$router.push({ name: "deviceDetail",params:{did:item.efairydevice_id} });
+            this.$set(item, "isClicked", true);
+            this.setUpClickedList(item);
+            this.$router.push({
+                name: "deviceDetail",
+                params: { did: item.efairydevice_id }
+            });
+        },
+        setUpClickedList(item) {
+            if (localStorage.getItem("dcyClkList")) {
+                const list = JSON.parse(localStorage.getItem("dcyClkList"));
+                if (list.indexOf(item.efairydevice_id) == -1) {
+                    list.push(Number(item.efairydevice_id));
+                    localStorage["dcyClkList"] = JSON.stringify(list);
+                }
+            } else {
+                localStorage["dcyClkList"] = JSON.stringify([
+                    Number(item.efairydevice_id)
+                ]);
+            }
+        },
+        checkItemIsInClickedList(item) {
+            if (!localStorage.getItem("dcyClkList")) return false;
+            const list = JSON.parse(localStorage.getItem("dcyClkList"));
+			item.isClicked = list.indexOf(item.efairydevice_id) != -1;
         },
         onSelect(item) {
             // 点击选项时默认不会关闭菜单，可以手动关闭
@@ -210,8 +256,8 @@ export default {
 <style lang="scss" scoped>
 @import "@/assets/color.scss";
 
-.van-search__action{
-	width: 30px;
+.van-search__action {
+    width: 30px;
 }
 
 .search-box {
@@ -276,8 +322,6 @@ export default {
     }
 }
 
-
-
 .device-list {
     padding-bottom: 30px;
     .loading-tips {
@@ -296,6 +340,9 @@ export default {
             display: flex;
             transition: all 0.3s ease-in-out;
             padding: 3px 0;
+            &.viewed {
+                background: #efefef;
+            }
             .icon {
                 width: 70px;
                 position: relative;
