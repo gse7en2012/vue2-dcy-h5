@@ -310,7 +310,7 @@ const checkWeixinToken = (to, from) => {
 dcyRouter.beforeEach((to, from, next) => {
 	//check
 	// checkRouterForwardOrBack(to,from);
-	// checkWeixinToken(to, from);
+	checkWeixinToken(to, from);
 
 	if (to.matched.some(r => r.meta.requireAuth)) {
 		if (store.state.accessToken) {

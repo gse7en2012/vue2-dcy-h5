@@ -80,7 +80,7 @@ export default {
         initRc() {
             const rcAppToken = this.rcToken;
             const params = {
-                appKey: rcAppKey,
+                appKey: rcAppkeyProduction,
                 token: rcAppToken
             };
 

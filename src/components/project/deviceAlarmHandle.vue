@@ -163,11 +163,26 @@ export default {
             if (!this.subScroll) this.setupSubBetterScroll();
             if (!this.showMoreFlag) this.subScroll.disable();
         },
-        async loadMoreList() {},
+        async loadMoreList() {
+			this.page++;
+			this.subScroll.finishPullUp();
+            const idList = this.idList.slice(
+                (this.page - 1) * this.size,
+                this.page * this.size
+			);
+			console.log(idList[0],this.page)
+            const data = await this.$service.projectService.getCacheAlarmListId(
+                {
+                    efairydevicealarmstatistics_id_list: JSON.stringify(idList)
+                }
+            );
+            this.showList = this.showList.concat(data.result.alarm_msg_list);
+        },
         toggleMore() {
             if (!this.showMoreFlag) {
                 this.showMoreFlag = true;
-                this.subScroll.enable();
+				this.subScroll.enable();
+				this.subScroll.refresh();
             } else {
                 this.showMoreFlag = false;
                 this.subScroll.scrollTo(0, 0);
@@ -283,7 +298,7 @@ export default {
                     }
                 });
                 this.subScroll.on("pullingUp", pos => {
-                    console.log(333);
+                    this.loadMoreList();
                     setTimeout(() => {
                         this.subScroll.refresh();
                     }, 0);
