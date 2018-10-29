@@ -12,8 +12,8 @@
 						<input :type="!viewPassword?'password':'text'" placeholder="密码" v-model="password">
 						<span class="icon"><img src="@/assets/icons/password.png" class="pass"></span>
 						<span class="icon right" @click="toggleViewPassword()">
-							<img src="@/assets/icons/view_show.png" class="view" v-if="!viewPassword">
-							<img src="@/assets/icons/view_hide.png" class="view" v-if="viewPassword">
+							<img src="@/assets/icons/view_show.png" class="view" v-if="viewPassword">
+							<img src="@/assets/icons/view_hide.png" class="view" v-if="!viewPassword">
 						</span>
 						<span class="icon right close" @click="password=''">
 							&times;

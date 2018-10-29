@@ -13,13 +13,13 @@
 							<span class="right">{{deviceInfo.efairydevice_device_type}}</span>
 						</div>
 						<div class="intro">
+							<span class="left">报警次数</span>
+							<span class="right red">{{deviceInfo.efairydevice_alarm_times}}</span>
+						</div>
+						<div class="intro">
 							<span class="left">预警次数</span>
 							<span class="right orange">{{deviceInfo.efairydevice_early_warning_times}}</span>
 
-						</div>
-						<div class="intro">
-							<span class="left">报警次数</span>
-							<span class="right red">{{deviceInfo.efairydevice_alarm_times}}</span>
 						</div>
 						<div class="intro">
 							<span class="left">故障次数</span>

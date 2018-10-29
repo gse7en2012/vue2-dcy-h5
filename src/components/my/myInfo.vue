@@ -85,7 +85,8 @@ export default {
             this.editInfo();
         },
         async uploadToQiniu(file) {
-            const data = new FormData();
+			const data = new FormData();
+			const params='?imageView2/1/w/200/h/200';
             data.append("token", this.qiniuToken);
             data.append("file", file.file);
             const response = await axiosInstance({
@@ -93,7 +94,7 @@ export default {
                 url: "http://up-z2.qiniup.com",
                 data: data
             });
-            const img = QINIUDOMAIN + "/" + response.data.key;
+            const img = QINIUDOMAIN + "/" + response.data.key+params;
             // this.uploadImgList.push(img);
             this.userInfo.efairyuser_headimg_url = img;
             return img;

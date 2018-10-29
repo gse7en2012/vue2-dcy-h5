@@ -133,7 +133,7 @@ export default {
             this.projectList = data.result.project_list;
             if (data.result.project_list.length < this.listPagesize)
                 this.listFinished = true;
-            this.$toast("加载完成");
+            // this.$toast("加载完成");
             this.$nextTick(() => {
                 this.setupBetterScroll();
             });
@@ -322,8 +322,12 @@ export default {
             this.$router.push("/project/map");
         },
         goToDetail(project) {
-            // project.isClicked = true;
-            this.$set(project, "isClicked", true);
+			// project.isClicked = true;
+			this.projectList.forEach((item)=>{
+				// item.isClicked=false;
+				this.$set(item, "isClicked", false);
+			})
+			this.$set(project, "isClicked", true);
             this.$router.push(`/project/${project.efairyproject_id}/devices`);
         },
         closePop() {

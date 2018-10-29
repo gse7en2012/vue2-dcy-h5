@@ -153,7 +153,7 @@ export default {
                 ];
                 this.checkItemIsInClickedList(item);
             });
-            this.$toast("加载完成");
+            // this.$toast("加载完成");
             this.$nextTick(() => {
                 this.setupBetterScroll();
             });
@@ -224,22 +224,26 @@ export default {
             });
         },
         setUpClickedList(item) {
-            if (localStorage.getItem("dcyClkList")) {
-                const list = JSON.parse(localStorage.getItem("dcyClkList"));
-                if (list.indexOf(item.efairydevice_id) == -1) {
-                    list.push(Number(item.efairydevice_id));
-                    localStorage["dcyClkList"] = JSON.stringify(list);
-                }
-            } else {
-                localStorage["dcyClkList"] = JSON.stringify([
-                    Number(item.efairydevice_id)
-                ]);
-            }
+            localStorage["dcyClkList"] = item.efairydevice_id;
+            //only one
+            // if (localStorage.getItem("dcyClkList")) {
+            //     const list = JSON.parse(localStorage.getItem("dcyClkList"));
+            //     if (list.indexOf(item.efairydevice_id) == -1) {
+            //         list.push(Number(item.efairydevice_id));
+            //         localStorage["dcyClkList"] = JSON.stringify(list);
+            //     }
+            // } else {
+            //     localStorage["dcyClkList"] = JSON.stringify([
+            //         Number(item.efairydevice_id)
+            //     ]);
+            // }
         },
         checkItemIsInClickedList(item) {
             if (!localStorage.getItem("dcyClkList")) return false;
-            const list = JSON.parse(localStorage.getItem("dcyClkList"));
-			item.isClicked = list.indexOf(item.efairydevice_id) != -1;
+            // const list = JSON.parse(localStorage.getItem("dcyClkList"));
+            // item.isClicked = list.indexOf(item.efairydevice_id) != -1;
+            item.isClicked =
+                localStorage.getItem("dcyClkList") == item.efairydevice_id;
         },
         onSelect(item) {
             // 点击选项时默认不会关闭菜单，可以手动关闭

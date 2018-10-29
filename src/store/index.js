@@ -32,11 +32,11 @@ export default new Vuex.Store({
 			return 3;
 		},
 		getDeviceMsg(state) {
-			console.log(state.deviceMsgList);
 			try {
 				if (state.deviceMsgList) return JSON.parse(state.deviceMsgList);
 				return [];
 			} catch (e) {
+				console.log(state.deviceMsgList)
 				console.log(e);
 				return [];
 			}

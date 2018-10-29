@@ -172,6 +172,7 @@ const dcyRoutes = [{
 		component: myIndex,
 		meta: {
 			requireAuth: true,
+			nokeepAlive: true
 		},
 	},
 	{

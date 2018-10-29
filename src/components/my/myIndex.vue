@@ -31,6 +31,7 @@
 								<img src="@/assets/icons/my_copy.png" class="icon" style="width:16px;">
 							</div>
 						</template>
+						{{userInfo.efairyuser_company}}
 					</van-cell>
 					<van-cell title="单位地址" is-link :to="{path:'/my/address'}">
 						<template slot="icon">
@@ -38,8 +39,9 @@
 								<img src="@/assets/icons/my_address.png" class="icon" style="width:16px;">
 							</div>
 						</template>
+						{{userInfo.efairyuser_company_address}}
 					</van-cell>
-					<van-cell title="联系号码"  >
+					<van-cell title="联系号码">
 						<template slot="icon">
 							<div class="icon-wrapper">
 								<img src="@/assets/icons/my_phone.png" class="icon">
@@ -53,6 +55,7 @@
 								<img src="@/assets/icons/my_mail.png" class="icon">
 							</div>
 						</template>
+						{{userInfo.efairyuser_email}}
 					</van-cell>
 					<van-cell title="设备供应商">
 						<template slot="icon">
@@ -90,10 +93,10 @@ export default {
     },
     data() {
         return {
-			//0-超级管理员 1-总监+ 2-总监 3-项目管理员 4-普通用户
+            //0-超级管理员 1-总监+ 2-总监 3-项目管理员 4-普通用户
             // query: this.$route.query,
-			userInfo: {},
-			levelHash:['超级管理员','总监+','总监','项目管理员','普通用户']
+            userInfo: {},
+            levelHash: ["超级管理员", "总监+", "总监", "项目管理员", "普通用户"]
         };
     },
     async mounted() {
@@ -127,6 +130,11 @@ export default {
 
 <style lang="scss" scoped>
 $dcyColor: #282549;
+
+
+.van-cell__value{
+	color:#666;
+}
 
 .personal-info {
     position: relative;

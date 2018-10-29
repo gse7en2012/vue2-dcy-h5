@@ -56,6 +56,9 @@ import BScroll from "better-scroll";
 import bottomTab from "@/components/bottomTab";
 import rongCloudInit from "@/components/rongCloud/init";
 
+
+
+
 // 测试版：vnroth0kvdmso
 // 正式版：m7ua80gbmpi3m
 
@@ -83,7 +86,12 @@ export default {
         // this.initRc();
         this.msgList.forEach(item => {
             item.unread = false;
-        });
+		});
+
+		Bus.$on('getNewDeviceMsg',()=>{
+			console.log('goott')
+
+		})
         this.$nextTick(() => {
             // document.title = "消息列表";
             this.setupBetterScroll();

@@ -90,6 +90,22 @@ export default {
             });
         },
         formatBarData(nameList, dataList) {
+            const series = [];
+            console.log(nameList, dataList);
+            nameList.forEach((item, index) => {
+                series.push({
+                    name: item,
+                    type: "bar",
+                    barGap: 2,
+                    label: {
+                        normal: {
+                            show: true,
+                            position: "inside"
+                        }
+                    },
+                    data: [dataList[index]]
+                });
+            });
             return {
                 title: {
                     text: "报警次数统计",
@@ -97,6 +113,17 @@ export default {
                     textStyle: {
                         fontSize: 14,
                         color: "#666"
+                    }
+				},
+				legend: {
+                    orient: "vertical",
+                    x: "right",
+                    data: nameList,
+                    itemWidth: 20,
+                    itemHeight: 10,
+                    textStyle: {
+                        color: "#333",
+                        fontSize: 11
                     }
                 },
                 grid: {
@@ -108,7 +135,8 @@ export default {
                 xAxis: [
                     {
                         type: "category",
-                        data: nameList,
+                        // data: nameList,
+                        data: ["报警类型"],
                         axisTick: {
                             alignWithLabel: true
                         }
@@ -118,21 +146,22 @@ export default {
                     {
                         type: "value"
                     }
-                ],
-                series: [
-                    {
-                        name: "报警类型",
-                        type: "bar",
-                        barWidth: "40%",
-                        label: {
-                            normal: {
-                                show: true,
-                                position: "inside"
-                            }
-                        },
-                        data: dataList
-                    }
-                ]
+				],
+				series:series
+                // series: [
+                //     {
+                //         name: "报警类型",
+                //         type: "bar",
+                //         barWidth: "40%",
+                //         label: {
+                //             normal: {
+                //                 show: true,
+                //                 position: "inside"
+                //             }
+                //         },
+                //         data: dataList
+                //     }
+                // ]
             };
         },
         formatPieData(nameList, dataList) {

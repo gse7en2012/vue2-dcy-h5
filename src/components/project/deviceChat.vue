@@ -37,6 +37,7 @@
 <script>
 import BScroll from "better-scroll";
 import moment, { max } from "moment";
+import Bus from "@/service/bus";
 
 export default {
     name: "deviceChat",
@@ -55,14 +56,33 @@ export default {
         };
     },
     async mounted() {
-        console.log(this.userMsgId);
+        // console.log(this.userMsgId);
         this.getChatMsgList();
         this.getUserInfo();
         this.$nextTick(() => {
             this.setupBetterScroll();
         });
+        Bus.$on("getNewDeviceMsg", this.getNewDeviceMsg);
     },
     methods: {
+        getNewDeviceMsg(msg) {
+            if (
+                msg.efairymsg_from_id == this.query.msgobj_id &&
+                msg.efairymsg_to_id == this.userMsgId
+            ) {
+                this.chatList.push({
+                    isMine: 0,
+                    efairymsg_add_time: msg.efairymsg_add_time,
+                    ctx: {
+                        text: msg.efairydevicemsg_content
+                    }
+                });
+                this.scroll.refresh();
+                setTimeout(() => {
+                    this.scroll.scrollTo(0, this.scroll.maxScrollY);
+                }, 0);
+            }
+        },
         async getChatMsgList() {
             const data = await this.$service.projectService.getDeviceChatMsgList(
                 {
@@ -85,13 +105,13 @@ export default {
                 control_order: type, //67peizhi 128fuwei 129xiaoyin
                 extra_info: {}
             });
-            this.chatList.push({
-                isMine: 0,
-                efairymsg_add_time: moment().format("YYYY-MM-DD HH:mm:ss"),
-                ctx: {
-                    text: txt + "成功"
-                }
-            });
+            // this.chatList.push({
+            //     isMine: 0,
+            //     efairymsg_add_time: moment().format("YYYY-MM-DD HH:mm:ss"),
+            //     ctx: {
+            //         text: txt + "成功"
+            //     }
+            // });
             this.$toast("操作成功");
             this.scroll.refresh();
             setTimeout(() => {

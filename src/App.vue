@@ -32,7 +32,7 @@ import rongCloudInit from "@/components/rongCloud/init";
 // 正式版：m7ua80gbmpi3m  zhongchengwul uwd1c0sxuvio1
 
 const rcAppKey = "vnroth0kvdmso";
-const rcAppkeyProduction = "uwd1c0sxuvio1";
+const rcAppKeyProduction = "uwd1c0sxuvio1";
 
 export default {
     name: "App",
@@ -80,7 +80,7 @@ export default {
         initRc() {
             const rcAppToken = this.rcToken;
             const params = {
-                appKey: rcAppkeyProduction,
+                appKey: rcAppKeyProduction,
                 token: rcAppToken
             };
 
