@@ -59,9 +59,9 @@ export default {
         // console.log(this.userMsgId);
         this.getChatMsgList();
         this.getUserInfo();
-        this.$nextTick(() => {
-            this.setupBetterScroll();
-        });
+        // this.$nextTick(() => {
+        //     this.setupBetterScroll();
+        // });
         Bus.$on("getNewDeviceMsg", this.getNewDeviceMsg);
     },
     methods: {
@@ -96,7 +96,9 @@ export default {
                 item.ctx = JSON.parse(item.efairymsg_content);
                 item.isMine = item.efairymsg_from_id == this.userMsgId;
                 if (index == 0) this.lastId = item.efairymsg_id;
-            });
+			});
+
+			this.setupBetterScroll();
         },
         async postDeviceMsg(type) {
             const txt = type == 129 ? "远程消音" : "远程复位";
@@ -161,20 +163,24 @@ export default {
             this.$router.push({ name: "deviceConfig", query: { q: 3 } });
         },
         async setupBetterScroll() {
-            this.scroll = new BScroll(this.$refs.wrapper, {
-                tap: true,
-                click: true,
-                pullDownRefresh: {
-                    threshold: 0,
-                    stop: 0
-                }
-            });
-            this.scroll.on("pullingDown", () => {
-                this.loadEarlyMsgList();
-            });
+            if (!this.scroll) {
+                this.scroll = new BScroll(this.$refs.wrapper, {
+                    tap: true,
+                    click: true,
+                    pullDownRefresh: {
+                        threshold: 0,
+                        stop: 0
+                    }
+                });
+                this.scroll.on("pullingDown", () => {
+                    this.loadEarlyMsgList();
+                });
+            } else {
+                this.scroll.refresh();
+            }
             setTimeout(() => {
                 this.scroll.scrollTo(0, this.scroll.maxScrollY);
-            }, 1000);
+            }, 0);
         },
         async loadEarlyMsgList() {
             const tmpLastId = this.lastId;

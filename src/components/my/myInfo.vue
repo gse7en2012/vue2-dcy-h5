@@ -86,7 +86,7 @@ export default {
         },
         async uploadToQiniu(file) {
 			const data = new FormData();
-			const params='?imageView2/1/w/200/h/200';
+			const params='?imageView2/1/w/100/h/100';
             data.append("token", this.qiniuToken);
             data.append("file", file.file);
             const response = await axiosInstance({

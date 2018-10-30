@@ -71,8 +71,8 @@ export default {
             isSendCode: false,
             phone: "",
             password: "",
-            phone: "13751066522",
-            password: "66666",
+            // phone: "13751066522",
+            // password: "66666",
             count: 60,
             sendCodeTimer: null,
             viewPassword: false

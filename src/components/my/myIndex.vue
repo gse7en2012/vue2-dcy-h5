@@ -162,7 +162,8 @@ $dcyColor: #282549;
             align-items: center;
             text-align: center;
             .avatar {
-                width: 60px;
+				width: 60px;
+				height:60px;
                 background: #fff;
                 border-radius: 30px;
                 margin: 0 auto;
