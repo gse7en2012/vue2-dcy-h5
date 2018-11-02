@@ -12,6 +12,7 @@ import deviceChat from '@/components/project/deviceChat';
 import deviceAlarmList from '@/components/project/deviceAlarmList';
 import deviceAlarmHandle from '@/components/project/deviceAlarmHandle';
 import deviceAlarmFixed from '@/components/project/deviceAlarmFixed';
+import deviceAlarmFixedFromMsg from '@/components/project/deviceAlarmFixedFromMsg';
 import deviceConfig from '@/components/project/deviceConfig';
 
 import messageIndex from '@/components/message/messageIndex';
@@ -25,6 +26,9 @@ import myEmail from '@/components/my/myEmail';
 import myInfo from '@/components/my/myInfo';
 import myName from '@/components/my/myName';
 import myPass from '@/components/my/myPass';
+import mySetting from '@/components/my/mySetting';
+import myBook from '@/components/my/myBook';
+import myDesc from '@/components/my/myDesc';
 
 import reportIndex from '@/components/report/reportIndex';
 import reportDetail from '@/components/report/reportDetail';
@@ -36,7 +40,7 @@ import VueCookies from '../service/cookies';
 
 Vue.use(Router);
 
-const appId='wx7df072b8e5881faf';
+const appId = 'wx7df072b8e5881faf';
 const appIdTest = 'wx1cb0950621818b8e';
 
 
@@ -141,6 +145,15 @@ const dcyRoutes = [{
 		},
 	},
 	{
+		path: '/project/:pid/devices/:did/detail/chat/alarm/fixed_msg',
+		name: 'deviceAlarmFixedFromMsg',
+		component: deviceAlarmFixedFromMsg,
+		meta: {
+			nokeepAlive: true,
+			requireAuth: true,
+		}
+	},
+	{
 		path: '/project/:pid/devices/:did/detail/chat/config',
 		name: 'deviceConfig',
 		component: deviceConfig,
@@ -214,6 +227,26 @@ const dcyRoutes = [{
 		meta: {
 			requireAuth: true,
 		},
+	},
+	{
+		path: '/my/setting',
+		name: 'mySetting',
+		component: mySetting,
+		meta: {
+			requireAuth: true
+		}
+	},
+	{
+		path: '/my/about/book',
+		name: 'myBook',
+		component: myBook,
+
+	},
+	{
+		path: '/my/about/desc',
+		name: 'myDesc',
+		component: myDesc,
+
 	},
 	{
 		path: '/my/info/name',
@@ -298,8 +331,8 @@ const checkRouterForwardOrBack = (to, from) => {
 }
 
 const checkWeixinToken = (to, from) => {
-	const oauthApi="http://efawxapi.cciotsz.com/wechatapi/oauth_callback";
-	const oauthApiTest="http://wechatts.cciotsz.com/wechatapi/oauth_callback";
+	const oauthApi = "http://efawxapi.cciotsz.com/wechatapi/oauth_callback";
+	const oauthApiTest = "http://wechatts.cciotsz.com/wechatapi/oauth_callback";
 	if (!VueCookies.get('efairywxuser_id')) {
 		// const redirectUri=encodeURIComponent(location.origin+'/wechatapi/oauth_callback');
 		const path = encodeURIComponent('/#' + to.path);

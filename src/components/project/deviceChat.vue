@@ -3,6 +3,9 @@
 		<van-nav-bar title="设备对话框" @click-right="goBack">
 			<span slot="right" class="bar-close">&times;</span>
 		</van-nav-bar>
+		<van-notice-bar mode="closeable" v-if="unhandleMsgCount>0">
+			尊敬的用户，您的电气设备存在{{unhandleMsgCount}}个未处理的严重安全隐患，本设备报警短信不再重复推送，请及时处理所有报警隐患，以免影响正常使用，造成严重后果！
+		</van-notice-bar>
 		<div class="wrapper" ref="wrapper">
 			<div class="chat-box">
 				<div class="block" v-for="(msg,i) in chatList" :id="'msg'+msg.efairymsg_id" @click="gotoMsgDetail(msg)">
@@ -48,6 +51,7 @@ export default {
             deviceId: this.$route.params.did,
             userMsgId: this.$store.state.userMsgId,
             userInfo: {},
+            unhandleMsgCount: 0,
             chatList: [],
             lastId: 0,
             page: 1,
@@ -59,12 +63,21 @@ export default {
         // console.log(this.userMsgId);
         this.getChatMsgList();
         this.getUserInfo();
+        this.getUnhandleMsgList();
         // this.$nextTick(() => {
         //     this.setupBetterScroll();
         // });
         Bus.$on("getNewDeviceMsg", this.getNewDeviceMsg);
     },
     methods: {
+        async getUnhandleMsgList() {
+            const data = await this.$service.projectService.getDeviceUnhandleMsgList(
+                {
+                    efairydevice_id: this.$route.params.did
+                }
+            );
+            this.unhandleMsgCount = data.result.total_rows || 0;
+        },
         getNewDeviceMsg(msg) {
             if (
                 msg.efairymsg_from_id == this.query.msgobj_id &&
@@ -96,9 +109,9 @@ export default {
                 item.ctx = JSON.parse(item.efairymsg_content);
                 item.isMine = item.efairymsg_from_id == this.userMsgId;
                 if (index == 0) this.lastId = item.efairymsg_id;
-			});
+            });
 
-			this.setupBetterScroll();
+            this.setupBetterScroll();
         },
         async postDeviceMsg(type) {
             const txt = type == 129 ? "远程消音" : "远程复位";
@@ -124,12 +137,13 @@ export default {
             const data = await this.$service.userService.getUserInfo();
             this.userInfo = data.result;
         },
-        gotoMsgDetail(msg) {
+        async gotoMsgDetail(msg) {
+            //deviceAlarmFixed
             if (msg.efairymsg_msgtype && msg.efairymsg_ishandle)
                 this.$router.push({
-                    name: "deviceAlarmList",
+                    name: "deviceAlarmFixedFromMsg",
                     query: {
-                        status: 1
+                        msgId: msg.efairymsg_id
                     }
                 });
             if (msg.efairymsg_msgtype && !msg.efairymsg_ishandle)
@@ -224,6 +238,10 @@ export default {
     &:nth-last-of-type(1) {
         border: 0;
     }
+}
+
+.van-notice-bar{
+	z-index: 999;
 }
 
 .wrapper {

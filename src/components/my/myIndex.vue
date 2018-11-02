@@ -76,6 +76,16 @@
 						</template>
 					</van-cell>
 				</van-cell-group>
+
+				<van-cell-group class="my-list">
+					<van-cell title="设置" is-link :to="{path:'/my/setting'}">
+						<template slot="icon">
+							<div class="icon-wrapper">
+								<img src="@/assets/icons/setting.png" class="icon">
+							</div>
+						</template>
+					</van-cell>
+				</van-cell-group>
 			</div>
 		</section>
 		<bottom-tab />

@@ -79,7 +79,8 @@ import {
 	Switch,
 	SwitchCell,
 	DatetimePicker,
-	Actionsheet
+	Actionsheet,
+	NoticeBar
 } from "vant";
 
 import '@/assets/global.scss';
@@ -106,6 +107,7 @@ Vue.use(Tab)
 	.use(Uploader)
 	.use(SwitchCell)
 	.use(Actionsheet)
+	.use(NoticeBar)
 	.use(DatetimePicker);
 
 

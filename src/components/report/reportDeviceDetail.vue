@@ -191,9 +191,9 @@ export default {
                 }
             );
             this.deviceInfo = data.result;
-            this.deviceInfo.efairydevice_user_info_list = JSON.parse(
-                this.deviceInfo.efairydevice_user_info_list
-            );
+            // this.deviceInfo.efairydevice_user_info_list = JSON.parse(
+            //     this.deviceInfo.efairydevice_user_info_list
+            // );
         },
         onSelect1(item) {
             // 点击选项时默认不会关闭菜单，可以手动关闭

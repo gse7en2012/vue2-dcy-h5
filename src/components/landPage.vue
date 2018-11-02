@@ -45,7 +45,7 @@
 					</div>
 					<div class="row">
 						<p class="tips">点击登录，即表示已阅读并同意
-							<a @click="gotoRule()">《电次元服务条款》</a>
+							<a @click="gotoRule()" >《电次元服务条款》</a>
 						</p>
 					</div>
 				</div>
@@ -137,7 +137,7 @@ export default {
             }, 1000);
         },
         gotoRule() {
-            this.$router.push({ name: "rulePage" });
+            this.$router.push({ name: "myBook" });
 		},
 
         async loginViaCode() {

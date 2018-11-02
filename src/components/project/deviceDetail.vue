@@ -13,6 +13,10 @@
 						<span class="r">{{basicInfo.efairyproject_name}}</span>
 					</div>
 					<div class="row">
+						<span class="l">设备类型</span>
+						<span class="r">{{basicInfo.efairydevice_type}}</span>
+					</div>
+					<div class="row">
 						<span class="l">设备ID</span>
 						<span class="r">{{basicInfo.efairydevice_uuid}}</span>
 					</div>
@@ -23,6 +27,19 @@
 					<div class="row">
 						<span class="l">设备地址</span>
 						<span class="r">{{basicInfo.efairydevice_address}}</span>
+					</div>
+
+					<div class="row">
+						<span class="l">设备竣工图</span>
+					</div>
+					<div class="row">
+						<div class="img-uploader">
+							<p v-if="!imgUrlList||imgUrlList.length==0" class="no-img">暂无图片，请管理员于【设备管理】中添加。</p>
+							<div class="item" v-for="(item,i) in imgUrlList">
+								<img :src="item" @click="previewUploadImg(i)">
+							</div>
+
+						</div>
 					</div>
 
 				</div>
@@ -104,7 +121,7 @@
 </template>
 
 <script>
-import { Dialog } from "vant";
+import { Dialog, ImagePreview } from "vant";
 import BScroll from "better-scroll";
 // 设备状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常，优先级:离线 报警  预警  故障 启动 屏蔽 正常
 
@@ -140,6 +157,7 @@ export default {
             rtInfo: {},
             userList: [],
             cdataList: [],
+            imgUrlList: [],
             channelNameEditing: false,
             modList: []
         };
@@ -161,6 +179,12 @@ export default {
         editChannelName() {
             this.channelNameEditing = true;
             document.querySelectorAll("input")[0].focus();
+        },
+        previewUploadImg(i) {
+            this.imgPrevie = ImagePreview({
+                images: this.imgUrlList,
+                startPosition: i
+            });
         },
         addIntoModList(item) {
             // this.modList.push({
@@ -189,7 +213,7 @@ export default {
         async editDeviceMultiChannelName(item) {
             this.modList = this.cdataList
                 .filter(item => {
-                    return item.c_name!=item.c_name_new;
+                    return item.c_name != item.c_name_new;
                 })
                 .map(item => {
                     return {
@@ -233,6 +257,7 @@ export default {
             );
             this.basicInfo = data.result.basic_info;
             this.rtInfo = data.result.rt_info;
+            this.imgUrlList = data.result.efairydevice_imgurl_list;
             this.userList = data.result.user_list;
             this.phoneList = this.userList.map(item => {
                 return {
@@ -243,15 +268,15 @@ export default {
                 };
             });
             if (data.result.rt_info) {
-				this.cdataList = data.result.rt_info.c_data_list || [];
-				this.cdataList.forEach(item=>{
-					item.c_name_new=item.c_name;
-				})
+                this.cdataList = data.result.rt_info.c_data_list || [];
+                this.cdataList.forEach(item => {
+                    item.c_name_new = item.c_name;
+                });
             }
-		},
-		cancelEditChannelName(){
-			this.channelNameEditing=false;
-		},
+        },
+        cancelEditChannelName() {
+            this.channelNameEditing = false;
+        },
         onSelect(item) {
             this.show = false;
             document.location.href = "tel:" + item.phone;
@@ -288,6 +313,55 @@ export default {
     margin: 10px auto 5px;
     font-size: 16px;
     color: $dcyColor;
+}
+
+.no-img {
+    margin: 0;
+    font-size: 13px;
+    text-align: center;
+    width: 100%;
+    color: #666;
+}
+
+.img-uploader {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -4px;
+    width: 100%;
+    .item {
+        flex: 0 0 33.333%;
+        padding-top: calc(33.333% - 8px);
+        box-sizing: border-box;
+        border: 4px solid #fff;
+        background: #ddd;
+        position: relative;
+        overflow: hidden;
+        .van-icon {
+            font-size: 16px;
+            position: absolute;
+            width: 20px;
+            right: 0;
+            top: 0;
+            z-index: 10;
+            background: $dcyColor;
+            text-align: center;
+            height: 20px;
+            line-height: 20px;
+            color: #fff;
+            opacity: 0.8;
+        }
+        img {
+            width: 100%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            left: 50%;
+            top: 50%;
+            &.ver {
+                width: auto;
+                height: 100%;
+            }
+        }
+    }
 }
 
 .main-box {

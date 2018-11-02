@@ -9,7 +9,7 @@
 							<img :src="details.efairyuser_headimg_url" class="avatar">
 						</div>
 						<div class="info">
-							<p class="l1">{{deviceName}}</p>
+							<p class="l1">{{details.efairydevicealarmstatistics_c_name}}</p>
 							<p class="l2">处理人员：{{details.efairyuser_nickname}}</p>
 						</div>
 					</div>

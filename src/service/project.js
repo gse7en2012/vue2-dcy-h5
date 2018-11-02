@@ -69,6 +69,16 @@ const projectService = {
 		return await axios.get('/device_unhandle_alarm_statistics_list_by_id', {
 			params: opts
 		})
+	},
+	async getAlarmRecord(opts) {
+		return await axios.get('/alarmrecord', {
+			params: opts
+		})
+	},
+	async getDeviceUnhandleMsgList(opts) {
+		return await axios.get('/device_unhandlemsg_list', {
+			params: opts
+		})
 	}
 }
 

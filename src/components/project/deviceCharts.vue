@@ -107,6 +107,7 @@ export default {
             optionList: [],
             dataHash: dataHash,
             defaultPointTotal: 200,
+            unhandleMsgCount: 0,
             currentDatePickerType: "start",
             currentDate: new Date(),
             showDatePicker: false,
@@ -328,20 +329,24 @@ export default {
                         this.endDate = moment(date).format("YYYY-MM-DD");
                     }
                     if (moment(date).diff(moment(this.endDate), "days") < -7) {
-						this.endDate = moment(date).add(7,'days').format("YYYY-MM-DD");
-						this.$toast('最多支持查询7天跨度')
+                        this.endDate = moment(date)
+                            .add(7, "days")
+                            .format("YYYY-MM-DD");
+                        this.$toast("最多支持查询7天跨度");
                     }
                 }
             }
             if (this.currentDatePickerType == "end") {
-				this.endDate = formatDate;
-				if (this.startDate) {
+                this.endDate = formatDate;
+                if (this.startDate) {
                     if (moment(date).isBefore(moment(this.startDate))) {
                         this.startDate = moment(date).format("YYYY-MM-DD");
                     }
                     if (moment(date).diff(moment(this.startDate), "days") > 7) {
-						this.startDate = moment(date).add(-7,'days').format("YYYY-MM-DD");
-						this.$toast('最多支持查询7天跨度')
+                        this.startDate = moment(date)
+                            .add(-7, "days")
+                            .format("YYYY-MM-DD");
+                        this.$toast("最多支持查询7天跨度");
                     }
                 }
             }

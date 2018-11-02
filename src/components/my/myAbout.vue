@@ -4,22 +4,19 @@
 		<!-- <section class="page-main" ref="wrapper"> -->
 		<div class="box">
 			<div class="logo-info">
-				<img src="@/assets/icons/avatar.png" class="logo" />
+				<img src="@/assets/icons/logo.png" class="logo" />
 				<p class="ver">V1.0</p>
 			</div>
 
 			<van-cell-group class="my-list">
-				<van-cell title="查看功能特性" is-link />
-				<van-cell title="查看服务条款" is-link />
+				<van-cell title="查看功能特性" is-link :to="{path:'/my/about/desc'}"/>
+				<van-cell title="查看服务条款" is-link :to="{path:'/my/about/book'}"/>
 			</van-cell-group>
 
 			<van-cell-group class="my-list">
 				<van-cell title="意见反馈" is-link />
 			</van-cell-group>
 
-			<van-cell-group class="my-list">
-				<van-switch-cell v-model="checked" title="接收消息提醒" />
-			</van-cell-group>
 
 			<!-- <van-cell-group class="my-list">
 				<van-switch-cell v-model="checked3" title="报警短信通知" />
