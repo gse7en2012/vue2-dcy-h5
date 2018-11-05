@@ -5,13 +5,13 @@
 		<div class="box">
 
 			<van-cell-group class="my-list">
-				<van-switch-cell v-model="checked1" title="短信通知" />
+				<van-switch-cell v-model="setting.efairyuserconfig_is_sms" title="短信通知" @input="saveUserSetting"/>
 			</van-cell-group>
 			<van-cell-group class="my-list">
-				<van-switch-cell v-model="checked2" title="电话语音通知" />
+				<van-switch-cell v-model="setting.efairyuserconfig_is_voice" title="电话语音通知" @input="saveUserSetting"/>
 			</van-cell-group>
 			<van-cell-group class="my-list">
-				<van-switch-cell v-model="checked3" title="微信推送通知" />
+				<van-switch-cell v-model="setting.efairyuserconfig_is_wx_notify" title="微信推送通知" @input="saveUserSetting"/>
 			</van-cell-group>
 
 		</div>
@@ -26,37 +26,58 @@ import axios from "axios";
 
 export default {
     name: "mySetting",
+    watch: {
+        // setting: {
+        //     handler(newValue, oldValue) {
+        //         this.saveUserSetting();
+        //     },
+        //     deep: true
+        // }
+    },
     data() {
         return {
-            // query: this.$route.query,
-            userInfo: {},
-            qiniuToken: null,
-            checked1: false,
-            checked2: false,
-            checked3: false
+            setting: {
+                efairyuserconfig_is_sms: false,
+                efairyuserconfig_is_voice: false,
+                efairyuserconfig_is_wx_notify: false
+            }
         };
     },
     async mounted() {
-        this.getUserInfo();
+        this.getUserSetting();
     },
 
     methods: {
         goBack() {
             this.$router.back();
         },
-        async getUserInfo() {
-            const data = await this.$service.userService.getUserInfo();
-            this.userInfo = data.result;
-            this.userInfo.showPhone =
-                this.userInfo.efairyuser_phonenumber.slice(0, 3) +
-                "****" +
-                this.userInfo.efairyuser_phonenumber.slice(7, 11);
-
-            this.$store.commit("saveUserInfo", this.userInfo);
+        async saveUserSetting() {
+            const config = {
+                efairyuserconfig_is_sms: Number(
+                    this.setting.efairyuserconfig_is_sms
+                ),
+                efairyuserconfig_is_voice: Number(
+                    this.setting.efairyuserconfig_is_voice
+                ),
+                efairyuserconfig_is_wx_notify: Number(
+                    this.setting.efairyuserconfig_is_wx_notify
+                )
+            };
+            await this.$service.userService.editUserSetting({
+                efairyuser_config_info: config
+            });
+            this.$toast("修改成功！");
         },
-        logout() {
-            this.$store.commit("accountLogout");
-            this.$router.push({ name: "loginPage" });
+        async getUserSetting() {
+            const data = await this.$service.userService.getUserSetting();
+            this.setting = {
+                efairyuserconfig_is_sms:
+                    data.result.efairyuserconfig_is_sms == 1,
+                efairyuserconfig_is_voice:
+                    data.result.efairyuserconfig_is_voice == 1,
+                efairyuserconfig_is_wx_notify:
+                    data.result.efairyuserconfig_is_wx_notify == 1
+            };
         }
     }
 };

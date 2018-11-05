@@ -43,6 +43,8 @@ Vue.use(Router);
 const appId = 'wx7df072b8e5881faf';
 const appIdTest = 'wx1cb0950621818b8e';
 
+const isProdEnv = process.env.NODE_ENV == "prod";
+
 
 const dcyRoutes = [{
 		path: '',
@@ -331,6 +333,9 @@ const checkRouterForwardOrBack = (to, from) => {
 }
 
 const checkWeixinToken = (to, from) => {
+
+	if (!isProdEnv) return;
+
 	const oauthApi = "http://efawxapi.cciotsz.com/wechatapi/oauth_callback";
 	const oauthApiTest = "http://wechatts.cciotsz.com/wechatapi/oauth_callback";
 	if (!VueCookies.get('efairywxuser_id')) {

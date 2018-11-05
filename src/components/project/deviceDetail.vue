@@ -210,7 +210,7 @@ export default {
                 }
             );
         },
-        async editDeviceMultiChannelName(item) {
+        async editDeviceMultiChannelName() {
             this.modList = this.cdataList
                 .filter(item => {
                     return item.c_name != item.c_name_new;
@@ -230,6 +230,10 @@ export default {
                 }
             );
             this.$toast("修改成功！");
+            this.channelNameEditing = false;
+            this.cdataList.forEach(item => {
+                item.c_name = item.c_name_new;
+            });
         },
         beforeClose(action, done) {
             if (action === "confirm") {

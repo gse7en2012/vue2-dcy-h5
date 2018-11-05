@@ -44,6 +44,12 @@ const userService = {
 	},
 	async editPassword(opts) {
 		return await axios.put('/password', opts)
+	},
+	async getUserSetting(opts){
+		return await axios.get('/user_config');
+	},
+	async editUserSetting(opts){
+		return await axios.put('/user_config',opts);
 	}
 }
 

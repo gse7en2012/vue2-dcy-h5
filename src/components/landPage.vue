@@ -45,7 +45,7 @@
 					</div>
 					<div class="row">
 						<p class="tips">点击登录，即表示已阅读并同意
-							<a @click="gotoRule()" >《电次元服务条款》</a>
+							<a @click="gotoRule()">《电次元服务条款》</a>
 						</p>
 					</div>
 				</div>
@@ -59,6 +59,9 @@
 import Bus from "@/service/bus";
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
+
+const isProdEnv = process.env.NODE_ENV == "prod";
+
 export default {
     name: "landPage",
     data() {
@@ -69,8 +72,8 @@ export default {
             codeText: "发送验证码",
             code: "",
             isSendCode: false,
-            phone: "",
-            password: "",
+            phone: isProdEnv ? "" : "13751066522",
+            password: isProdEnv ? "" : "66666",
             // phone: "13751066522",
             // password: "66666",
             count: 60,
@@ -138,7 +141,7 @@ export default {
         },
         gotoRule() {
             this.$router.push({ name: "myBook" });
-		},
+        },
 
         async loginViaCode() {
             if (!this.code) return this.$toast("请输入验证码");
@@ -149,8 +152,8 @@ export default {
                     this.phone.replace(/-/g, ""),
                     this.code
                 );
-				this.loading = false;
-				 Bus.$emit("loginSuccess", "login via code");
+                this.loading = false;
+                Bus.$emit("loginSuccess", "login via code");
                 this.$store.commit("accountLogin", data.result);
                 this.$router.push({ name: "projectIndex" });
             } catch (e) {
