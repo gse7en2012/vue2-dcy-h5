@@ -31,8 +31,9 @@ import rongCloudInit from "@/components/rongCloud/init";
 // 测试版：vnroth0kvdmso
 // 正式版：m7ua80gbmpi3m  zhongchengwul uwd1c0sxuvio1
 
+console.log(process.env.NODE_ENV);
 const env = process.env.NODE_ENV;
-const rcAppKey = env === "prod" ? "uwd1c0sxuvio1" : "vnroth0kvdmso";
+const rcAppKey = env === "production" ? "uwd1c0sxuvio1" : "vnroth0kvdmso";
 // const rcAppKeyProduction = "uwd1c0sxuvio1";
 
 export default {

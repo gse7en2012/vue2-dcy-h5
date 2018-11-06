@@ -60,7 +60,7 @@ import Bus from "@/service/bus";
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
 
-const isProdEnv = process.env.NODE_ENV == "prod";
+const isProdEnv = process.env.NODE_ENV == "production";
 
 export default {
     name: "landPage",

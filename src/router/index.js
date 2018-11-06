@@ -43,7 +43,7 @@ Vue.use(Router);
 const appId = 'wx7df072b8e5881faf';
 const appIdTest = 'wx1cb0950621818b8e';
 
-const isProdEnv = process.env.NODE_ENV == "prod";
+const isProdEnv = process.env.NODE_ENV == "production";
 
 
 const dcyRoutes = [{

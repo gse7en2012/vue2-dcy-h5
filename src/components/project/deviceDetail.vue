@@ -178,7 +178,6 @@ export default {
     methods: {
         editChannelName() {
             this.channelNameEditing = true;
-            document.querySelectorAll("input")[0].focus();
         },
         previewUploadImg(i) {
             this.imgPrevie = ImagePreview({
