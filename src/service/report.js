@@ -51,6 +51,9 @@ const reportService = {
 		return await axios.get('/report_project_device_alarm_list', {
 			params: opts
 		})
+	},
+	async saveReportTitle(opts){
+		return await axios.post('/report_title',opts)
 	}
 }
 

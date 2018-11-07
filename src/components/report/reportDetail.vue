@@ -185,6 +185,10 @@ export default {
         },
         saveTitle() {
             this.editTitle = false;
+            this.$service.reportService.saveReportTitle({
+                efairyreport_id: this.reportId,
+                efairyreport_title: this.basicInfo.efairyreport_title
+            });
         },
         setupBetterScroll() {
             this.scroll = new BScroll(this.$refs.wrapper, {

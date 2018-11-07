@@ -20,12 +20,12 @@
 									<label>报告编号：
 										<span>#{{item.efairyreport_id}}</span>
 									</label>
-									<label>生成时间：
+									<label>统计时间：
 										<span>{{item.st}}-{{item.et}}</span>
 									</label>
 								</p>
 								<p>
-									<label>统计时间：
+									<label>生成时间：
 										<span>{{item.efairyreport_add_time}}</span>
 									</label>
 								</p>
