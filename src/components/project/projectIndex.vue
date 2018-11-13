@@ -282,12 +282,18 @@ export default {
                 className: "town"
             };
 
-            this.areaQuery = {
-                efairyprovince_id: data[0].efairyprovince_id
-            };
-            this.areaQueryText = [data[0].efairyprovince_name].join("");
-
-            this.$store.dispatch("setProjectAreaSelectedQuery", this.areaQuery);
+            if (data.length > 0) {
+                this.areaQuery = {
+                    efairyprovince_id: data[0].efairyprovince_id
+                };
+                this.areaQueryText = [data[0].efairyprovince_name].join("");
+                this.$store.dispatch(
+                    "setProjectAreaSelectedQuery",
+                    this.areaQuery
+                );
+            }else{
+				this.areaQueryText='没有数据'
+			}
         },
 
         setupBetterScroll() {
@@ -322,12 +328,12 @@ export default {
             this.$router.push("/project/map");
         },
         goToDetail(project) {
-			// project.isClicked = true;
-			this.projectList.forEach((item)=>{
-				// item.isClicked=false;
-				this.$set(item, "isClicked", false);
-			})
-			this.$set(project, "isClicked", true);
+            // project.isClicked = true;
+            this.projectList.forEach(item => {
+                // item.isClicked=false;
+                this.$set(item, "isClicked", false);
+            });
+            this.$set(project, "isClicked", true);
             this.$router.push(`/project/${project.efairyproject_id}/devices`);
         },
         closePop() {

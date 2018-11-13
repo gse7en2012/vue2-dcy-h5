@@ -65,7 +65,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="edit-button-box" :class="{show:edit}">
+			<div class="edit-button-box" :class="{show:edit}" v-if="!currentStatus.status">
 				<div class="dcy-radio" @click="chooseAll()">
 					<div class="radio" :class="{chose:chooseAllFlag}"></div>全选 （选中{{choseCount}}条）
 				</div>

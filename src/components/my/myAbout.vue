@@ -14,7 +14,7 @@
 			</van-cell-group>
 
 			<van-cell-group class="my-list">
-				<van-cell title="意见反馈" is-link />
+				<van-cell title="意见反馈" is-link :to="{path:'/my/about/fb'}"/>
 			</van-cell-group>
 
 

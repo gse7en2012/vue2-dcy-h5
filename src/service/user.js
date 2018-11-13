@@ -45,11 +45,19 @@ const userService = {
 	async editPassword(opts) {
 		return await axios.put('/password', opts)
 	},
-	async getUserSetting(opts){
+	async getUserSetting(opts) {
 		return await axios.get('/user_config');
 	},
-	async editUserSetting(opts){
-		return await axios.put('/user_config',opts);
+	async editUserSetting(opts) {
+		return await axios.put('/user_config', opts);
+	},
+	async postFeedback(opts) {
+		return await axios.post('/feedback', opts)
+	},
+	async getWxShareInfo(opts) {
+		return await axios.get('/wx_share_config', {
+			params: opts
+		})
 	}
 }
 

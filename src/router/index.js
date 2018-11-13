@@ -29,6 +29,7 @@ import myPass from '@/components/my/myPass';
 import mySetting from '@/components/my/mySetting';
 import myBook from '@/components/my/myBook';
 import myDesc from '@/components/my/myDesc';
+import myFeedback from '@/components/my/myFeedback';
 
 import reportIndex from '@/components/report/reportIndex';
 import reportDetail from '@/components/report/reportDetail';
@@ -37,6 +38,9 @@ import reportDeviceDetail from '@/components/report/reportDeviceDetail';
 
 import loginPage from '@/components/landPage';
 import VueCookies from '../service/cookies';
+import userService from '@/service/user';
+
+import wx from "weixin-js-sdk";
 
 Vue.use(Router);
 
@@ -171,6 +175,7 @@ const dcyRoutes = [{
 		component: messageIndex,
 		meta: {
 			requireAuth: true,
+			nokeepAlive: true
 		},
 	},
 	{
@@ -214,6 +219,7 @@ const dcyRoutes = [{
 			requireAuth: true,
 		},
 	},
+
 	{
 		path: '/my/company',
 		name: 'myCompany',
@@ -228,6 +234,7 @@ const dcyRoutes = [{
 		component: myInfo,
 		meta: {
 			requireAuth: true,
+			nokeepAlive: true
 		},
 	},
 	{
@@ -249,6 +256,14 @@ const dcyRoutes = [{
 		name: 'myDesc',
 		component: myDesc,
 
+	},
+	{
+		path: '/my/about/fb',
+		name: 'myFeedback',
+		component: myFeedback,
+		meta: {
+			requireAuth: true,
+		},
 	},
 	{
 		path: '/my/info/name',
@@ -317,6 +332,18 @@ const dcyRouter = new Router({
 	routes: dcyRoutes
 });
 
+wx.ready(function () { //需在用户可能点击分享按钮前就先调用
+	wx.updateAppMessageShareData({
+		title: '1', // 分享标题
+		desc: '1', // 分享描述
+		link: '1', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+		imgUrl: '', // 分享图标
+		success: function () {
+			// 设置成功
+		}
+	});
+})
+
 const checkRouterForwardOrBack = (to, from) => {
 	let toDepth = to.path.split('/').length
 	let fromDepth = from.path.split('/').length
@@ -332,6 +359,8 @@ const checkRouterForwardOrBack = (to, from) => {
 	// }
 }
 
+
+
 const checkWeixinToken = (to, from) => {
 
 	if (!isProdEnv) return;
@@ -346,10 +375,55 @@ const checkWeixinToken = (to, from) => {
 	}
 }
 
+const setupShareInfo = (to) => {
+	const opts = {
+		share_type: 10000,
+		share_args: {}
+	};
+	switch (to.name) {
+		case 'messageIndex':
+			opts.share_type = 10000;
+			break;
+		case 'projectIndex':
+			opts.share_type = 20000;
+			break;
+		case 'deviceDetail':
+			opts.share_type = 20001;
+			opts.share_args = {
+				efairydevice_id: to.params.did
+			}
+			break;
+		case 'reportIndex':
+			opts.share_type = 30000;
+			break;
+		case 'reportDetail':
+			opts.share_type = 30001;
+			opts.share_args = {
+				efairyreport_id: to.params.rid
+			}
+			break;
+	}
+	// return opts;
+	userService.getWxShareInfo(opts).then((data) => {
+		const config = data.result;
+		wx.updateAppMessageShareData({
+			title: config.title, // 分享标题
+			desc: config.desc, // 分享描述
+			link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+			imgUrl: config.img_url, // 分享图标
+			success() {
+				// 设置成功
+			}
+		});
+	})
+};
+
+
 dcyRouter.beforeEach((to, from, next) => {
 	//check
 	// checkRouterForwardOrBack(to,from);
 	checkWeixinToken(to, from);
+	setupShareInfo(to);
 
 	if (to.matched.some(r => r.meta.requireAuth)) {
 		if (store.state.accessToken) {
@@ -365,6 +439,7 @@ dcyRouter.beforeEach((to, from, next) => {
 	} else {
 		next();
 	}
+
 })
 
 export default dcyRouter;
