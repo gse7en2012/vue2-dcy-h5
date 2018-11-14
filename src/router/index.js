@@ -327,7 +327,7 @@ const dcyRoutes = [{
 ];
 
 const dcyRouter = new Router({
-	mode: 'history',
+	mode: 'hash',
 	base: '/wxgzh/',
 	routes: dcyRoutes
 });
