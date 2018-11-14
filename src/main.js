@@ -145,7 +145,21 @@ function connectRongCloud() {
 	rongCloudInit(params, callbacks);
 }
 
-
+// function setUpWxconfig() {
+// 	const data = await this.$service.userService.getJssdkConfig();
+// 	const config = data.result;
+// 	wx.config({
+// 		debug: false, // 开启调试模式，true会alert所有api返回值
+// 		appId: config.app_id, // 公众号唯一id
+// 		timestamp: config.timestamp, // 生成签名的时间戳
+// 		nonceStr: config.nonce_str, // 生成签名的随机串
+// 		signature: config.signature, // 签名
+// 		jsApiList: [
+// 			// 需要使用的js列表
+// 			"openLocation", "onMenuShareAppMessage", "onMenuShareTimeline", "updateTimelineShareData", "updateAppMessageShareData"
+// 		]
+// 	});
+// },
 
 new Vue({
 	el: '#app',

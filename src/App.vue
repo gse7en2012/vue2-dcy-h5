@@ -72,7 +72,7 @@ export default {
                 signature: config.signature, // 签名
                 jsApiList: [
                     // 需要使用的js列表
-                    "openLocation"
+                    "openLocation","onMenuShareAppMessage","onMenuShareTimeline","updateTimelineShareData","updateAppMessageShareData"
                 ]
             });
         },
