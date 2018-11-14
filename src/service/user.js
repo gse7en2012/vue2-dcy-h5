@@ -36,8 +36,10 @@ const userService = {
 	async getUserInfo() {
 		return await axios.get('/user_info');
 	},
-	async getJssdkConfig() {
-		return await axios.get('/jssdk_config');
+	async getJssdkConfig(opts) {
+		return await axios.get('/jssdk_config',{
+			params:opts
+		});
 	},
 	async getQiniuToken() {
 		return await axios.get('/qiniu_token');

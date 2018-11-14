@@ -62,7 +62,9 @@ export default {
     },
     methods: {
         async setUpWxconfig() {
-            const data = await this.$service.userService.getJssdkConfig();
+            const data = await this.$service.userService.getJssdkConfig({
+				jssdk_url:encodeURIComponent(location.origin+location.search)
+			});
             const config = data.result;
             wx.config({
                 debug: false, // 开启调试模式，true会alert所有api返回值
