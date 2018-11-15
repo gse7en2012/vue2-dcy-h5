@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 Vue.use(Vuex);
-
+console.log('rct', localStorage.getItem('dcyRcToken'), )
 export default new Vuex.Store({
 	state: {
 		accessToken: localStorage.getItem('dcyAccessToken'),
@@ -18,10 +18,10 @@ export default new Vuex.Store({
 		isLogin: false,
 		userInfo: {},
 		showNewMessage: false,
-		newMessageCount: 0,
 		// deviceMsgList: [],
 		deviceMsgList: localStorage.getItem('dcyDevMsg'),
-		isChooseAllAlarmList:false
+		newMessageCount: 0,
+		isChooseAllAlarmList: false
 	},
 	getters: {
 		deviclAlarmListChooseList(state) {
@@ -31,12 +31,28 @@ export default new Vuex.Store({
 			console.log(Vue.$cookies);
 			return 3;
 		},
+		getNewMsgCount(state) {
+			try {
+				if (state.deviceMsgList) {
+					// console.log(state.deviceMsgList,typeof state.deviceMsgList)
+					// const tmp = JSON.parse(state.deviceMsgList);
+					return JSON.parse(state.deviceMsgList).filter(item => item.unread).length;
+				}
+				return 0;
+			} catch (e) {
+				return 0;
+			}
+
+		},
 		getDeviceMsg(state) {
 			try {
-				if (state.deviceMsgList) return JSON.parse(state.deviceMsgList);
+				if (state.deviceMsgList) {
+					// console.log(state.deviceMsgList,typeof state.deviceMsgList)
+					return JSON.parse(state.deviceMsgList);
+				}
 				return [];
 			} catch (e) {
-				console.log(state.deviceMsgList)
+				// console.log(state.deviceMsgList)
 				console.log(e);
 				return [];
 			}
@@ -101,7 +117,7 @@ export default new Vuex.Store({
 			ctx.state.newMessageCount = 0;
 		},
 		setMsgToCache(ctx, data) {
-			ctx.state.deviceMsgList = data;
+			ctx.state.deviceMsgList = JSON.stringify(data);
 			localStorage['dcyDevMsg'] = JSON.stringify(data);
 			// const list = ctx.state.deviceMsgList;
 			// if (!list) {

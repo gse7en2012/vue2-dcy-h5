@@ -191,3 +191,8 @@ body {
 		color:#666;
 	}
 }
+
+.van-checkbox__icon--checked .van-icon{
+	border-color:$dcyColor;
+    background-color: $dcyColor;
+}

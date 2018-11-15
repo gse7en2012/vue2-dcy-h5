@@ -262,27 +262,27 @@ export default {
             }
         },
         initAreaList(data) {
-            this.columns = [];
-            this.columns[0] = {
-                values: data.map(province => province.efairyprovince_name),
-                className: "province"
-            };
-            this.columns[1] = {
-                values: [this.areaPlaceholder].concat(
-                    data[0]["city_list"].map(city => city.efairycity_name)
-                ),
-                className: "city"
-            };
-            this.columns[2] = {
-                vaules: ["--"],
-                className: "district"
-            };
-            this.columns[3] = {
-                vaules: ["--"],
-                className: "town"
-            };
-
             if (data.length > 0) {
+                this.columns = [];
+                this.columns[0] = {
+                    values: data.map(province => province.efairyprovince_name),
+                    className: "province"
+                };
+                this.columns[1] = {
+                    values: [this.areaPlaceholder].concat(
+                        data[0]["city_list"].map(city => city.efairycity_name)
+                    ),
+                    className: "city"
+                };
+                this.columns[2] = {
+                    vaules: ["--"],
+                    className: "district"
+                };
+                this.columns[3] = {
+                    vaules: ["--"],
+                    className: "town"
+                };
+
                 this.areaQuery = {
                     efairyprovince_id: data[0].efairyprovince_id
                 };
@@ -291,9 +291,9 @@ export default {
                     "setProjectAreaSelectedQuery",
                     this.areaQuery
                 );
-            }else{
-				this.areaQueryText='没有数据'
-			}
+            } else {
+                this.areaQueryText = "没有数据";
+            }
         },
 
         setupBetterScroll() {

@@ -2,7 +2,7 @@
 	<!-- <div class="nav-bar" v-if="!hideNavBar"> -->
 	<van-tabbar v-model="active">
 		<van-tabbar-item icon="shop" :to="{path:'/message'}">
-			<i class="dot" v-if="showNewMessage">{{newMessageCount}}</i>
+			<i class="dot" v-if="newMessageCount>0">{{newMessageCount}}</i>
 			<span>设备消息</span>
 			<img slot="icon" slot-scope="props" :src="props.active ? iconHash.message.active : iconHash.message.normal">
 		</van-tabbar-item>
@@ -40,7 +40,7 @@ export default {
 
     data() {
         return {
-            newMessageCount: this.$store.state.newMessageCount,
+            newMessageCount: this.$store.getters.getNewMsgCount,
             showNewMessage: this.$store.state.showNewMessage,
             active: 0,
             // showNavBar: true,

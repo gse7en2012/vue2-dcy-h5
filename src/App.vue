@@ -63,7 +63,7 @@ export default {
     methods: {
         async setUpWxconfig() {
             const data = await this.$service.userService.getJssdkConfig({
-				jssdk_url:encodeURIComponent(location.origin+location.search)
+				jssdk_url:encodeURIComponent(location.origin+location.pathname+location.search)
 			});
             const config = data.result;
             wx.config({

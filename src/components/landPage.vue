@@ -20,6 +20,9 @@
 						</span>
 					</div>
 					<div class="row">
+						<van-checkbox v-model="savePhone">记住账号</van-checkbox>
+					</div>
+					<div class="row">
 						<a class="btn" @click="loginViaPass()">立即登录</a>
 					</div>
 					<div class="row">
@@ -62,6 +65,7 @@ import BScroll from "better-scroll";
 
 const isProdEnv = process.env.NODE_ENV == "production";
 
+const tmpPhone = localStorage.getItem("dcy_phone");
 export default {
     name: "landPage",
     data() {
@@ -69,10 +73,11 @@ export default {
             // query: this.$route.query,
             loading: false,
             active: 0,
+            savePhone: false,
             codeText: "发送验证码",
             code: "",
             isSendCode: false,
-            phone: isProdEnv ? "" : "13751066522",
+            phone: isProdEnv ? tmpPhone || "" :tmpPhone|| "13751066522",
             password: isProdEnv ? "" : "66666",
             // phone: "13751066522",
             // password: "66666",
@@ -160,6 +165,11 @@ export default {
                 this.loading = false;
                 this.$toast(e.msg);
             }
+            if (this.savePhone) {
+                localStorage.setItem("dcy_phone", this.phone);
+            } else {
+                localStorage.removeItem("dcy_phone");
+            }
         },
         async loginViaPass() {
             if (!this.password) return this.$toast("请输入密码");
@@ -177,6 +187,11 @@ export default {
             } catch (e) {
                 this.loading = false;
                 this.$toast(e.msg);
+            }
+            if (this.savePhone) {
+                localStorage.setItem("dcy_phone", this.phone);
+            } else {
+                localStorage.removeItem("dcy_phone");
             }
         }
     }

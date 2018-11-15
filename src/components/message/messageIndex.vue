@@ -56,9 +56,6 @@ import BScroll from "better-scroll";
 import bottomTab from "@/components/bottomTab";
 import rongCloudInit from "@/components/rongCloud/init";
 
-
-
-
 // 测试版：vnroth0kvdmso
 // 正式版：m7ua80gbmpi3m
 
@@ -79,19 +76,19 @@ export default {
             chooseAllFlag: false,
             rcToken: this.$store.state.rcToken,
             showNewMessage: false,
-            newMessageCount: 1
+            newMessageCount: this.$store.getters.getNewMsgCount
         };
     },
     async mounted() {
         // this.initRc();
-        this.msgList.forEach(item => {
-            item.unread = false;
-		});
-
-		Bus.$on('getNewDeviceMsg',()=>{
-			console.log('goott')
-
-		})
+        // console.log(this.msgList)
+        // this.msgList.forEach(item => {
+        //     item.unread = false;
+        // });
+        console.log(this.newMessageCount);
+        Bus.$on("getNewDeviceMsg", () => {
+            console.log("goott");
+        });
         this.$nextTick(() => {
             // document.title = "消息列表";
             this.setupBetterScroll();
@@ -140,8 +137,8 @@ export default {
             });
             console.log(isExist);
             if (!isExist) {
-				msg.unread = true;
-				if(this.msgList.length>10) this.msgList.pop();
+                msg.unread = true;
+                if (this.msgList.length > 10) this.msgList.pop();
                 this.msgList.unshift(msg);
             }
         },
@@ -165,6 +162,7 @@ export default {
                 item.unread = false;
                 Bus.$emit("hideNewDeviceMsg");
                 this.$store.dispatch("cancelNewMsgToBottomNav");
+                this.$store.dispatch("setMsgToCache", this.msgList);
                 this.$router.push({
                     name: "deviceChat",
                     params: {

@@ -80,7 +80,8 @@ import {
 	SwitchCell,
 	DatetimePicker,
 	Actionsheet,
-	NoticeBar
+	NoticeBar,
+	Checkbox
 } from "vant";
 
 import '@/assets/global.scss';
@@ -108,6 +109,7 @@ Vue.use(Tab)
 	.use(SwitchCell)
 	.use(Actionsheet)
 	.use(NoticeBar)
+	.use(Checkbox)
 	.use(DatetimePicker);
 
 
