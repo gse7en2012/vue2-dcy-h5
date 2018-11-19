@@ -20,7 +20,7 @@
 						</span>
 					</div>
 					<div class="row">
-						<van-checkbox v-model="savePhone">记住账号</van-checkbox>
+						<van-checkbox v-model="savePass">记住密码</van-checkbox>
 					</div>
 					<div class="row">
 						<a class="btn" @click="loginViaPass()">立即登录</a>
@@ -63,9 +63,10 @@ import Bus from "@/service/bus";
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
 
-const isProdEnv = process.env.NODE_ENV == "production";
+const isProdEnv =process.env.NODE_ENV == "production";
 
 const tmpPhone = localStorage.getItem("dcy_phone");
+const tmpPass = localStorage.getItem("dcy_password");
 export default {
     name: "landPage",
     data() {
@@ -73,12 +74,12 @@ export default {
             // query: this.$route.query,
             loading: false,
             active: 0,
-            savePhone: false,
+            savePass: true,
             codeText: "发送验证码",
             code: "",
             isSendCode: false,
-            phone: isProdEnv ? tmpPhone || "" :tmpPhone|| "13751066522",
-            password: isProdEnv ? "" : "66666",
+            phone: isProdEnv ? tmpPhone || "" : tmpPhone || "13751066522",
+            password: isProdEnv ? tmpPass || "" : "66666",
             // phone: "13751066522",
             // password: "66666",
             count: 60,
@@ -165,11 +166,8 @@ export default {
                 this.loading = false;
                 this.$toast(e.msg);
             }
-            if (this.savePhone) {
-                localStorage.setItem("dcy_phone", this.phone);
-            } else {
-                localStorage.removeItem("dcy_phone");
-            }
+            localStorage.setItem("dcy_phone", this.phone);
+
         },
         async loginViaPass() {
             if (!this.password) return this.$toast("请输入密码");
@@ -188,10 +186,11 @@ export default {
                 this.loading = false;
                 this.$toast(e.msg);
             }
-            if (this.savePhone) {
-                localStorage.setItem("dcy_phone", this.phone);
+            localStorage.setItem("dcy_phone", this.phone);
+            if (this.savePass) {
+                localStorage.setItem("dcy_password", this.password);
             } else {
-                localStorage.removeItem("dcy_phone");
+                localStorage.removeItem("dcy_password");
             }
         }
     }

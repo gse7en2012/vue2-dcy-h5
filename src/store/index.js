@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 Vue.use(Vuex);
-console.log('rct', localStorage.getItem('dcyRcToken'), )
 export default new Vuex.Store({
 	state: {
 		accessToken: localStorage.getItem('dcyAccessToken'),

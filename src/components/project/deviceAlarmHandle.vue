@@ -72,7 +72,7 @@
 								<img :src="img.content" :class="{'ver':img.isWide}" @click="previewUploadImg(i)">
 							</div>
 
-							<van-uploader :after-read="onReadUploadImg" class="item add" v-if="uploadList.length<=8" />
+							<van-uploader :after-read="onReadUploadImg" class="item add" v-if="uploadList.length<=8" multiple />
 						</div>
 					</div>
 				</div>
@@ -164,13 +164,13 @@ export default {
             if (!this.showMoreFlag) this.subScroll.disable();
         },
         async loadMoreList() {
-			this.page++;
-			this.subScroll.finishPullUp();
+            this.page++;
+            this.subScroll.finishPullUp();
             const idList = this.idList.slice(
                 (this.page - 1) * this.size,
                 this.page * this.size
-			);
-			console.log(idList[0],this.page)
+            );
+            console.log(idList[0], this.page);
             const data = await this.$service.projectService.getCacheAlarmListId(
                 {
                     efairydevicealarmstatistics_id_list: JSON.stringify(idList)
@@ -181,8 +181,8 @@ export default {
         toggleMore() {
             if (!this.showMoreFlag) {
                 this.showMoreFlag = true;
-				this.subScroll.enable();
-				this.subScroll.refresh();
+                this.subScroll.enable();
+                this.subScroll.refresh();
             } else {
                 this.showMoreFlag = false;
                 this.subScroll.scrollTo(0, 0);
@@ -225,7 +225,7 @@ export default {
             this.$toast("处理成功！");
             this.$router.back();
         },
-        async onReadUploadImg(file) {
+        uploadImgFn(file) {
             file.id = this.idSeed++;
             this.getImgWidthAndHeight(file);
             this.uploadToQiniu(file);
@@ -233,6 +233,15 @@ export default {
             setTimeout(() => {
                 this.uploadList.push(file);
             }, 0);
+        },
+        async onReadUploadImg(files) {
+            if (Array.isArray(files)) {
+                files.forEach(item => {
+                    this.uploadImgFn(item);
+                });
+            } else {
+                this.uploadImgFn(files);
+            }
         },
         async getQiniuToken() {
             const token = await this.$service.userService.getQiniuToken();

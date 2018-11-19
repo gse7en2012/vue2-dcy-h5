@@ -2,36 +2,38 @@
 	<div class="main">
 		<van-nav-bar title="设备配置" @click-left="goBack" left-arrow />
 		<div class="wrapper" ref="wrapper">
+			<div>
+				<van-cell-group class="op-list">
+					<van-cell @click="showHeartBeatDialog()" is-link>
+						<span class="van-cell-text">心跳间隔</span>
+						<div class="van-cell-box">
 
-			<van-cell-group class="op-list">
-				<van-cell @click="showHeartBeatDialog()" is-link>
-					<span class="van-cell-text">心跳间隔</span>
-					<div class="van-cell-box">
+							<span>s</span>
+							<span>{{heartModel}}</span>
+						</div>
+					</van-cell>
+					<van-cell @click="showA=true" is-link>
+						<span class="van-cell-text">音响模式</span>
+						<div class="van-cell-box">
+							<span>{{audioModel?'音响':'静音'}}</span>
+						</div>
+					</van-cell>
+				</van-cell-group>
+				<van-cell-group class="op-list">
+					<van-cell @click="showDialog(item)" is-link v-for="(item,i) in configList" :ref="item.cid" :key="item.cid">
+						<span class="van-cell-text">{{item.c_name}}</span>
+						<div class="van-cell-box" v-if="item.value_type==1">
+							<span>{{item.unit}}</span>
+							<span>{{item.thv}}</span>
+						</div>
+						<div class="van-cell-box" v-if="item.value_type==2">
+							<span>{{item.value_range[Number(item.thv)]['name']}}</span>
+							<!-- <span>{{item.thv}}</span> -->
+						</div>
+					</van-cell>
+				</van-cell-group>
 
-						<span>s</span>
-						<span>{{heartModel}}</span>
-					</div>
-				</van-cell>
-				<van-cell @click="showA=true" is-link>
-					<span class="van-cell-text">音响模式</span>
-					<div class="van-cell-box">
-						<span>{{audioModel?'音响':'静音'}}</span>
-					</div>
-				</van-cell>
-			</van-cell-group>
-			<van-cell-group class="op-list">
-				<van-cell @click="showDialog(item)" is-link v-for="(item,i) in configList" :ref="item.cid" :key="item.cid">
-					<span class="van-cell-text">{{item.c_name}}</span>
-					<div class="van-cell-box" v-if="item.value_type==1">
-						<span>{{item.unit}}</span>
-						<span>{{item.thv}}</span>
-					</div>
-					<div class="van-cell-box" v-if="item.value_type==2">
-						<span>{{item.value_range[Number(item.thv)]['name']}}</span>
-						<!-- <span>{{item.thv}}</span> -->
-					</div>
-				</van-cell>
-			</van-cell-group>
+			</div>
 		</div>
 		<a class="dcy-btn" @click="postDeviceMsg()">保存配置</a>
 		<van-dialog v-model="show" show-cancel-button :before-close="beforeClose">
@@ -67,9 +69,9 @@ export default {
             // query: this.$route.query,
             show: false,
             showA: false,
-			showB: false,
-			showEditItem:false,
-			currentEditingItem:null,
+            showB: false,
+            showEditItem: false,
+            currentEditingItem: null,
             dialogModel: {},
             deviceId: this.$route.params.did,
             configList: [],
@@ -79,8 +81,8 @@ export default {
                 //不传则返回所有状态，0-离线 1-火警 2-预警 3-故障 4-启动 5-屏蔽 6-正常
                 { name: "静音", id: 0 },
                 { name: "音响", id: 1 }
-			],
-			actionsItem:[]
+            ],
+            actionsItem: []
         };
     },
     async mounted() {
@@ -124,11 +126,11 @@ export default {
             // 点击选项时默认不会关闭菜单，可以手动关闭
             this.showA = false;
             this.audioModel = item.id;
-		},
-		onSelectItem(item){
-			this.showEditItem=false;
-			this.currentEditingItem.thv=item.value;
-		},
+        },
+        onSelectItem(item) {
+            this.showEditItem = false;
+            this.currentEditingItem.thv = item.value;
+        },
         async getDeviceConfigList() {
             const data = await this.$service.projectService.getDeviceSetting({
                 efairydevice_id: this.deviceId
@@ -154,12 +156,12 @@ export default {
             if (item.value_type == 1) {
                 this.show = true;
                 this.dialogModel = item;
-			}
-			if(item.value_type==2){
-				this.showEditItem=true;
-				this.actionsItem=item.value_range;
-				this.currentEditingItem=item;
-			}
+            }
+            if (item.value_type == 2) {
+                this.showEditItem = true;
+                this.actionsItem = item.value_range;
+                this.currentEditingItem = item;
+            }
             // this.$refs[item.id].focus();
         },
         showHeartBeatDialog() {
@@ -200,7 +202,7 @@ export default {
     top: 46px;
     overflow: hidden;
     width: 100%;
-    bottom: 0;
+    bottom: 60px;
     // height: calc(100% - 102px);
     overflow: hidden;
 }
