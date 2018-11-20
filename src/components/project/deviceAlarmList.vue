@@ -163,7 +163,8 @@ export default {
             });
         },
         async getDeviceAlarmList() {
-            if (this.showLoading) return;
+
+            // if (this.showLoading) return;
             if (this.listFinished) return this.$toast("没有更多了");
             const query = {
                 alarm_id: this.current.id == -1 ? null : this.current.id,

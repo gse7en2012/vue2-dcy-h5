@@ -20,7 +20,7 @@
 						</span>
 					</div>
 					<div class="row">
-						<van-checkbox v-model="savePass">记住密码</van-checkbox>
+						<van-checkbox v-model="savePass" >记住密码</van-checkbox>
 					</div>
 					<div class="row">
 						<a class="btn" @click="loginViaPass()">立即登录</a>
@@ -63,18 +63,20 @@ import Bus from "@/service/bus";
 import { Dialog } from "vant";
 import BScroll from "better-scroll";
 
-const isProdEnv =process.env.NODE_ENV == "production";
+const isProdEnv = process.env.NODE_ENV == "production";
 
 const tmpPhone = localStorage.getItem("dcy_phone");
 const tmpPass = localStorage.getItem("dcy_password");
+const tmpSavePass = localStorage.getItem("dcy_savepss") == "1";
 export default {
     name: "landPage",
+
     data() {
         return {
             // query: this.$route.query,
             loading: false,
             active: 0,
-            savePass: true,
+            savePass: tmpSavePass,
             codeText: "发送验证码",
             code: "",
             isSendCode: false,
@@ -88,8 +90,15 @@ export default {
         };
     },
     watch: {
-        phone(nval, oval) {
-            // this.phone=this.phone.slice(0,2)+'-'+this.phone.slice(2,6)+'-'+this.phone.slice(7,10);
+        savePass(newV, oldV) {
+            console.log(newV, oldV);
+            if (newV) {
+                localStorage.setItem("dcy_savepss", 1);
+                localStorage.setItem("dcy_password", this.password);
+            } else {
+                localStorage.removeItem("dcy_savepss");
+                localStorage.removeItem("dcy_password");
+            }
         }
     },
     async mounted() {
@@ -101,7 +110,8 @@ export default {
         onClickLeft() {},
         toggleViewPassword() {
             this.viewPassword = !this.viewPassword;
-        },
+		},
+		changeSavePass(){},
         change() {
             console.log("c");
             let tmp = this.phone;
@@ -167,7 +177,6 @@ export default {
                 this.$toast(e.msg);
             }
             localStorage.setItem("dcy_phone", this.phone);
-
         },
         async loginViaPass() {
             if (!this.password) return this.$toast("请输入密码");
@@ -187,11 +196,6 @@ export default {
                 this.$toast(e.msg);
             }
             localStorage.setItem("dcy_phone", this.phone);
-            if (this.savePass) {
-                localStorage.setItem("dcy_password", this.password);
-            } else {
-                localStorage.removeItem("dcy_password");
-            }
         }
     }
 };
