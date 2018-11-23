@@ -8,16 +8,16 @@
 		</van-notice-bar>
 		<div class="wrapper" ref="wrapper">
 			<div class="chat-box">
-				<div class="block" v-for="(msg,i) in chatList" :id="'msg'+msg.efairymsg_id" @click="gotoMsgDetail(msg)">
+				<div class="block" v-for="(msg,i) in chatList" :id="'msg'+msg.efairymsg_id">
 					<div class="chat-time">{{msg.efairymsg_add_time}}</div>
 					<div class="chat-message" :class="{my:msg.isMine}">
-						<div class="avatar">
+						<div class="avatar"  @click="gotoDeviceDetail(msg)">
 							<img src="@/assets/icons/device_chat.png" v-if="!msg.isMine">
 							<img src="@/assets/icons/avatar.png" v-if="msg.isMine&&!userInfo.efairyuser_headimg_url">
 							<img :src="userInfo.efairyuser_headimg_url" v-if="msg.isMine&&userInfo.efairyuser_headimg_url">
 						</div>
-						<div class="ctx">{{msg.ctx.text}}</div>
-						<div class="status" v-if="!msg.isMine">
+						<div class="ctx" @click="gotoMsgDetail(msg)">{{msg.ctx.text}}</div>
+						<div class="status" v-if="!msg.isMine" @click="gotoMsgDetail(msg)">
 							<img src="@/assets/icons/fixed_chat.png" v-if="msg.efairymsg_msgtype==1&&msg.efairymsg_ishandle==1">
 							<img src="@/assets/icons/warning_chat.png" v-if="msg.efairymsg_msgtype==1&&msg.efairymsg_ishandle==0">
 						</div>
@@ -50,6 +50,7 @@ export default {
             query: this.$route.query,
             deviceId: this.$route.params.did,
             userMsgId: this.$store.state.userMsgId,
+            isFromMsgIndex: this.$route.query.frommsg == 1,
             userInfo: {},
             unhandleMsgCount: 0,
             chatList: [],
@@ -136,6 +137,18 @@ export default {
         async getUserInfo() {
             const data = await this.$service.userService.getUserInfo();
             this.userInfo = data.result;
+        },
+        async gotoDeviceDetail(msg) {
+            if (this.isFromMsgIndex) {
+                this.$router.push({
+                    name: "deviceDetail",
+                    params: {
+                        did: this.deviceId
+                    }
+                });
+            }else{
+				this.goBack();
+			}
         },
         async gotoMsgDetail(msg) {
             //deviceAlarmFixed
@@ -240,8 +253,8 @@ export default {
     }
 }
 
-.van-notice-bar{
-	z-index: 999;
+.van-notice-bar {
+    z-index: 999;
 }
 
 .wrapper {

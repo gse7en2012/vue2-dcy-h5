@@ -173,7 +173,8 @@ export default {
                         pid: 0
                     },
                     query: {
-                        msgobj_id: item.efairymsg_from_id
+                        msgobj_id: item.efairymsg_from_id,
+                        frommsg: 1
                     }
                 });
             }
