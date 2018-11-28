@@ -2,7 +2,8 @@
 	<!-- <div class="nav-bar" v-if="!hideNavBar"> -->
 	<van-tabbar v-model="active">
 		<van-tabbar-item icon="shop" :to="{path:'/message'}">
-			<i class="dot" v-if="newMessageCount>0">{{newMessageCount}}</i>
+			<!-- <i class="dot" v-if="newMessageCount>0">{{newMessageCount}}</i> -->
+			<i class="dot" v-if="newMessageCount>0"></i>
 			<span>设备消息</span>
 			<img slot="icon" slot-scope="props" :src="props.active ? iconHash.message.active : iconHash.message.normal">
 		</van-tabbar-item>
@@ -32,7 +33,7 @@ import reportIconS from "@/assets/icons/report_s.png";
 import mineIcon from "@/assets/icons/my.png";
 import mineIconS from "@/assets/icons/my_s.png";
 
-import Bus from '@/service/bus';
+import Bus from "@/service/bus";
 
 export default {
     name: "bottomTab",
@@ -73,24 +74,26 @@ export default {
     watch: {
         $route(to, from) {
             this.checkCurrentParentRoute();
-		}
+        }
     },
     created() {
-		console.log("created bottom");
+        console.log("created bottom");
     },
     async mounted() {
         console.log("mounted bottom");
-		this.checkCurrentParentRoute();
+        this.checkCurrentParentRoute();
 
-		Bus.$on('getNewDeviceMsg',()=>{
-			console.log('goott')
-			this.showNewMessage=true;
-			this.newMessageCount++;
-		})
-		Bus.$on('hideNewDeviceMsg',()=>{
-			this.showNewMessage=false;
-			this.newMessageCount=0;
-		})
+        Bus.$on("getNewDeviceMsg", () => {
+            console.log("goott");
+            this.showNewMessage = true;
+            this.newMessageCount++;
+        });
+        Bus.$on("hideNewDeviceMsg", () => {
+
+            this.showNewMessage = false;
+			this.newMessageCount = 0;
+			console.log('on hidemsg',this.newMessageCount)
+        });
 
         this.$nextTick(() => {
             //  this.checkCurrentParentRoute();
@@ -128,6 +131,8 @@ body {
         position: absolute;
         min-width: 16px;
         height: 16px;
+        min-width: 10px;
+        height: 10px;
         border-radius: 10px;
         color: #fff;
         background: #ff0000;

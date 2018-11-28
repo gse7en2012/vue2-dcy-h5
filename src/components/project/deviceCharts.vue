@@ -21,7 +21,7 @@
 						</div>
 					</van-cell>
 				</van-cell-group>
-				<div class="chart-box" v-if="optionList.length==0">
+				<div class="chart-box" v-if="optionList.length==0&&!showLoading">
 					<p style="text-align:center;padding: 30px;color: #333;">没有数据</p>
 				</div>
 				<div class="chart-box" v-for="(op,i) in optionList">
@@ -72,6 +72,8 @@ import "echarts/lib/chart/bar";
 import "echarts/lib/chart/line";
 import "echarts/lib/chart/pie";
 
+import { mapState } from "vuex";
+
 import moment from "moment";
 import pako from "pako";
 // import 'zrender/lib/svg/svg'
@@ -81,6 +83,11 @@ export default {
     // components: {
     //     chart: ECharts
     // },
+    computed: {
+        ...mapState({
+            showLoading: state => state.isAjaxLoading
+        })
+    },
     data() {
         const dataHash = {
             1: ["高度", 0.01, "m"],

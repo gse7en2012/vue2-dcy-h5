@@ -135,7 +135,6 @@ export default {
                     item.efairydevicemsg_content = msg.efairydevicemsg_content;
                 }
             });
-            console.log(isExist);
             if (!isExist) {
                 msg.unread = true;
                 if (this.msgList.length > 10) this.msgList.pop();
@@ -188,15 +187,18 @@ export default {
                     // on confirm
                     if (type == 2) {
                         this.msgList.forEach(item => {
-                            console.log(item);
-                            item.unread = false;
-                            Bus.$emit("hideNewDeviceMsg");
-                            this.$store.dispatch("cancelNewMsgToBottomNav");
+                            if (item.choose) {
+                                item.unread = false;
+							}
+							item.choose=false;
                         });
                     }
                     if (type == 1) {
                         this.msgList = [];
                     }
+                    Bus.$emit("hideNewDeviceMsg");
+                    this.$store.dispatch("cancelNewMsgToBottomNav");
+                    this.$store.dispatch("setMsgToCache", this.msgList);
                     this.edit = false;
                 })
                 .catch(() => {
