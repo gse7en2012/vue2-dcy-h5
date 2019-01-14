@@ -40,7 +40,7 @@
 			<h5 class="dialog-title">修改配置</h5>
 			<van-cell-group class="dialog-van-cell-group">
 				<van-field v-model="dialogModel.thv" :label="dialogModel.c_name" />
-				<van-cell>输入0可关闭通道，可修改范围：{{dialogModel.minRange}}-{{dialogModel.maxRange}}</van-cell>
+				<van-cell><span class="red">输入0可关闭通道</span>，可修改范围：{{dialogModel.minRange}}-{{dialogModel.maxRange}}</van-cell>
 			</van-cell-group>
 		</van-dialog>
 		<van-dialog v-model="showB" show-cancel-button>
@@ -102,7 +102,9 @@ export default {
         beforeClose(action, done) {
             if (action === "confirm") {
                 // setTimeout(done, 1000);
-
+				if(this.dialogModel.thv==0){
+					return done();
+				}
                 if (
                     this.dialogModel.maxRange &&
                     this.dialogModel.thv > this.dialogModel.maxRange
@@ -227,6 +229,9 @@ export default {
     .van-field .van-cell__title {
         max-width: auto;
     }
+	.red{
+		color:#f45d4c;
+	}
 }
 .dialog-title {
     text-align: center;
